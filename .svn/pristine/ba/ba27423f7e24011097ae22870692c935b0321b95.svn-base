@@ -1,0 +1,12 @@
+package com.blackboard.classin.mapper;
+
+import java.util.List;
+import java.util.Map;
+
+public interface ClassScheduleDataMapper {
+    List<Map<String,String>> getCreateClassResult(Map<String,String> paraMap);
+    void saveHandledScheduleData(Map<String,String> paraMap) ;
+    List<Map<String,String>> getAllCreateClassResult(String todayTime);
+    void deleteFailureDataBySubId(String content);
+    void deleteFailureDataByReasonByReason(Map<String,String> paraMap);
+}

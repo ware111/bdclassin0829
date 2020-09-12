@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blackboard.classin.mapper.UserPhoneMapper" >
+    <resultMap id="BaseResultMap" type="com.blackboard.classin.entity.UserPhone" >
+        <id column="user_id" property="userId" jdbcType="VARCHAR" />
+        <result column="phone" property="phone" jdbcType="VARCHAR" />
+        <result column="classin_uid" property="classinUid" jdbcType="VARCHAR" />
+    </resultMap>
+    
+    <select id="findPhoneByUserId" parameterType="java.lang.String" resultMap="BaseResultMap">
+    	select user_id,phone,classin_uid from user_phone where user_id = #{userId}
+    </select>
+    
+    <insert id="save" parameterType="java.util.Map">
+    	insert into user_phone values (#{userId},#{phone},#{classinUid})
+    </insert>
+    
+    <select id="findByPhone" parameterType="java.lang.String" resultMap="BaseResultMap">
+    	select user_id,phone,classin_uid from user_phone where phone = #{telephone}
+    </select>
+    
+    <update id="updatePhone" parameterType="com.blackboard.classin.entity.UserPhone">
+    	update user_phone set phone=#{phone},classin_uid=#{classinUid} where user_id = #{userId}
+    </update>
+    
+    <delete id="delete" parameterType="com.blackboard.classin.entity.UserPhone">
+    	delete from user_phone where user_id = #{userId} and phone = #{phone}
+    </delete>
+    
+    <select id="findNameList" resultType="com.blackboard.classin.entity.UserPhoneName">
+    	select user_id userId,phone phone,firstname firstname,lastname familyname 
+    	from user_phone_name 
+    	where update_flag = '0'
+    </select>
+    
+    <update id="updateUpdateFlag" parameterType="com.blackboard.classin.entity.UserPhoneName">
+    	 update user_phone_name set update_flag = '1' where user_id = #{userId} and phone = #{phone}
+    </update>
+</mapper>

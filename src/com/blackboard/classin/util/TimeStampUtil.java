@@ -1,0 +1,94 @@
+package com.blackboard.classin.util;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+
+/**
+ * 时间工具类
+ * @autho panhaiming
+ * @date 20200730
+ *
+ * */
+public class TimeStampUtil {
+
+    //获取当前的时间秒级戳
+    public static long getTimeStamp(String dateTime){
+        Date date = null;
+        try {
+            date = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateTime);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        long timestamp = date.getTime()/1000;
+        return timestamp;
+    }
+
+    //获取当天的凌晨时间：00:00:00
+    public static String getTodayTime(){
+        SimpleDateFormat date11 = new SimpleDateFormat("yyyy-MM-dd");
+        String format11 = date11.format(new Date());
+        String todayTime= format11;
+        return  todayTime;
+    }
+
+    //获取明天的凌晨时间：00:00:00
+    public static String getYearDateTime(String dateTime){
+        String yearDate= dateTime.split(" ")[0];
+        return  yearDate;
+    }
+
+    //获取年月日时间格式时间
+    public static String getMonthDay(){
+        SimpleDateFormat date11 = new SimpleDateFormat("yyyy-MM-dd");
+        String monthDay = date11.format(new Date());
+        return  monthDay;
+    }
+
+    //时间戳转时间
+    public static String timeStampToTime(String secondTimeStamp){
+        SimpleDateFormat date11 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Long aLong = Long.valueOf(secondTimeStamp+"000");
+        String format11 = date11.format(new Date(aLong));
+        String time= format11;
+        return time;
+    }
+
+    //明天时间戳转时间
+    public static String tommorrowTimeStampToTime(){
+        String format = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        Date date = null;
+        try {
+            date = new SimpleDateFormat("yyyy-MM-dd").parse(format);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        long timestamp = date.getTime()/1000+24*60*60;
+        String time = timeStampToTime(timestamp+"").split(" ")[0];
+        return time;
+    }
+
+    //获取当天时间
+    public static long todayTimeStampToTime(){
+        String format = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        Date date = null;
+        try {
+            date = new SimpleDateFormat("yyyy-MM-dd").parse(format+"00:00:00");
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        long timestamp = date.getTime()/1000;
+        return timestamp;
+    }
+
+
+
+
+    public static String getCurrentTime(){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String currentTime = simpleDateFormat.format(new Date());
+        return currentTime;
+    }
+}

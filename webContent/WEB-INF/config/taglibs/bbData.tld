@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml-stylesheet type="text/xsl" href="bbUI.xsl"?>
+<!DOCTYPE taglib
+PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN"
+"http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">
+<taglib>
+  <tlib-version>1.0</tlib-version>
+
+  <jsp-version>1.2</jsp-version>
+
+  <short-name>bbData</short-name>
+
+  <uri>/bbData</uri>
+
+  <description>
+    The Blackboard Data tag library encapsulates interaction with the Blackboard data and
+    logic layer to allow separation of the UI elements (bbUI) and other page logic.
+  </description>
+
+  <tag>
+    <name>context</name>
+
+    <tag-class>blackboard.servlet.tags.data.ContextTag</tag-class>
+
+    <tei-class>blackboard.servlet.tags.data.ContextTei</tei-class>
+    <body-content>JSP</body-content>
+
+    <description>
+      In order to support forward compatibility for 5.5 extension into 6, we need to build
+      a hook that will allow us to capture virtual installation info in 6.
+      Programmatically, this was going to be through the Context object. We need to
+      formalize the interface in 5.5 so that developers can use the API to ensure 6.0
+      conformance. As a high-level wrapper, we also need a taglib for simple inclusion.
+      The taglib would be a no-arg tag required before any service APIs were called, with
+      a required closing tag at the bottom of the page (ensuring context is released). API
+      calls would be Context.setInstance( HttpServletRequest req ) and
+      Context.releaseInstance(). We need to include some kind of integrity
+      checking/reference counting to ensure proper behavior of nested calls.
+    </description>
+
+    <attribute>
+      <name>id</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>
+        May be used to explicitly reference the context object elsewhere in the page (also
+        can access the context from the Java APIs, as usual)
+      </description>
+    </attribute>
+    <attribute>
+      <name>license</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>
+        License key, used to ensure that page will not display if the license is not valid
+      </description>
+    </attribute>
+    <attribute>
+      <name>navItem</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>
+        Navigation Item handle: initializes a NavigationItemControl that will automatically handle entitlements,
+        and also sets default values for the page title and breadcrumbs on a given page
+      </description>
+    </attribute>
+    <attribute>
+      <name>authentication</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>
+        A Y|N indicator for whether a logged-in user is required. Default is Y. if you set
+        this to N, you better know why, and you better not set entitlement or navItem
+      </description>
+    </attribute>
+
+    <attribute>
+      <name>entitlements</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <type>java.lang.String[]</type>
+      <description>
+        A String[] containing entitlements to check before displaying the page
+        entitlements as per
+        blackboard.platform.security.AccessManagerService.userHasAnyEntitlements()
+      </description>
+    </attribute>
+
+    <attribute>
+      <name>entitlement</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>
+        A String containing a single entitlement to check before displaying the page
+        entitlement as per
+        blackboard.platform.security.AccessManagerService.userEntitlement()
+      </description>
+    </attribute>
+
+    <attribute>
+      <name>contextOverride</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+      <description>
+        May be used to explicitly define the context for locale rendering purposes. This
+        field should not be set unless explicitly needed. Overriding context is relevant
+        on pages where the id parameters on the request implicitly infer one context, but
+        the locale should render based on a different context. For example, an admin panel
+        page that manages courses passes the course_id as a request parameter. This sets
+        CourseContext in the context object. However, because the page is an admin panel
+        page, the course's context should not be used to determine the locale. Currently,
+        the only possible value is ADMIN_PANEL
+      </description>
+    </attribute>
+
+
+  </tag>
+</taglib>
+

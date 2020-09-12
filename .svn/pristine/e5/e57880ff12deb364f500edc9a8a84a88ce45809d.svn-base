@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         id="WebApp_ID" version="2.5">
+  <display-name>springmvcdemo</display-name>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+
+  <!-- 配置前端控制器 --><!--配置定时任务-->
+  <servlet>
+    <servlet-name>springmvc</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <init-param>
+      <!-- 指定springmvc配置文件的路径。如果不指定，默认为：/WEB-INF/${servlet-name}-servlet.xml -->
+      <param-name>contextConfigLocation</param-name>
+      <param-value>classpath:spring/springmvc.xml
+        classpath:spring/taskConfig.xml</param-value>
+    </init-param>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>springmvc</servlet-name>
+    <url-pattern>*.do</url-pattern>
+  </servlet-mapping>
+
+
+
+
+  <!-- 初始化Spring容器 -->
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>classpath:spring/applicationContext-*.xml</param-value>
+  </context-param>
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+
+  <!-- 日志 -->
+  <context-param>
+    <param-name>log4jConfigLocation</param-name>
+    <param-value>classpath:log4j.properties</param-value>
+  </context-param>
+  <listener>
+    <listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+  </listener>
+
+  <!-- 编码过滤器 -->
+  <filter>      <!--注意这里是filter，不要配置成servlet-->
+    <filter-name>CharactorFilter</filter-name>    <!--过滤器名称-->
+    <filter-class>com.blackboard.classin.filter.CharactorFilter</filter-class>  <!--过滤器的完整类名-->
+    <init-param>   <!--初始化参数-->
+      <param-name>encoding</param-name>  <!--参数名称-->
+      <param-value>utf-8</param-value>   <!--参数值-->
+    </init-param>
+  </filter>
+  <filter-mapping> <!--过滤器映射-->
+    <filter-name>CharactorFilter</filter-name><!--过滤器名称-->
+    <url-pattern>/*</url-pattern><!--URL映射，给所有页面处理乱码-->
+  </filter-mapping>
+
+  <!-- 引入BB的页面规范 -->
+  <jsp-config>
+    <taglib>
+         <taglib-uri>/bbUI</taglib-uri>
+         <taglib-location>/WEB-INF/config/taglibs/bbUI.tld</taglib-location>
+     </taglib>
+
+     <taglib>
+         <taglib-uri>/bbData</taglib-uri>
+           <taglib-location>/WEB-INF/config/taglibs/bbData.tld</taglib-location>
+     </taglib>
+
+      <taglib>
+         <taglib-uri>/bbNG</taglib-uri>
+         <taglib-location>/WEB-INF/config/taglibs/bbNG.tld</taglib-location>
+     </taglib>
+  </jsp-config>
+</web-app>

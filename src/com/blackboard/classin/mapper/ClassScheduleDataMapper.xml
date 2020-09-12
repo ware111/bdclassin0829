@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blackboard.classin.mapper.ClassScheduleDataMapper" >
+    <select id="getCreateClassResult" resultType="java.util.Map" parameterType="java.util.Map">
+    	select id,content,result,reason,year_date from class_schedule_data where course_id=#{courseId} and year_date>= #{todayTime}
+    </select>
+
+    <select id="getTimeOutClassResult" resultType="java.util.Map" parameterType="java.util.Map">
+    	select id,content,result,reason,year_date from class_schedule_data where year_date>= #{todayTime} and reason=#{reason}
+    </select>
+
+    <delete id="deleteFailureDataBySubId" parameterType="java.lang.String">
+    	delete from class_schedule_data where sub_id=#{subId}
+    </delete>
+
+    <delete id="deleteFailureDataByReason" parameterType="java.util.Map">
+    	delete from class_schedule_data where reason=#{reason} and year_date={yearDate}
+    </delete>
+    <!--只通过当天凌晨时间，来获取创建课节结果-->
+    <select id="getAllCreateClassResult" resultType="java.util.Map" parameterType="String">
+    	select content,result,reason,COURSE_ID,year_date from class_schedule_data where year_date>= #{yearDate}
+    </select>
+
+    <select id="getDataByReason" resultType="java.util.Map" parameterType="java.util.Map">
+    	select content,result,reason,COURSE_ID,year_date from class_schedule_data where year_date>= #{yearDate} and result = #{result}
+    </select>
+
+    <insert id="saveHandledScheduleData" parameterType="java.util.Map">
+    	insert into class_schedule_data (content,result,reason,course_id,year_date,sub_id) values(#{content},#{result},#{reason},#{courseId},#{yearDate},#{subId})
+    </insert>
+
+    <select id="getCreateClassStatus" parameterType="java.lang.String" resultType="java.lang.String">
+        select result from class_schedule_data where sub_id=#{subId}
+    </select>
+</mapper>

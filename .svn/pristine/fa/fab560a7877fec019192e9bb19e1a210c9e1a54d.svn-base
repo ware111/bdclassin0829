@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/mvc 
+        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+    <context:component-scan base-package="com.blackboard.classin.controller"/>
+    
+    <!-- 配置一个注解驱动，如果配置此标签，那么就可以不用配置处理器映射器和处理器适配器 -->
+    <mvc:annotation-driven />
+	
+	<!--添加拦截器配置-->
+    <mvc:interceptors>
+    	<!-- 系统配置 管理员-->
+        <mvc:interceptor>
+            <mvc:mapping path="/config/*"/>
+            <!--<mvc:exclude-mapping path="/user/index"/>-->
+            <bean class="com.blackboard.classin.interceptor.AccessInterceptor"/>
+        </mvc:interceptor>
+        
+        <mvc:interceptor>
+            <mvc:mapping path="/bbCourseClassinCourse/findClass.do"/>
+            <bean class="com.blackboard.classin.interceptor.StudentInterceptor"/>
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/classinCourseClass/delete.do"/>
+            <mvc:mapping path="/bbCourseClassinCourse/create.do"/>
+            <!--<mvc:mapping path="/bbCourseClassinCourse/deleteCourseStudent.do"/>-->
+            <mvc:mapping path="/classinCourseClass/create.do"/>
+            <mvc:mapping path="/classinCourseClass/editClass.do"/>
+            <mvc:mapping path="/video/delete.do"/>
+            <!--<mvc:exclude-mapping path="/user/index"/>-->
+            <bean class="com.blackboard.classin.interceptor.DeleteInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+    <!-- 配置视图解析器 -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/page"></property>
+        <property name="suffix" value=".jsp"></property>
+    </bean>
+</beans>

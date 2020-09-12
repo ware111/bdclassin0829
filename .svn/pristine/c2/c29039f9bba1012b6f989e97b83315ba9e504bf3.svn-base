@@ -1,0 +1,337 @@
+package com.blackboard.classin.task;
+
+import blackboard.data.course.Course;
+import com.alibaba.fastjson.JSONObject;
+import com.blackboard.classin.constants.Constants;
+import com.blackboard.classin.entity.*;
+import com.blackboard.classin.mapper.*;
+import com.blackboard.classin.service.IBbCourseClassinCourse;
+import com.blackboard.classin.util.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import javax.mail.MessagingException;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+@Component
+public class ScheduledTask {
+
+    private Logger log = Logger.getLogger(ScheduledTask.class);
+
+
+    @Autowired
+    private ClassinCourseClassMapper classinCourseClassMapper;
+
+    @Autowired
+    private SystemRegistryMapper systemRegistryMapper;
+
+    @Autowired
+    private UserPhoneMapper userPhoneMapper;
+
+    @Autowired
+    private BbCourseClassinCourseMapper bbCourseClassinCourseMapper;
+
+    @Autowired
+    private ClassScheduleDataMapper classScheduleDataMapper;
+
+    @Autowired
+    private IBbCourseClassinCourse classinCourseServuce;
+
+    /**
+     * 定时删除已经从bb网移除的课程下学生
+     * @author panhaiming
+     * @date 20200905
+     * */
+    @Scheduled(cron = "0 0 4 * * *")
+    public void deleteStudentTask() throws IOException {
+        classinCourseServuce.deleteClassInCourseStudent();
+    }
+
+
+    /**
+     * 创建课节定时任务
+     *
+     * @author panhaiming
+     * @date 20200825
+     */
+    @Scheduled(cron = "0 0 5 * * *")
+    public void firstCreateTask() throws IOException, MessagingException, InterruptedException {
+       task();
+        System.out.println(">>>>>>>>>>>>>>第一个定时任务"+Thread.currentThread());
+
+    }
+
+
+    @Scheduled(cron = "0 0 6 * * *")
+    public void secondCreateClassTask1() throws IOException, MessagingException, InterruptedException {
+        List<Map<String, String>> createClassResult = classScheduleDataMapper.getAllCreateClassResult(TimeStampUtil.getTodayTime());
+        if (createClassResult != null && createClassResult.size() != 0){
+          task();
+        }
+        System.out.println(">>>>>>>>>>>>>>第二个定时任务"+Thread.currentThread());
+
+    }
+
+    public void task() throws MessagingException, InterruptedException, IOException {
+        String fileName = "/usr/local/blackboard/content/vi/BBLEARN/plugins/bb-ClassIn/wrongData" + System.currentTimeMillis() + ".txt";
+        String emailMsg = "";
+        HashMap<String, String> paraMap = new HashMap<>();
+        List<ClassBean> list = null;
+        String data = HttpClient.doGet("https://coursehqy.pku.edu.cn/v2/schedule/get-course-list?search_time=tomorrow");
+        String scheduleTime = "";
+        if (!data.equals("timeout")) {
+            ClassScheduleBean classScheduleBean = JSONObject.parseObject(data, ClassScheduleBean.class);
+            if (classScheduleBean != null) {
+                list = classScheduleBean.getList();
+                if (list != null) {
+                    int k = 0;
+                    String sID = "SID=" + Constants.SID;
+                    String classinUid = "";
+                    while (k < list.size()) {
+                        classScheduleDataMapper.deleteFailureDataBySubId(list.get(k).getSub_id());
+                        scheduleTime = TimeStampUtil.getYearDateTime(list.get(k).getCourse_begin());
+                        UserPhone userInfo = userPhoneMapper.findPhoneByUserId(list.get(k).getTeacher());
+                        if (userInfo != null) {
+                            String teacherPhone = userInfo.getPhone();
+                            classinUid = userInfo.getClassinUid();
+                            String addClassURL = systemRegistryMapper.getURLByKey("classin_addcourseclass_url");
+                            String classInCourseId = "";
+                            String params = "";
+                            int status = 0;
+                            //创建课程
+                            Course bbCourse = SystemUtil.getCourseByCourseId(list.get(k).getKcwybm());
+                            String bbId = list.get(k).getKcwybm();
+                            long currentCreateClassTime = System.currentTimeMillis() / 1000;
+                            BbCourseClassinCourse classinCourse = bbCourseClassinCourseMapper.findByCourseId(list.get(k).getKcwybm());
+                            String safeKey = "safeKey=" + SystemUtil.MD5Encode(Constants.SECRET + currentCreateClassTime);
+                            String timeStamp = "timeStamp=" + currentCreateClassTime;
+                            if (classinCourse == null) {
+                                String courseName = "courseName=" + bbCourse.getTitle();
+                                String createCoureseURL = systemRegistryMapper.getURLByKey("classin_addcourse_url");
+                                status = 1;
+                                params = sID + "&" + safeKey + "&" + timeStamp + "&" + courseName;
+                                String resultCourse = HttpClient.doPost(createCoureseURL, params);
+                                Map<String, Object> classInCourseMap = new HashMap<String, Object>();
+
+                                ObjectMapper objectMapper = new ObjectMapper();
+                                if (resultCourse != null && !resultCourse.equals("")) {
+                                    try {
+                                        classInCourseMap = objectMapper.readValue(resultCourse, Map.class);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    //解析返回的数据
+                                    Map<String, Object> errorInfo = (Map<String, Object>) classInCourseMap.get("error_info");
+                                    String errno = errorInfo.get("errno").toString();
+                                    String error = errorInfo.get("error").toString();
+                                    if ("1".equals(errno)) {
+                                        //创建classin课程成功，获取classin_course_id
+                                        classInCourseId = classInCourseMap.get("data").toString();
+                                        String courseId = bbCourse.getCourseId();
+                                        BBCourseClassinCourseInfo courseInfo = new BBCourseClassinCourseInfo();
+                                        courseInfo.setBbCourseId("kecheng1");
+                                        courseInfo.setClassinCourseId(classInCourseId);
+                                        bbCourseClassinCourseMapper.createClassinCourseOnBbCourse(courseInfo);
+                                    }
+                                }
+                            }
+                            if (status == 0) {
+                                classInCourseId = classinCourse.getClassinCourseId();
+                            }
+                            //创建课节
+                            String courseNum = classinCourseClassMapper.findByBBCourseId(bbId);
+
+                            String courseId = "courseId=" + classInCourseId;
+//                                User user = SystemUtil.getUserByUserId(bean.getTeacher());
+                            String courseClassName = bbCourse.getCourseId() + "_" + bbCourse.getTitle() + "_" + TimeStampUtil.getMonthDay();
+                            String className = "className=" + courseClassName;
+                            long startTimeStamp = TimeStampUtil.getTimeStamp(list.get(k).getCourse_begin());
+                            long endTimeStamp = TimeStampUtil.getTimeStamp(list.get(k).getCourse_over());
+                            String beginTime = "beginTime=" + startTimeStamp;
+                            String endTime = "endTime=" + endTimeStamp;
+                            String teacherUID = "teacherUid=" + classinUid;
+                            String live = "live=1";
+                            String replay = "replay=1";
+                            String record = "record=1";
+
+                            params = sID + "&" + safeKey + "&" + timeStamp + "&" + teacherUID + "&" + courseId + "&" + className +
+                                    "&" + beginTime + "&" + endTime + "&" + record + "&" + replay + "&" + live;
+
+                            Thread.sleep(1000);
+                            String resultClass = HttpClient.classSchedulePost(addClassURL, params);
+                            Map<String, Object> classInClassMap = new HashMap<String, Object>();
+                            ObjectMapper objectMapper1 = new ObjectMapper();
+                            if (resultClass != null && !resultClass.equals("") && !resultClass.equals("timeout")) {
+                                try {
+                                    classInClassMap = objectMapper1.readValue(resultClass, Map.class);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                Map<String, Object> errorInfo = (Map<String, Object>) classInClassMap.get("error_info");
+                                String errno = errorInfo.get("errno").toString();
+                                String error = errorInfo.get("error").toString();
+
+                                if ("1".equals(errno)) {
+                                    String classinCourseClassId = classInClassMap.get("data").toString();
+                                    Map<String, Object> classInclassMap = new HashMap<String, Object>();
+                                    Map<String, Object> moreData = (Map<String, Object>) classInclassMap.get("more_data");
+                                    moreData = (Map<String, Object>) classInClassMap.get("more_data");
+                                    String liveURL = moreData.get("live_url").toString();
+//                                        log.info(">>>>>>>>>>>>>>>>>>回放回放" + liveURL);
+//                                        String liveInfo = moreData.get("live_info").toString();
+                                    String userName = userInfo.getUserId();
+                                    Map<String, Object> paramMap = new HashMap<String, Object>();
+                                    paramMap.put("className", courseClassName);
+                                    paramMap.put("userName", userName);
+                                    paramMap.put("dtCreated", System.currentTimeMillis() / 1000);
+                                    paramMap.put("assistantName", " ");
+                                    paramMap.put("assistantPhone", " ");
+                                    paramMap.put("classType", "课表课");
+                                    paramMap.put("classinClassId", classinCourseClassId);
+                                    paramMap.put("classinCourseId", classInCourseId);
+                                    long totalTime = TimeStampUtil.getTimeStamp(list.get(k).getCourse_over()) - TimeStampUtil.getTimeStamp(list.get(k).getCourse_begin());
+                                    long hour = totalTime / 60;
+                                    long minute = totalTime % 60;
+                                    paramMap.put("classTotalTime", hour + "小时" + minute + "分钟");
+                                    paramMap.put("startTime", list.get(k).getCourse_begin());
+                                    paramMap.put("startTimeStamp", startTimeStamp);
+                                    paramMap.put("startDate", list.get(k).getCourse_begin().split(" ")[0]);
+                                    paramMap.put("teacherPhone", teacherPhone);
+                                    paramMap.put("endTimeStamp", endTimeStamp);
+                                    paramMap.put("teacherName", list.get(k).getTeacher_name());
+                                    paramMap.put("liveURL", liveURL);
+                                    paramMap.put("bbCourseId", bbId);
+                                    paramMap.put("live", 1);
+                                    paramMap.put("record", 1);
+                                    paramMap.put("replay", 1);
+                                    paramMap.put("expireStatus", "1");
+                                    paramMap.put("deleteStatus", "N");
+                                    paraMap.put("studentsTotal", list.get(k).getStudent_total());
+                                    classinCourseClassMapper.save(paramMap);
+                                } else if (errno.equals("136")) {
+                                    String teacherAccount = "teacherAccount=" + teacherPhone;
+                                    String teacherIdentity = "teacherName=" + list.get(k).getTeacher_name();
+                                    params = sID + "&" + safeKey + "&" + timeStamp + "&" + teacherAccount + "&" + teacherIdentity;
+                                    String addTeacherURL = systemRegistryMapper.getURLByKey("classin_addteacher_url");
+                                    resultClass = HttpClient.doPost(addTeacherURL, params);
+                                    ObjectMapper objectMapper = new ObjectMapper();
+                                    if (resultClass != null && !resultClass.equals("")) {
+                                        Map resultHashMap = objectMapper.readValue(resultClass, Map.class);
+                                        resultHashMap = resultHashMap;
+                                        errorInfo = (Map<String, Object>) resultHashMap.get("error_info");
+                                        errno = errorInfo.get("errno").toString();
+                                        error = errorInfo.get("error").toString();
+                                        if (!errno.equals("1")) {
+                                            paraMap.put("content", JSONObject.toJSON(list.get(k)).toString());
+                                            paraMap.put("result", "创建失败");
+                                            paraMap.put("reason", error);
+                                            paraMap.put("courseId", list.get(k).getKcwybm());
+                                            paraMap.put("yearDate", TimeStampUtil.getYearDateTime(list.get(k).getCourse_begin()));
+                                            paraMap.put("subId",list.get(k).getSub_id());
+                                            classScheduleDataMapper.saveHandledScheduleData(paraMap);
+                                        } else {
+                                            k--;
+                                            continue;
+                                        }
+                                    } else {
+                                        paraMap.put("content", JSONObject.toJSON(list.get(k)).toString());
+                                        paraMap.put("result", "创建失败");
+                                        paraMap.put("reason", "没有收到创建课节后，classin后台返回的数据");
+                                        paraMap.put("courseId", list.get(k).getKcwybm());
+                                        paraMap.put("yearDate", scheduleTime);
+                                        paraMap.put("subId",list.get(k).getSub_id());
+                                        classScheduleDataMapper.saveHandledScheduleData(paraMap);
+                                    }
+                                } else {
+                                    paraMap.put("content", JSONObject.toJSON(list.get(k)).toString());
+                                    paraMap.put("result", "创建失败");
+                                    paraMap.put("reason", error);
+                                    paraMap.put("courseId", list.get(k).getKcwybm());
+                                    paraMap.put("yearDate", scheduleTime);
+                                    paraMap.put("subId",list.get(k).getSub_id());
+                                    classScheduleDataMapper.saveHandledScheduleData(paraMap);
+                                }
+                            } else if (resultClass == null || resultClass.equals("")) {
+                                paraMap.put("content", list.get(k).getSub_id());
+                                paraMap.put("result", "创建失败");
+                                paraMap.put("reason", "没有收到创建课节后，classin后台返回的数据");
+                                paraMap.put("courseId", list.get(k).getKcwybm());
+                                paraMap.put("yearDate", scheduleTime);
+                                paraMap.put("subId",list.get(k).getSub_id());
+                                classScheduleDataMapper.saveHandledScheduleData(paraMap);
+                            } else if (resultClass.equals("timeout")) {
+                                paraMap.put("content", JSONObject.toJSON(list.get(k)).toString());
+                                paraMap.put("result", "创建失败");
+                                paraMap.put("reason", "classintimeout");
+                                paraMap.put("courseId", list.get(k).getKcwybm());
+                                paraMap.put("yearDate", scheduleTime);
+                                paraMap.put("subId",list.get(k).getSub_id());
+                                classScheduleDataMapper.saveHandledScheduleData(paraMap);
+                            }
+                        } else {
+                            paraMap.put("content", JSONObject.toJSON(list.get(k)).toString());
+                            paraMap.put("result", "创建失败");
+                            paraMap.put("reason", "此用户没有注册classin账号");
+                            paraMap.put("courseId", list.get(k).getKcwybm());
+                            paraMap.put("yearDate", scheduleTime);
+                            paraMap.put("subId",list.get(k).getSub_id());
+                            classScheduleDataMapper.saveHandledScheduleData(paraMap);
+                        }
+                        k++;
+                    }
+                } else {
+
+                    scheduleTime = TimeStampUtil.tommorrowTimeStampToTime();
+                    HashMap<String, String> hashMap = new HashMap<>();
+                    hashMap.put("reason","课表数据为空");
+                    hashMap.put("yearDate",scheduleTime);
+                    classScheduleDataMapper.deleteFailureDataByReasonByReason(hashMap);
+                    paraMap.put("content", "无数据");
+                    paraMap.put("result", "创建失败");
+                    paraMap.put("reason", "课表数据为空");
+                    paraMap.put("courseId", "课程ID为空");
+                    paraMap.put("yearDate", scheduleTime);
+                    paraMap.put("subId","无");
+                    classScheduleDataMapper.saveHandledScheduleData(paraMap);
+                }
+            }
+        } else {
+            scheduleTime = TimeStampUtil.tommorrowTimeStampToTime();
+            HashMap<String, String> hashMap = new HashMap<>();
+            hashMap.put("reason","获取课表数据超时");
+            hashMap.put("yearDate",scheduleTime);
+            classScheduleDataMapper.deleteFailureDataByReasonByReason(hashMap);
+            paraMap.put("content", "无数据");
+            paraMap.put("result", "创建失败");
+            paraMap.put("reason", "获取课表数据超时");
+            paraMap.put("courseId", "课程ID为空");
+            paraMap.put("yearDate", scheduleTime);
+            paraMap.put("subId","无");
+            classScheduleDataMapper.saveHandledScheduleData(paraMap);
+        }
+        if (data.equals("timeout")) {
+            emailMsg = "创建失败课表数据：所有数据   " +"失败原因：课表数据接口超时";
+            SendEmailUtil.sendMail("ware1111@126.com", emailMsg, fileName);
+        } else {
+            if (list == null) {
+                emailMsg = "创建失败课表数据：所有数据   " +"失败原因：无课表数据";
+                SendEmailUtil.sendMail("ware1111@126.com", emailMsg, fileName);
+            } else {
+                scheduleTime = TimeStampUtil.tommorrowTimeStampToTime();
+                WriteFileUtil.writeFile(classScheduleDataMapper, fileName);
+                List<Map<String, String>> allCreateClassResult = classScheduleDataMapper.getAllCreateClassResult(scheduleTime);
+                int failureData = allCreateClassResult.size();
+                int totalData = list.size();
+                int suceessData = totalData - failureData;
+                emailMsg = "创建课节成功数据：" + suceessData + "   创建课节失败数据：" + failureData + "    课节总数据：" + totalData;
+                SendEmailUtil.sendMail("ware1111@126.com", emailMsg, fileName);
+            }
+        }
+    }
+}

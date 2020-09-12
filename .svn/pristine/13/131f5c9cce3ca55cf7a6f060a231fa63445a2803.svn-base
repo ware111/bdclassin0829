@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blackboard.classin.mapper.ClassinClassVideoMapper" >
+
+	
+	<select id="findVediosByClassId" parameterType="java.lang.String" resultType="com.blackboard.classin.entity.ClassinClassVideo">
+		select 
+    		classin_course_id classinCourseId,classin_class_id classinClassId, action_time actionTime,
+    		sid_id sid ,v_timestamp vTimestamp ,vst vst,vet vet,cmd cmd,v_url vURL,v_duration vDuration,file_id fileId,v_size vSize,delete_status deleteStatus
+    	from classin_class_video 
+    	where classin_class_id = #{classinClassId} and delete_status = 'N'
+    	order by vst asc
+	</select>
+	
+	<insert id="save" parameterType="com.blackboard.classin.entity.ClassinClassVideo">
+		insert into classin_class_video values(#{classinCourseId},#{classinClassId},#{actionTime},#{sid},#{vTimestamp},#{vst},#{vet},#{cmd},#{vURL},#{vDuration},#{fileId},#{vSize},#{deleteStatus})
+	</insert>
+	
+	<update id="delete" parameterType="java.lang.String">
+		update classin_class_video set delete_status = 'Y' where file_id = #{fileId}
+	</update>
+</mapper>

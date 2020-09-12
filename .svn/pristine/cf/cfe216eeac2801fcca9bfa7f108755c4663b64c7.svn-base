@@ -1,0 +1,17 @@
+package com.blackboard.classin.util;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
+public class GetMailAddressUtil {
+    public static String getMailAddress() throws IOException {
+        SendEmailUtil sendEmailUtil = new SendEmailUtil();
+        String dir = "/usr/local/blackboard/content/vi/BBLEARN/plugins/bb-ClassIn/webapp/WEB-INF/classes/mailAddress.properties";
+        FileInputStream fileInputStream = new FileInputStream(dir);
+        Properties properties = new Properties();
+        properties.load(fileInputStream);
+        String address = properties.getProperty("address");
+        return address;
+    }
+}
