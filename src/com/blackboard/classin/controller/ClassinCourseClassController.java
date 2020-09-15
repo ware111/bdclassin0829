@@ -81,7 +81,7 @@ public class ClassinCourseClassController {
         @Override
         public void run() {
             try {
-                iBbCourseClassinCourse.deleteClassInCourseStudent();
+                iBbCourseClassinCourse.deleteCourseStudentByUid();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -239,8 +239,8 @@ public class ClassinCourseClassController {
      * @author panhaiming
      * @date 20200818
      */
-//    @ResponseBody
-//    @RequestMapping("/getClassScheduleData.do")
+    @ResponseBody
+    @RequestMapping("/getClassScheduleData.do")
     public String getClassScheduleData() throws IOException, MessagingException, InterruptedException {
 //      String datas="{\n" +
 //                "    \"ClassID\": 25672,\n" +
@@ -506,11 +506,11 @@ public class ClassinCourseClassController {
 //        jsonArray.add(jsonObject);
 //        String param7 = "studentJson="+jsonArray.toJSONString();
 //        log.info("para7>>>>>>>>>>>>>>"+param7);
-//        String param_studentName = "studentName=" + userId;
+        String studentName = "studentName=" + userId;
         String classin_addclassstudent_url = systemRegistryMapper.getURLByKey("classin_addcoursestudent_url");
         StringBuilder sBuilder = new StringBuilder();
         sBuilder.append(parma1).append("&").append(param2).append("&").append(param3)
-                .append("&").append(param4).append("&").append(param5).append("&").append(param6);
+                .append("&").append(param4).append("&").append(param5).append("&").append(param6).append("&").append(studentName);
         ObjectMapper objectMapper = new ObjectMapper();
         String addClassStudentResultMapString = HttpClient.doPost(classin_addclassstudent_url, sBuilder.toString());
         log.info("addCourseStudentResultMapString is >>>" + addClassStudentResultMapString);

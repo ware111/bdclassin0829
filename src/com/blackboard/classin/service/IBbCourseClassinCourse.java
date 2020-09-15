@@ -19,4 +19,6 @@ public interface IBbCourseClassinCourse {
 
 	void deleteClassInCourseStudent() throws JsonParseException, JsonMappingException, IOException;
 
+	void deleteCourseStudentByUid() throws IOException;
+
 }

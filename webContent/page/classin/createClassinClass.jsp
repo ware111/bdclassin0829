@@ -248,8 +248,9 @@
                         var teacher = teacherSelect.options[teacherIndex].value;
                         var teacherInfo = teacher;
                         var assistPhone = document.getElementById("assistantPhone" + classinClassId).innerText;
-                        var teacherPhone = document.getElementById("teacherPhone").innerText;
+                        var teacherPhone = document.getElementById("teacherPhone" + classinClassId).innerText;
                         var currentUserPhone = document.getElementById("currentUserTelephone").innerText;
+                        currentUserPhone = currentUserPhone.trim();
                         if (assistPhone.indexOf(currentUserPhone) != -1 || teacherPhone.indexOf(currentUserPhone) != -1) {
                             if (text == "进入教室") {
                                 jQuery.ajax({
@@ -651,7 +652,7 @@
                             onclick="getTeacherOption(${classInfo.CLASSIN_CLASS_ID})"
                             onchange="editTeacher(${classInfo.CLASSIN_CLASS_ID})" style="width: 100%">
                         <option value="${classInfo.TEACHER_NAME},${classInfo.TEACHER_PHONE}">${classInfo.TEACHER_NAME}&nbsp;&nbsp;&nbsp;${classInfo.TEACHER_PHONE}</option>
-                        <option id="teacherPhone" hidden>${classInfo.TEACHER_PHONE}</option>
+                        <option id="teacherPhone${classInfo.CLASSIN_CLASS_ID}" hidden>${classInfo.TEACHER_PHONE}</option>
                         <c:forEach items="${teachers}" var="bbUser">
                             <c:if test="${bbUser.phone!='   (请绑定手机号)' && (classInfo.TEACHER_PHONE != bbUser.phone)}">
                                 <option value="${bbUser.userName},${bbUser.phone}"

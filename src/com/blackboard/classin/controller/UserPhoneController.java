@@ -78,7 +78,7 @@ public class UserPhoneController {
                 parma1 = "SID=" + Constants.SID;
                 parma2 = "safeKey=" + SystemUtil.MD5Encode(Constants.SECRET + currentCreateClassTime);
                 parma3 = "timeStamp=" + currentCreateClassTime;
-                String param_nickname = "nickname=" + user.getFamilyName() + user.getMiddleName() + user.getGivenName() + "_" + user.getUserName();
+                String param_nickname = "nickname=" + user.getUserName();
                 String param_pwd = "password=" + phone;
                 String param_telephone = "telephone=" + phone;
                 String param_identity = "";

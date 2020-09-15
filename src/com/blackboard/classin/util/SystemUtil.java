@@ -444,4 +444,37 @@ public class SystemUtil {
             }
     }
 
+    public static String retriveStudentUid(String phone,SystemRegistryMapper systemRegistryMapper) throws IOException {
+            long currentCreateClassTime = System.currentTimeMillis() / 1000;
+            String sID = "SID=" + Constants.SID;
+            String safeKey = "safeKey=" + SystemUtil.MD5Encode(Constants.SECRET + currentCreateClassTime);
+            String timeStamp = "timeStamp=" + currentCreateClassTime;
+            String nickname = "nickname=" + phone;
+            String param_pwd = "password=" + "password";
+            String param_telephone = "telephone=" + phone;
+
+            StringBuilder strsBuilder = new StringBuilder();
+            strsBuilder.append(sID).append("&").append(safeKey).append("&").append(timeStamp).append("&").append(param_telephone)
+                    .append("&").append(nickname).append("&").append(param_pwd).append("&");
+
+            String classin_register_url = systemRegistryMapper.getURLByKey("classin_register_url");
+            String resultRegisterMapStr = HttpClient.doPost(classin_register_url, strsBuilder.toString());
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> resultRegisterMap = new HashMap<String, Object>();
+            if (resultRegisterMapStr != null && !"".equals(resultRegisterMapStr)) {
+                resultRegisterMap = objectMapper.readValue(resultRegisterMapStr, Map.class);
+                //解析返回的数据
+                Map<String, Object> errorInfo = (Map<String, Object>) resultRegisterMap.get("error_info");
+                String errno = errorInfo.get("errno").toString();
+                String error = errorInfo.get("error").toString();
+                String classinUid;
+                UserPhone userInfo = new UserPhone();
+                if ("1".equals(errno) || "135".equals(errno)) {
+                    classinUid = resultRegisterMap.get("data").toString();
+                    return classinUid;
+                }
+            }
+            return "fail";
+    }
+
 }
