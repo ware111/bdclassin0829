@@ -4,6 +4,20 @@
     <list default="true" id="992ca7fd-32f7-404b-874f-294548831d3c" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bb-classin.war" beforeDir="false" afterPath="$PROJECT_DIR$/bb-classin.war" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/constants/Constants.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/constants/Constants.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/controller/BbCourseClassinCourseController.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/controller/BbCourseClassinCourseController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/controller/ClassinController.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/controller/ClassinController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/controller/ClassinCourseClassController$MyThread.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/controller/ClassinCourseClassController$MyThread.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/controller/ClassinCourseClassController.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/controller/ClassinCourseClassController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/controller/ClssinClassVideoController.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/controller/ClssinClassVideoController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/controller/UserPhoneController.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/controller/UserPhoneController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/service/IBbCourseClassinCourse.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/service/IBbCourseClassinCourse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/service/impl/BbCourseClassinCourseImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/service/impl/BbCourseClassinCourseImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/service/impl/ClassinCourseClassImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/service/impl/ClassinCourseClassImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/service/impl/TimerTaskImp.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/service/impl/TimerTaskImp.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/util/HttpClient.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/util/HttpClient.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/util/SystemUtil.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/util/SystemUtil.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/db.properties" beforeDir="false" afterPath="$PROJECT_DIR$/bin/db.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/db.properties" beforeDir="false" afterPath="$PROJECT_DIR$/config/db.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/constants/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/constants/Constants.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/controller/ClassinCourseClassController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/controller/ClassinCourseClassController.java" afterDir="false" />
@@ -24,10 +38,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="ClassinCourseClassController.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="ClassinCourseClassController.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/blackboard/classin/controller/ClassinCourseClassController.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="461">
+            <state relative-caret-position="-135">
               <caret line="339" selection-start-line="339" selection-end-line="339" />
               <folding>
                 <element signature="method#summaryCheckinData#0;class#ClassinCourseClassController#0" />
@@ -40,17 +54,17 @@
       <file leaf-file-name="UserPhoneController.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/blackboard/classin/controller/UserPhoneController.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="621">
+            <state relative-caret-position="1350">
               <caret line="80" column="73" selection-start-line="80" selection-start-column="73" selection-end-line="80" selection-end-column="73" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BbCourseClassinCourseImpl.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="BbCourseClassinCourseImpl.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/blackboard/classin/service/impl/BbCourseClassinCourseImpl.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2631">
-              <caret line="424" column="70" selection-start-line="424" selection-start-column="70" selection-end-line="424" selection-end-column="70" />
+            <state relative-caret-position="199">
+              <caret line="397" column="48" lean-forward="true" selection-start-line="397" selection-start-column="48" selection-end-line="397" selection-end-column="48" />
             </state>
           </provider>
         </entry>
@@ -58,7 +72,7 @@
       <file leaf-file-name="ScheduledTask.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/blackboard/classin/task/ScheduledTask.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1107">
+            <state relative-caret-position="690">
               <caret line="63" column="15" selection-start-line="63" selection-start-column="15" selection-end-line="63" selection-end-column="15" />
             </state>
           </provider>
@@ -67,7 +81,7 @@
       <file leaf-file-name="SystemUtil.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/blackboard/classin/util/SystemUtil.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="391">
+            <state relative-caret-position="123">
               <caret line="453" column="58" selection-start-line="453" selection-start-column="58" selection-end-line="453" selection-end-column="58" />
             </state>
           </provider>
@@ -349,43 +363,44 @@
       <workItem from="1599836840573" duration="1574000" />
       <workItem from="1599881067921" duration="26017000" />
       <workItem from="1600137922213" duration="3483000" />
+      <workItem from="1600141551895" duration="259000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="35100000" />
+    <option name="totallyTimeSpent" value="35359000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
     <layout>
       <window_info anchor="right" id="Palette" order="3" />
-      <window_info anchor="bottom" id="Event Log" order="13" sideWeight="0.50319827" side_tool="true" weight="0.12513484" />
-      <window_info anchor="right" id="Maven Projects" order="8" />
-      <window_info anchor="bottom" id="Database Changes" order="11" show_stripe_button="false" />
-      <window_info id="Capture Tool" order="6" />
-      <window_info id="Designer" order="1" />
-      <window_info anchor="right" id="Database" order="5" />
-      <window_info id="Structure" order="7" sideWeight="0.4432577" weight="0.6695096" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info id="UI Designer" order="3" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Messages" order="9" sideWeight="0.49636218" weight="0.18554477" />
       <window_info anchor="right" id="Palette&#9;" order="6" />
       <window_info id="Image Layers" order="2" />
       <window_info anchor="bottom" id="Java Enterprise" order="10" />
       <window_info anchor="right" id="Capture Analysis" order="4" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.38727078" />
+      <window_info anchor="bottom" id="Event Log" order="13" sideWeight="0.50319827" side_tool="true" weight="0.12513484" />
+      <window_info anchor="right" id="Maven Projects" order="8" />
+      <window_info anchor="bottom" id="Database Changes" order="11" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="12" sideWeight="0.4995958" weight="0.32897195" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.38727078" />
       <window_info anchor="bottom" id="Spring" order="7" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.4968017" visible="true" weight="0.14347357" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.4968017" visible="true" weight="0.70873785" />
+      <window_info id="Capture Tool" order="6" />
+      <window_info id="Designer" order="1" />
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.5567423" weight="0.3219616" />
       <window_info id="Web" order="5" side_tool="true" />
+      <window_info anchor="right" id="Database" order="5" />
+      <window_info id="Structure" order="7" sideWeight="0.4432577" side_tool="true" weight="0.6695096" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info id="UI Designer" order="3" />
       <window_info anchor="right" id="Theme Preview" order="7" />
       <window_info id="Favorites" order="4" side_tool="true" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Messages" order="9" sideWeight="0.49636218" weight="0.18554477" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32901832" />
@@ -393,10 +408,9 @@
     <layout-to-restore>
       <window_info id="Designer" order="1" />
       <window_info anchor="right" id="Palette" order="3" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.38727078" />
       <window_info anchor="bottom" id="Spring" order="7" />
       <window_info id="Image Layers" order="2" />
-      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.38727078" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info id="UI Designer" order="3" />
@@ -404,6 +418,7 @@
       <window_info anchor="bottom" id="Terminal" order="8" sideWeight="0.4968017" visible="true" weight="0.14347357" />
       <window_info id="Capture Tool" order="6" />
       <window_info anchor="right" id="Capture Analysis" order="4" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="bottom" id="Event Log" order="13" sideWeight="0.50319827" side_tool="true" weight="0.12513484" />
       <window_info anchor="bottom" id="Messages" order="9" sideWeight="0.49636218" weight="0.18554477" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -412,7 +427,6 @@
       <window_info anchor="bottom" id="Database Changes" order="11" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="12" sideWeight="0.4995958" weight="0.32897195" />
       <window_info anchor="right" id="Maven Projects" order="8" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32901832" />
       <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.5567423" visible="true" weight="0.3219616" />
       <window_info anchor="right" id="Database" order="5" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -421,6 +435,7 @@
       <window_info anchor="right" id="Theme Preview" order="7" />
       <window_info id="Structure" order="7" sideWeight="0.4432577" weight="0.6695096" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32901832" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
     </layout-to-restore>
   </component>
@@ -686,13 +701,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/blackboard/classin/task/ScheduledTask.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1107">
-          <caret line="63" column="15" selection-start-line="63" selection-start-column="15" selection-end-line="63" selection-end-column="15" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/webContent/page/classin/createClassinClass.jsp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="428">
@@ -707,25 +715,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/blackboard/classin/util/SystemUtil.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="453" column="58" selection-start-line="453" selection-start-column="58" selection-end-line="453" selection-end-column="58" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/webContent/js/scripts.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/blackboard/classin/controller/UserPhoneController.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="621">
+        <state relative-caret-position="1350">
           <caret line="80" column="73" selection-start-line="80" selection-start-column="73" selection-end-line="80" selection-end-column="73" />
         </state>
       </provider>
@@ -751,21 +746,35 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/blackboard/classin/service/impl/BbCourseClassinCourseImpl.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2631">
-          <caret line="424" column="70" selection-start-line="424" selection-start-column="70" selection-end-line="424" selection-end-column="70" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/blackboard/classin/controller/ClassinCourseClassController.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="461">
+        <state relative-caret-position="-135">
           <caret line="339" selection-start-line="339" selection-end-line="339" />
           <folding>
             <element signature="method#summaryCheckinData#0;class#ClassinCourseClassController#0" />
             <element signature="method#getFailureData#0;class#ClassinCourseClassController#0" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/blackboard/classin/util/SystemUtil.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="123">
+          <caret line="453" column="58" selection-start-line="453" selection-start-column="58" selection-end-line="453" selection-end-column="58" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/blackboard/classin/task/ScheduledTask.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="690">
+          <caret line="63" column="15" selection-start-line="63" selection-start-column="15" selection-end-line="63" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/blackboard/classin/service/impl/BbCourseClassinCourseImpl.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="199">
+          <caret line="397" column="48" lean-forward="true" selection-start-line="397" selection-start-column="48" selection-end-line="397" selection-end-column="48" />
         </state>
       </provider>
     </entry>
