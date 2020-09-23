@@ -67,7 +67,7 @@ public class ScheduledTask {
         while ((hostName = stdInput.readLine()) != null) {
             log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>主机名ip地址" + hostName);
             if (hostName.equals(targetHostName)) {
-                classinCourseServuce.deleteClassInCourseStudent();
+                classinCourseServuce.deleteCourseStudentByPhoneAndUid();
             }
         }
 

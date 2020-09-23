@@ -27,7 +27,7 @@
     <bbData:context id="ctx">
         <bbNG:jsBlock>
             <SCRIPT type="text/javascript">
-                var courseId = document.getElementById("course_id").value;
+                var courseId=document.getElementById("course_id").value;
                 var intervalTimeArray = new Array();
                 refresh();
                 initSeleted();
@@ -169,9 +169,9 @@
                                         if (data.condition != "error") {
                                             window.open("https://www.eeo.cn/client/invoke/index.html?" + data.condition);
                                         } else if (data.source == "classin提示您----") {
-                                            window.open("${pageContext.request.contextPath}/page/classin/tips.jsp?source=" + data.source + "&" + "errno=" + data.errorno + "&error=" + data.error);
+                                            window.open("${pageContext.request.contextPath}/classinCourseClass/error.do?error=" + data.error);
                                         } else {
-                                            window.open("${pageContext.request.contextPath}/page/classin/tips.jsp?source=" + data.source + "&error=" + data.error);
+                                            window.open("${pageContext.request.contextPath}/classinCourseClass/error.do?error=" + data.error);
                                         }
                                     },
                                     error: function () {
@@ -212,9 +212,9 @@
                                                     if (data.condition != "error") {
                                                         window.open("https://www.eeo.cn/client/invoke/index.html?" + data.condition);
                                                     } else if (data.source == "classin提示您----") {
-                                                        window.open("${pageContext.request.contextPath}/page/classin/tips.jsp?source=" + data.source + "&" + "errno=" + data.errorno + "&error=" + data.error);
+                                                        window.open("${pageContext.request.contextPath}/classinCourseClass/error.do?error=" + data.error);
                                                     } else {
-                                                        window.open("${pageContext.request.contextPath}/page/classin/tips.jsp?source=" + data.source + "&error=" + data.error);
+                                                        window.open("${pageContext.request.contextPath}/classinCourseClass/error.do?error=" + data.error);
                                                     }
                                                 },
                                                 error: function () {
@@ -313,9 +313,9 @@
                                                 if (data.condition != "error") {
                                                     window.open("https://www.eeo.cn/client/invoke/index.html?" + data.condition);
                                                 } else if (data.source == "classin提示您----") {
-                                                    window.open("${pageContext.request.contextPath}/page/classin/tips.jsp?source=" + data.source + "&" + "errno=" + data.errorno + "&error=" + data.error);
+                                                    window.open("${pageContext.request.contextPath}/classinCourseClass/error.do?error=" + data.error);
                                                 } else {
-                                                    window.open("${pageContext.request.contextPath}/page/classin/tips.jsp?source=" + data.source + "&error=" + data.error);
+                                                    window.open("${pageContext.request.contextPath}/classinCourseClass/error.do?error=" + data.error);
                                                 }
                                             },
                                             error: function () {
@@ -351,7 +351,7 @@
 
                 //返回首页
                 function goBack() {
-                    var courseId = document.getElementById("course_id").value;
+                    var courseId = document.getElementsByName("course_id")[0].value;
                     window.location.href = "${pageContext.request.contextPath}/classinCourseClass/goBack.do?course_id=" + courseId
                 }
 
@@ -452,6 +452,84 @@
                     }
                 }
 
+                var lableList=document.getElementsByTagName("label");
+                for(var i=0;i<lableList.length;i++){
+                    if (lableList[i].id.indexOf("startTime") != -1 || lableList[i].id.indexOf("startDate") != -1) {
+                        var lableListValue = lableList[i].innerText;
+                        lableListValue = lableListValue * 1000;
+                        console.log(lableListValue);
+                        var timeArr = startTime2(lableListValue);
+                        console.log(timeArr);
+                        if (i % 2 == 0) {
+                            lableList[i].innerText = timeArr[0];
+                        } else {
+                            lableList[i].innerText = timeArr[1];
+                        }
+                    }
+                }
+                function getLocalTime(i,len) {
+                    //参数i为时区值数字，比如北京为东八区则输进8,西5输入-5
+                    if (typeof i !== 'number') return;
+                    var d = new Date();
+                    //本地时间与GMT时间的时间偏移差
+                    var offset = d.getTimezoneOffset() * 60000;
+                    //得到现在的格林尼治时间
+                    var utcTime = len + offset;
+                    return new Date(utcTime + 3600000 * i);
+                }
+
+                //时间戳按照时区转换成时间
+                function startTime2(dTimeStamp) {
+                    var datey = new Date();
+                    var doffset = datey.getTimezoneOffset() / 60;
+                    var i = doffset >= 0 ? -doffset : Math.abs(doffset);
+                    var localTime = String(getLocalTime(i, dTimeStamp));
+                    var arr = localTime.split(" ");
+                    switch (arr[1]) {
+                        case "Jan":
+                            arr[1] = "01";
+                            break;
+                        case "Feb":
+                            arr[1] = "02";
+                            break;
+                        case "Mar":
+                            arr[1] = "03";
+                            break;
+                        case "Apr":
+                            arr[1] = "04";
+                            break;
+                        case "May":
+                            arr[1] = "05";
+                            break;
+                        case "Jun":
+                            arr[1] = "06";
+                            break;
+                        case "Jul":
+                            arr[1] = "07";
+                            break;
+                        case "Aug":
+                            arr[1] = "08";
+                            break;
+                        case "Sep":
+                            arr[1] = "09";
+                            break;
+                        case "Oct":
+                            arr[1] = "10";
+                            break;
+                        case "Nov":
+                            arr[1] = "11";
+                            break;
+                        case "Dec":
+                            arr[1] = "12";
+                            break;
+                    }
+                    var arr1=arr[4].split(":");
+                    var startTime=arr[4]=arr1[0]+":"+arr1[1];
+                    var startDate=arr[3]+"-"+arr[1]+"-"+arr[2]
+                    var time=[startDate,startTime];
+                    return time;
+                }
+
             </SCRIPT>
         </bbNG:jsBlock>
 
@@ -509,10 +587,10 @@
                 ${classInfo.CLASS_NAME}
             </bbNG:listElement>
             <bbNG:listElement label="开课日期" name="download">
-                ${classInfo.STARTDATE}
+                <label id="startDate${classInfo.id}">${classInfo.START_TIME_STAMP}</label>
             </bbNG:listElement>
             <bbNG:listElement label="开课时间" name="start">
-                ${classInfo.START_TIME}
+                <label id="startTime${classInfo.id}">${classInfo.START_TIME_STAMP}</label>
             </bbNG:listElement>
             <bbNG:listElement label="课节时长" name="total">
                 ${classInfo.CLASS_TOTAL_TIME}

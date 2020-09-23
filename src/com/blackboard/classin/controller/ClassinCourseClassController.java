@@ -36,6 +36,10 @@ import java.io.*;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.Executors;
 
@@ -77,269 +81,18 @@ public class ClassinCourseClassController {
     private IBbCourseClassinCourse iBbCourseClassinCourse;
 
 
-    class MyThread extends Thread{
-        @Override
-        public void run() {
-            try {
-                iBbCourseClassinCourse.deleteCourseStudentByUid();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
     /**
-     * 汇总出勤数据
+     * 网页端报错请求
      *
      * @author panhaiming
-     * @date 20200904
-     */
-    @ResponseBody
-    @RequestMapping(value = "receiveCheckinData", method = RequestMethod.POST)
-    public String summaryCheckinData(@RequestBody String datas) {
-        datas="{\n" +
-                "    \"ClassID\": 25672,\n" +
-                "    \"CourseID\" : 116576,\n" +
-                "    \"Cmd\" : \"End\",\n" +
-                "    \"CloseTime\" : 1499718000,\n" +
-                "    \"StartTime\" : 1499653800,\n" +
-                "    \"SID\" : 1000082,\n" +
-                "    \"Data\" : {\n" +
-                "        \"inoutEnd\" : {\n" +
-                "            \"1002646\" : {\n" +
-                "                \"Total\" : 965,\n" +
-                "                \"Details\" : [\n" +
-                "                    {\n" +
-                "                        \"Type\" : \"In\",\n" +
-                "                        \"Device\": 0,\n" +
-                "                        \"Time\" : 1499673085\n" +
-                "                    },\n" +
-                "                    {\n" +
-                "                        \"Type\" : \"Out\",\n" +
-                "                        \"Time\" : 1499674050\n" +
-                "                    }\n" +
-                "                ],\n" +
-                "                \"Identity\": 1\n" +
-                "            },\n" +
-                "            \"1002647\" : {\n" +
-                "                \"Total\" : 964,\n" +
-                "                \"Details\" : [\n" +
-                "                    {\n" +
-                "                        \"Type\" : \"In\",\n" +
-                "                        \"Device\": 0,\n" +
-                "                        \"Time\" : 1499673094\n" +
-                "                    },\n" +
-                "                    {\n" +
-                "                        \"Type\" : \"Out\",\n" +
-                "                        \"Time\" : 1499674058\n" +
-                "                    }\n" +
-                "                ],\n" +
-                "                \"Identity\": 3\n" +
-                "            },\n" +
-                "            \"1002648\" : {\n" +
-                "                \"Total\" : 827,\n" +
-                "                \"Details\" : [\n" +
-                "                    {\n" +
-                "                        \"Type\" : \"In\",\n" +
-                "                        \"Device\": 0,\n" +
-                "                        \"Time\" : 1499673196\n" +
-                "                    },\n" +
-                "                    {\n" +
-                "                        \"Type\" : \"Out\",\n" +
-                "                        \"Time\" : 1499674023\n" +
-                "                    }\n" +
-                "                ],\n" +
-                "                \"Identity\": 1\n" +
-                "            }\n" +
-                "        }\n" +
-                "    }\n" +
-                "}\n";
-        HashMap<String, String> paraMap = new HashMap<>();
-        JSONObject totalJson = JSONObject.parseObject(datas);
-        String classID = (String) totalJson.get("ClassID");
-        ClassinCourseClass classInfo = classinCourseClassMapper.findByClassId(classID);
-        String className = classInfo.getClassName();
-        String closeTime = (String) totalJson.get("CloseTime");
-        String startTime = (String) totalJson.get("StartTime");
-        String teacherBBId = classInfo.getUserName();
-        String teacherPhone = classInfo.getTeacherPhone();
-        String data = (String) totalJson.get("Data");
-        JSONObject dataJson = JSONObject.parseObject(data);
-        String inoutEnd = (String) dataJson.get("inoutEnd");
-        UserPhone userPhone = userPhoneMapper.findByPhone(teacherPhone);
-        String teacherUid = userPhone.getClassinUid();
-        JSONObject inOutEndJson = JSONObject.parseObject(inoutEnd);
-        String uid = (String) inOutEndJson.get(teacherUid);
-        JSONObject inOutUIDJson = JSONObject.parseObject(uid);
-        String total_time = (String) inOutUIDJson.get("Total");
-        String checkin="";
-        if (!total_time.equals("0")){
-            checkin = "出勤";
-        }else {
-            checkin = "缺勤";
-        }
-        String details = (String) inOutUIDJson.get("Details");
-        //JSONObject inOutDetaiJson = JSONObject.parseObject(details);
-        JSONArray detailsArray = JSONObject.parseArray(details);
-
-        return "";
+     * @date 20200915
+     * */
+    @RequestMapping("error.do")
+    public String getErrorMsg(String error,Model model){
+        model.addAttribute("error",error);
+        return "/classin/tips";
     }
 
-    /**
-     * 获取课表内，创建课节失败的数据
-     *
-     * @author panhaiming
-     * @date 20200820
-     */
-    @RequestMapping("/getFailureData.do")
-    public String getFailureData(Model model, String course_id) throws MessagingException {
-        Course bbCourse = SystemUtil.getCourseById(course_id);
-        if (bbCourse != null) {
-            HashMap<String, String> paraMap = new HashMap<>();
-            SimpleDateFormat date11 = new SimpleDateFormat("yyyy-MM-dd");
-            String format11 = date11.format(new Date());
-            String yearDate = format11 + " 00:00:00";
-            String courseId = bbCourse.getCourseId();
-            paraMap.put("courseId", courseId);
-            paraMap.put("yearDate", yearDate);
-            List<Map<String, String>> createClassResultList = classScheduleDataMapper.getCreateClassResult(paraMap);
-            int i = 1;
-            if (createClassResultList.size() != 0) {
-                for (Map<String, String> map : createClassResultList) {
-                    map.put("num", "" + i++);
-                }
-                model.addAttribute("createClassResultList", createClassResultList);
-            } else {
-                List<Map<String, String>> allCreateClassResult = classScheduleDataMapper.getAllCreateClassResult(yearDate);
-                if (allCreateClassResult.size() == 0) {
-                    createClassResultList = new ArrayList<>();
-                    HashMap<String, String> paraMap1 = new HashMap<>();
-                    paraMap1.put("num", 1 + "");
-                    paraMap1.put("ID", 1 + "");
-                    paraMap1.put("CONTENT", "详见课表内已创建课节");
-                    paraMap1.put("RESULT", "当天课表，全部课节创建成功");
-                    paraMap1.put("REASON", "无");
-                    paraMap.put("yearDate", yearDate);
-                    createClassResultList.add(paraMap1);
-                    model.addAttribute("createClassResultList", createClassResultList);
-                } else {
-                    for (Map<String, String> map : allCreateClassResult) {
-                        map.put("num", "" + i++);
-                    }
-                    model.addAttribute("createClassResultList", allCreateClassResult);
-                }
-            }
-        }
-        return "/classin/createScheduleClassReport";
-    }
-
-
-    /**
-     * 获取华西云课表数据
-     *
-     * @author panhaiming
-     * @date 20200818
-     */
-    @ResponseBody
-    @RequestMapping("/getClassScheduleData.do")
-    public String getClassScheduleData() throws IOException, MessagingException, InterruptedException {
-//      String datas="{\n" +
-//                "    \"ClassID\": 25672,\n" +
-//                "    \"CourseID\" : 116576,\n" +
-//                "    \"Cmd\" : \"End\",\n" +
-//                "    \"CloseTime\" : 1499718000,\n" +
-//                "    \"StartTime\" : 1499653800,\n" +
-//                "    \"SID\" : 1000082,\n" +
-//                "    \"Data\" : {\n" +
-//                "        \"inoutEnd\" : {\n" +
-//                "            \"1002646\" : {\n" +
-//                "                \"Total\" : 965,\n" +
-//                "                \"Details\" : [\n" +
-//                "                    {\n" +
-//                "                        \"Type\" : \"In\",\n" +
-//                "                        \"Device\": 0,\n" +
-//                "                        \"Time\" : 1499673085\n" +
-//                "                    },\n" +
-//                "                    {\n" +
-//                "                        \"Type\" : \"Out\",\n" +
-//                "                        \"Time\" : 1499674050\n" +
-//                "                    }\n" +
-//                "                ],\n" +
-//                "                \"Identity\": 1\n" +
-//                "            },\n" +
-//                "            \"1002647\" : {\n" +
-//                "                \"Total\" : 964,\n" +
-//                "                \"Details\" : [\n" +
-//                "                    {\n" +
-//                "                        \"Type\" : \"In\",\n" +
-//                "                        \"Device\": 0,\n" +
-//                "                        \"Time\" : 1499673094\n" +
-//                "                    },\n" +
-//                "                    {\n" +
-//                "                        \"Type\" : \"Out\",\n" +
-//                "                        \"Time\" : 1499674058\n" +
-//                "                    }\n" +
-//                "                ],\n" +
-//                "                \"Identity\": 3\n" +
-//                "            },\n" +
-//                "            \"1002648\" : {\n" +
-//                "                \"Total\" : 827,\n" +
-//                "                \"Details\" : [\n" +
-//                "                    {\n" +
-//                "                        \"Type\" : \"In\",\n" +
-//                "                        \"Device\": 0,\n" +
-//                "                        \"Time\" : 1499673196\n" +
-//                "                    },\n" +
-//                "                    {\n" +
-//                "                        \"Type\" : \"Out\",\n" +
-//                "                        \"Time\" : 1499674023\n" +
-//                "                    }\n" +
-//                "                ],\n" +
-//                "                \"Identity\": 1\n" +
-//                "            }\n" +
-//                "        }\n" +
-//                "    }\n" +
-//                "}\n";
-//        HashMap<String, String> paraMap = new HashMap<>();
-//        JSONObject totalJson = JSONObject.parseObject(datas);
-//        String classID = (String) totalJson.get("ClassID");
-//        ClassinCourseClass classInfo = classinCourseClassMapper.findByClassId(classID);
-//        String className = classInfo.getClassName();
-//        String closeTime = (String) totalJson.get("CloseTime");
-//        String startTime = (String) totalJson.get("StartTime");
-//        String teacherBBId = classInfo.getUserName();
-//        String teacherPhone = classInfo.getTeacherPhone();
-//        String data = (String) totalJson.get("Data");
-//        JSONObject dataJson = JSONObject.parseObject(data);
-//        String inoutEnd = (String) dataJson.get("inoutEnd");
-//        UserPhone userPhone = userPhoneMapper.findByPhone(teacherPhone);
-//        String teacherUid = userPhone.getClassinUid();
-//        JSONObject inOutEndJson = JSONObject.parseObject(inoutEnd);
-//        String uid = (String) inOutEndJson.get(teacherUid);
-//        JSONObject inOutUIDJson = JSONObject.parseObject(uid);
-//        String total_time = (String) inOutUIDJson.get("Total");
-//        String checkin="";
-//        if (!total_time.equals("0")){
-//            checkin = "出勤";
-//        }else {
-//            checkin = "缺勤";
-//        }
-//        String details = (String) inOutUIDJson.get("Details");
-//        JSONArray detailsArray = JSONObject.parseArray(details);
-
-//        Course course = SystemUtil.getCourseByCourseId(datas);
-        JSONObject jsonObject = new JSONObject();
-//        if (course == null){
-//            jsonObject.put("courseid", datas);
-//            log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>courseid is "+datas+ " course is null");
-//        } else{
-//            jsonObject.put("courseTitle",course.getTitle());
-//        }
-
-//        jsonObject.put("data","success");
-        new MyThread().start();
-
-        return jsonObject.toJSONString();
-    }
 
     /**
      * 获取课节页面所需的默认值
@@ -477,8 +230,7 @@ public class ClassinCourseClassController {
     @ResponseBody
     @RequestMapping("/addCourseStudent.do")
     public String addCourseStudent(HttpServletRequest request, HttpServletResponse response, Model
-            model, String
-                                           classId) throws
+            model, String classId) throws
             JsonParseException, JsonMappingException, IOException, PersistenceException {
         JSONObject jsonObject = new JSONObject();
         SessionManager sessionManager = (SessionManager) SessionManager.Factory.getInstance();
@@ -496,67 +248,64 @@ public class ClassinCourseClassController {
         //课程成添加学生/旁听
         String param4 = "identity=1";
         String param6 = "studentUid=" + classinUid;
-        //String param_studentAccount = "studentAccount="+telephone;
-        //手机号修改为uid
-//        String param_studentAccount = "studentUid=" + classinUid;
-//        HashMap<String, Object> students = new HashMap<>();
-//        students.put("uid",classinUid);
-//        jsonObject.put("uid",classinUid);
-//        JSONArray jsonArray = new JSONArray();
-//        jsonArray.add(jsonObject);
-//        String param7 = "studentJson="+jsonArray.toJSONString();
-//        log.info("para7>>>>>>>>>>>>>>"+param7);
+
         String studentName = "studentName=" + userId;
         String classin_addclassstudent_url = systemRegistryMapper.getURLByKey("classin_addcoursestudent_url");
         StringBuilder sBuilder = new StringBuilder();
         sBuilder.append(parma1).append("&").append(param2).append("&").append(param3)
                 .append("&").append(param4).append("&").append(param5).append("&").append(param6).append("&").append(studentName);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String addClassStudentResultMapString = HttpClient.doPost(classin_addclassstudent_url, sBuilder.toString());
-        log.info("addCourseStudentResultMapString is >>>" + addClassStudentResultMapString);
-        Map<String, Object> addCourseStudentResultMap = new HashMap<String, Object>();
+        for (int i = 0; i < 2; i++) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            String addClassStudentResultMapString = HttpClient.doPost(classin_addclassstudent_url, sBuilder.toString());
+            log.info("addCourseStudentResultMapString is >>>" + addClassStudentResultMapString);
+            Map<String, Object> addCourseStudentResultMap = new HashMap<String, Object>();
 
-        if (addClassStudentResultMapString != null && !"".equals(addClassStudentResultMapString)) {
-            addCourseStudentResultMap = objectMapper.readValue(addClassStudentResultMapString, Map.class);
-            //解析返回的数据
-            Map<String, Object> errorInfo = (Map<String, Object>) addCourseStudentResultMap.get("error_info");
-            String errno = errorInfo.get("errno").toString();
-            String error = errorInfo.get("error").toString();
-            //添加学生成功
-            if ("1".equals(errno) || "163".equals(errno)) {
-                jsonObject.put("errno", errno);
-            } else if ("228".equals(errno)) {
-                log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>机构下学生");
-                String classin_addstudent_url = systemRegistryMapper.getURLByKey("classin_addstudent_url");
-                long currentCreateClassTime = System.currentTimeMillis() / 1000;
-                parma1 = "SID=" + Constants.SID;
-                String parma2 = "safeKey=" + SystemUtil.MD5Encode(Constants.SECRET + currentCreateClassTime);
-                String parma3 = "timeStamp=" + currentCreateClassTime;
-                String param_studentAccount = "studentAccount=" + userPhoneMapper.findByPhone("");
-                User currentUser = SystemUtil.getCurrentUser();
-                String param_studentName = "studentName=" + currentUser.getFamilyName() + currentUser.getMiddleName()
-                        + currentUser.getGivenName();
-                ;
-                StringBuilder strsBuilder = new StringBuilder();
-                strsBuilder.append(parma1).append("&").append(parma2).append("&").append(parma3).append("&").
-                        append(param_studentAccount).append("&").append(param_studentName);
-                String resultRegisterMapStr = HttpClient.doPost(classin_addstudent_url, strsBuilder.toString());
-                Map resultRegisterMap = objectMapper.readValue(resultRegisterMapStr, Map.class);
-                errorInfo = (Map<String, Object>) resultRegisterMap.get("error_info");
-                errno = errorInfo.get("errno").toString();
-                error = errorInfo.get("error").toString();
-                if (!"1".equals(errno) && !"133".equals(errno)) {
-                    model.addAttribute("source", "来自BB的提示信息");
-                    model.addAttribute("error", error);
-                    return "/classin/tips";
+            if (addClassStudentResultMapString != null && !"".equals(addClassStudentResultMapString)) {
+                addCourseStudentResultMap = objectMapper.readValue(addClassStudentResultMapString, Map.class);
+                //解析返回的数据
+                Map<String, Object> errorInfo = (Map<String, Object>) addCourseStudentResultMap.get("error_info");
+                String errno = errorInfo.get("errno").toString();
+                String error = errorInfo.get("error").toString();
+                //添加学生成功
+                if ("1".equals(errno) || "163".equals(errno)) {
+                    jsonObject.put("errno", errno);
+                    return jsonObject.toJSONString();
+                } else if ("228".equals(errno)) {
+                    log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>机构下无此学生");
+                    String classin_addstudent_url = systemRegistryMapper.getURLByKey("classin_addstudent_url");
+                    long currentCreateClassTime = System.currentTimeMillis() / 1000;
+                    parma1 = "SID=" + Constants.SID;
+                    String parma2 = "safeKey=" + SystemUtil.MD5Encode(Constants.SECRET + currentCreateClassTime);
+                    String parma3 = "timeStamp=" + currentCreateClassTime;
+                    String param_studentAccount = "studentAccount=" + telephone;
+                    User currentUser = SystemUtil.getCurrentUser();
+                    String param_studentName = "studentName=" + currentUser.getUserName();
+                    StringBuilder strsBuilder = new StringBuilder();
+                    strsBuilder.append(parma1).append("&").append(parma2).append("&").append(parma3).append("&").
+                            append(param_studentAccount).append("&").append(param_studentName);
+                    String resultRegisterMapStr = HttpClient.doPost(classin_addstudent_url, strsBuilder.toString());
+                    Map resultRegisterMap = objectMapper.readValue(resultRegisterMapStr, Map.class);
+                    errorInfo = (Map<String, Object>) resultRegisterMap.get("error_info");
+                    errno = errorInfo.get("errno").toString();
+                    error = errorInfo.get("error").toString();
+                    if (!"1".equals(errno) && !"133".equals(errno)) {
+                        model.addAttribute("source", "来自BB的提示信息");
+                        model.addAttribute("error", error);
+                        return "/classin/tips";
+                    } else {
+                        continue;
+                    }
+
+                } else {
+                    jsonObject.put("errno", errno);
+                    jsonObject.put("error", error);
+                    return jsonObject.toJSONString();
                 }
             } else {
-                jsonObject.put("errno", errno);
-                jsonObject.put("error", error);
+                jsonObject.put("errno", "BB提示：");
+                jsonObject.put("error", "系统错误，请重试");
+                return jsonObject.toJSONString();
             }
-        } else {
-            jsonObject.put("errno", "BB提示：");
-            jsonObject.put("error", "系统错误，请重试");
         }
         return jsonObject.toJSONString();
     }
@@ -839,12 +588,12 @@ public class ClassinCourseClassController {
                         errno = errorInfo.get("errno").toString();
                         error = errorInfo.get("error").toString();
                         if (!errno.equals("1")) {
-                            model.addAttribute("tips", error);
-                            return "/classin/tisps.jsp";
+                            model.addAttribute("error", error);
+                            return "/classin/tips";
                         }
                     } else {
-                        model.addAttribute("tips", "classIn服务器未收到请求信息，请重试");
-                        return "/classin/tisps.jsp";
+                        model.addAttribute("error", "classIn服务器未收到请求信息，请重试");
+                        return "/classin/tips";
                     }
                     continue;
                 } else {
@@ -1087,6 +836,9 @@ public class ClassinCourseClassController {
             course_id, Model model) throws PersistenceException, IOException {
         Course course = SystemUtil.getCourseById(course_id);
         String bbCourseId = course.getCourseId();
+        SessionManager sessionManager = (SessionManager) SessionManager.Factory.getInstance();
+        BbSession bbSession = sessionManager.getSession(request, response);
+        String telephone = bbSession.getGlobalKey("telephone");
         long timeStamp = System.currentTimeMillis() / 1000;
         HashMap<String, Object> paraMap = new HashMap<>();
         paraMap.put("bbCourseId", bbCourseId);
@@ -1108,6 +860,7 @@ public class ClassinCourseClassController {
         model.addAttribute("classList", newClassList);
         model.addAttribute("assistantTeachers", assistantTeachers);
         model.addAttribute("teachers", teachers);
+        model.addAttribute("currentUserTelephone", telephone);
         return "/classin/createClassinClass";
     }
 
@@ -1120,7 +873,7 @@ public class ClassinCourseClassController {
                                                      String className, String classType, String startDate,
                                                      String startTime, String hour, String minute, String teacher,
                                                      String assistantTeacher, String bbCourseId, String isLive,
-                                                     String isRecord, String isReplay,
+                                                     String isRecord, String isReplay,String startTimeStamp,
                                                      Model model) throws
             PersistenceException, IOException {
         SessionManager sessionManager = (SessionManager) SessionManager.Factory.getInstance();
@@ -1201,10 +954,10 @@ public class ClassinCourseClassController {
         String courseId = "courseId=" + classInCourseId;
         String courseClassName = className;
         className = "className=" + className;
-        String tempStartTime = startDate + "  " + startTime;
-        long startTimeStamp = TimeStampUtil.getTimeStamp(tempStartTime);
+        //String tempStartTime = startDate + "  " + startTime;
+        //long startTimeStamp = TimeStampUtil.getTimeStamp(tempStartTime);
         log.info(">>>>>>>>>>>>>>>课程ID>>>>>>>>>>>>>" + classInCourseId);
-        long endTimeStamp = new Integer(hour) * 60 * 60 + new Integer(minute) * 60 + startTimeStamp;
+        long endTimeStamp = new Integer(hour) * 60 * 60 + new Integer(minute) * 60 + Long.valueOf(startTimeStamp);
         String beginTime = "beginTime=" + startTimeStamp;
         String endTime = "endTime=" + endTimeStamp;
         teacherUID = "teacherUid=" + teacherUID;
@@ -1276,6 +1029,10 @@ public class ClassinCourseClassController {
                 bbSession.setGlobalKey("classError", error);
                 //创建classin课节成功
                 if ("1".equals(errno)) {
+                    Instant parse = Instant.ofEpochSecond(Long.valueOf(startTimeStamp));
+                    ZonedDateTime zonedDateTime = parse.atZone(ZoneId.systemDefault());
+                    startDate = zonedDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                    startTime = zonedDateTime.format(DateTimeFormatter.ofPattern("HH:mm"));
                     //设置课节ID classinId
                     String classinCourseClassId = classInClassMap.get("data").toString();
                     bbSession.setGlobalKey("classinCourseId", classInCourseId);
@@ -1381,12 +1138,12 @@ public class ClassinCourseClassController {
                             error = errorInfo.get("error").toString();
                             //创建classin课节成功
                             if (!"1".equals(errno)) {
-                                model.addAttribute("tips", error);
-                                return "/classin/tisps.jsp";
+                                model.addAttribute("error", error);
+                                return "/classin/tips";
                             }
                         } else {
-                            model.addAttribute("tips", "classIn服务器未收到请求信息，请重试");
-                            return "/classin/tisps.jsp";
+                            model.addAttribute("error", "classIn服务器未收到请求信息，请重试");
+                            return "/classin/tips";
                         }
                     }
                     return "redirect:/classinCourseClass/goBack.do?course_id=" + bbCourseId;
@@ -1409,24 +1166,25 @@ public class ClassinCourseClassController {
                         errno = errorInfo.get("errno").toString();
                         error = errorInfo.get("error").toString();
                         if (!errno.equals("1") && !errno.equals("133")) {
-                            model.addAttribute("tips", error);
-                            return "/classin/tisps.jsp";
+                            model.addAttribute("error", error);
+                            return "/classin/tips";
                         } else {
                             continue;
                         }
                     } else {
-                        model.addAttribute("tips", "classIn服务器未收到请求信息，请重试");
-                        return "/classin/tisps.jsp";
+                        model.addAttribute("error", "classIn服务器未收到请求信息，请重试");
+                        return "/classin/tips";
                     }
 
                 } else {
+                    log.info(">>>>>>>>>>>>>>>>>>>>>>99999999999");
                     //其他错误代码
-                    model.addAttribute("tips", error);
-                    return "/classin/tisps.jsp";
+                    model.addAttribute("error", error);
+                    return "/classin/tips";
                 }
             } else {//未获取到classin返回的信息
-                model.addAttribute("tips", "classIn服务器未收到请求信息，请重试");
-                return "/classin/tisps.jsp";
+                model.addAttribute("error", "classIn服务器未收到请求信息，请重试");
+                return "/classin/tips";
             }
         }
         return "";

@@ -20,6 +20,28 @@
         <property name="username" value="${db.username}" />
         <property name="password" value="${db.password}" />
         <property name="maxActive" value="${maxActive}" />
+        <property name="maxIdle" value="${maxIdle}" />
+        <property name="minIdle" value="${minIdle}" />
+        <property name="initialSize" value="${initialSize}" />
+        <property name="removeAbandoned" value="true" />
+        <property name="removeAbandonedTimeout" value="${removeAbandonedTimeout}" />
+        <property name="maxWait" value="${maxWait}" />
+        <property name="logAbandoned" value="true" />
+        <property name="testOnReturn">
+            <value>true</value>
+        </property>
+        <property name="testWhileIdle">
+            <value>true</value>
+        </property>
+        <property name="minEvictableIdleTimeMillis">
+            <value>180000</value>
+        </property>
+        <property name="timeBetweenEvictionRunsMillis">
+            <value>360000</value>
+        </property>
+        <property name="validationQuery">
+            <value>SELECT 1 FROM SYS.DUAL</value>
+        </property>
         <!-- <property name="maxIdle" value="5" /> -->
     </bean>
     <!-- mapper配置 -->

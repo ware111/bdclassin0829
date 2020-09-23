@@ -330,7 +330,7 @@ public class BbCourseClassinCourseImpl implements IBbCourseClassinCourse {
     }
 
     @Override
-    public void deleteCourseStudentByUid() {
+    public void deleteCourseStudentByPhoneAndUid() {
         String classin_getcoursestudent_url = systemRegistryMapper.getURLByKey("classin_getcoursestudent_url");
         String classin_deletecoursestudent_url = systemRegistryMapper.getURLByKey("classin_delCourseStudent_url");
         String param1 = "SID=" + Constants.SID;
@@ -394,6 +394,15 @@ public class BbCourseClassinCourseImpl implements IBbCourseClassinCourse {
                                 }
                             } else {
                                 User user = SystemUtil.getUserByUserId(userId);
+                                String classinUid = userInfo.getClassinUid();
+                                if (classinUid == null){
+                                    try {
+                                        SystemUtil.getUid(userInfo, systemRegistryMapper, userPhoneMapper);
+                                        classinUid = userPhoneMapper.findByPhone(telephone).getClassinUid();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
                                 if (user == null) {
                                     //用户不存在，需要删除
                                     log.info("userId====>" + userId + "用户不存在,删除其classin的注册关系");
@@ -403,7 +412,7 @@ public class BbCourseClassinCourseImpl implements IBbCourseClassinCourse {
                                             .append("&timeStamp=" + currentLoignTime)
                                             .append("&").append(param4)
                                             .append("&courseId=" + classinCourseId)
-                                            .append("&studentUid=" + userInfo.getClassinUid());
+                                            .append("&studentUid=" + classinUid);
                                     String resultDeleteCourseStudentString = HttpClient.doPost(classin_deletecoursestudent_url, sb.toString());
                                     log.info("bbCourseId=" + bbCourseId + "==>userId(不存在)=" + userId + "===>resultDeleteCourseStudentString===>" + resultDeleteCourseStudentString);
                                 } else {
@@ -418,7 +427,7 @@ public class BbCourseClassinCourseImpl implements IBbCourseClassinCourse {
                                                 .append("&timeStamp=" + currentLoignTime)
                                                 .append("&").append(param4)
                                                 .append("&courseId=" + classinCourseId)
-                                                .append("&studentUid=" + userInfo.getClassinUid());
+                                                .append("&studentUid=" + classinUid);
                                         String resultDeleteCourseStudentString = HttpClient.doPost(classin_deletecoursestudent_url, sb.toString());
                                         log.info("bbCourseId=" + bbCourseId + "==>userId=" + userId + "===>resultDeleteCourseStudentString===>" + resultDeleteCourseStudentString);
 

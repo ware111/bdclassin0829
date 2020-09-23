@@ -117,7 +117,7 @@
 
                 //返回首页
                 function goBack() {
-                    var courseId = document.getElementById("course_id").value;
+                    var courseId = document.getElementsByName("course_id")[0].value;
                     window.location.href = "${pageContext.request.contextPath}/classinCourseClass/goBack.do?course_id=" + courseId
                 }
             </SCRIPT>
@@ -165,5 +165,5 @@
         </bbNG:actionControlBar>
 
     </bbData:context>
-    <bbNG:button type="PageLevel" label="返回" url="javascript:history.goBack()" />
+    <bbNG:button type="PageLevel" label="返回" url="javascript:goBack()" />
 </bbNG:learningSystemPage>

@@ -30,7 +30,7 @@
            <SCRIPT type="text/javascript">
             //返回
             function goBack() {
-                var courseId = document.getElementById("course_id").value;
+                var courseId=document.getElementById("course_id").value;
                 window.location.href = "${pageContext.request.contextPath}/classinCourseClass/goBack.do?course_id=" + courseId
             }
            </SCRIPT>

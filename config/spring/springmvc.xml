@@ -19,13 +19,20 @@
 	
 	<!--添加拦截器配置-->
     <mvc:interceptors>
+        <!--同一拦截器-->
+        <mvc:interceptor>
+            <mvc:mapping path="/classinCourseClass/getHomeClassList.do"/>
+            <mvc:mapping path="/classinCourseClass/getClassScheduleList.do"/>
+            <mvc:mapping path="/classinCourseClass/toUpdatePhone.do"/>
+            <mvc:mapping path="/classinCourseClass/getRepalyList.do"/>
+            <bean class="com.blackboard.classin.interceptor.UniversalInterceptor"/>
+        </mvc:interceptor>
     	<!-- 系统配置 管理员-->
         <mvc:interceptor>
             <mvc:mapping path="/config/*"/>
             <!--<mvc:exclude-mapping path="/user/index"/>-->
             <bean class="com.blackboard.classin.interceptor.AccessInterceptor"/>
         </mvc:interceptor>
-        
         <mvc:interceptor>
             <mvc:mapping path="/bbCourseClassinCourse/findClass.do"/>
             <bean class="com.blackboard.classin.interceptor.StudentInterceptor"/>
@@ -37,7 +44,6 @@
             <mvc:mapping path="/classinCourseClass/create.do"/>
             <mvc:mapping path="/classinCourseClass/editClass.do"/>
             <mvc:mapping path="/video/delete.do"/>
-            <!--<mvc:exclude-mapping path="/user/index"/>-->
             <bean class="com.blackboard.classin.interceptor.DeleteInterceptor"/>
         </mvc:interceptor>
     </mvc:interceptors>

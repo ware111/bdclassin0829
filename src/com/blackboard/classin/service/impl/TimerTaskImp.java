@@ -257,8 +257,8 @@ public class TimerTaskImp implements TimerTaskService {
                                         paramMap.put("classinClassId", classinCourseClassId);
                                         paramMap.put("classinCourseId", classInCourseId);
                                         long totalTime = TimeStampUtil.getTimeStamp(list.get(k).getCourse_over()) - TimeStampUtil.getTimeStamp(list.get(k).getCourse_begin());
-                                        long hour = totalTime / 60;
-                                        long minute = totalTime % 60;
+                                        long hour = totalTime / 60 / 60;
+                                        long minute = totalTime / 60 % 60;
                                         paramMap.put("classTotalTime", hour + "小时" + minute + "分钟");
                                         paramMap.put("startTime", list.get(k).getCourse_begin().split(" ")[1]);
                                         paramMap.put("startTimeStamp", startTimeStamp);

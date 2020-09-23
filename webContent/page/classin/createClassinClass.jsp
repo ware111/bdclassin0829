@@ -25,6 +25,10 @@
                  blackboard.platform.authentication.SessionManager,
                  blackboard.platform.session.BbSession" %>
 <%@ page import="com.blackboard.classin.util.SystemUtil" %>
+<%@ page import="java.time.Instant" %>
+<%@ page import="java.time.ZonedDateTime" %>
+<%@ page import="java.time.ZoneId" %>
+<%@ page import="java.time.format.DateTimeFormatter" %>
 <%
     SessionManager sessionManager = (SessionManager) SessionManager.Factory.getInstance();
     BbSession bbSession = sessionManager.getSession(request, response);
@@ -57,7 +61,7 @@
                     if (confirm("是否更新当前手机号？")) {
                         var type = document.getElementById("typeName").value;
                         var course_id = document.getElementById("course_id").value;
-                        window.location.href = "${pageContext.request.contextPath}/userPhone/toUpdatePhone.do?course_id=" + course_id + "&type=" + type;
+                        window.location.href = "${pageContext.request.contextPath}/userPhone/toUpdatePhone.do?course_id=" + courseId + "&type=" + type;
                     }
                 }
 
@@ -149,6 +153,7 @@
                                 var classTotalTime = endTimeStamp - (startTimeStamp - (20 * 60));
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).innerText = "课节未开始";
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).setAttribute("tag", "notYet");
+                                // alert(data[i].CLASS_TYPE);
                                 if (data[i].CLASS_TYPE != '课表课') {
                                     document.getElementById(data[i].CLASSIN_CLASS_ID + "delete").innerText = "删除";
                                 }
@@ -266,9 +271,9 @@
                                         if (data.condition != "error") {
                                             window.open("https://www.eeo.cn/client/invoke/index.html?" + data.condition);
                                         } else if (data.source == "classin提示您----") {
-                                            window.open("${pageContext.request.contextPath}/page/classin/tips.jsp?source=" + data.source + "&" + "errno=" + data.errorno + "&error=" + data.error);
+                                            window.open("${pageContext.request.contextPath}/classinCourseClass/error.do?error=" + data.error);
                                         } else {
-                                            window.open("${pageContext.request.contextPath}/page/classin/tips.jsp?source=" + data.source + "&error=" + data.error);
+                                            window.open("${pageContext.request.contextPath}/classinCourseClass/error.do?error=" + data.error);
                                         }
                                     },
                                     error: function () {
@@ -309,9 +314,9 @@
                                                     if (data.condition != "error") {
                                                         window.open("https://www.eeo.cn/client/invoke/index.html?" + data.condition);
                                                     } else if (data.source == "classin提示您----") {
-                                                        window.open("${pageContext.request.contextPath}/page/classin/tips.jsp?source=" + data.source + "&" + "errno=" + data.errorno + "&error=" + data.error);
+                                                        window.open("${pageContext.request.contextPath}/classinCourseClass/error.do?error=" + data.error);
                                                     } else {
-                                                        window.open("${pageContext.request.contextPath}/page/classin/tips.jsp?source=" + data.source + "&error=" + data.error);
+                                                        window.open("${pageContext.request.contextPath}/classinCourseClass/error.do?error=" + data.error);
                                                     }
                                                 },
                                                 error: function () {
@@ -411,9 +416,9 @@
                                                 if (data.condition != "error") {
                                                     window.open("https://www.eeo.cn/client/invoke/index.html?" + data.condition);
                                                 } else if (data.source == "classin提示您----") {
-                                                    window.open("${pageContext.request.contextPath}/page/classin/tips.jsp?source=" + data.source + "&" + "errno=" + data.errorno + "&error=" + data.error);
+                                                    window.open("${pageContext.request.contextPath}/classinCourseClass/error.do?error=" + data.error);
                                                 } else {
-                                                    window.open("${pageContext.request.contextPath}/page/classin/tips.jsp?source=" + data.source + "&error=" + data.error);
+                                                    window.open("${pageContext.request.contextPath}/classinCourseClass/error.do?error=" + data.error);
                                                 }
                                             },
                                             error: function () {
@@ -511,27 +516,14 @@
 
                 //获取华西云课表数据
                 function getHuaXiData() {
-                    jQuery.ajax({
-                        type: "GET",
-                        url: "${pageContext.request.contextPath}/classinCourseClass/getClassScheduleData.do",
-                        // data: {
-                        //     "classId": classinClassId,
-                        // },     // data参数是可选的，有多种写法，也可以直接在url参数拼接参数上去，例如这样：url:"getUser?id="+val,
-                        async: true,   // 异步，默认开启，也就是$.ajax后面的代码是不是跟$.ajx里面的代码一起执行
-                        cache: true,  // 表示浏览器是否缓存被请求页面,默认是 true
-                        dataType: "json",   // 返回浏览器的数据类型，指定是json格式，前端这里才可以解析json数据
-                        success: function (data) {
-                            alert(data.data);
-                        },
-                        error: function () {
-                            alert("发生错误123~");
-                        },
-                        complete: function () {
-                            //alert("ajax请求完成")
-                        }
-
-                    });
+                    window.open("${pageContext.request.contextPath}/classinCourseClass/error.do?error=123");
+                    var elementsByTagName = document.getElementsByTagName("label");
+                    for (var i = 0; i < elementsByTagName.length; i++){
+                        var id = elementsByTagName[i].id;
+                    }
                 }
+
+
 
                 function getCreateStatus() {
                     var courseId = document.getElementById("course_id").value;
@@ -541,7 +533,7 @@
 
                 //返回首页
                 function goBack() {
-                    var courseId = document.getElementById("course_id").value;
+                    var courseId = document.getElementsByName("course_id")[0].value;
                     window.location.href = "${pageContext.request.contextPath}/classinCourseClass/goBack.do?course_id=" + courseId
                 }
 
@@ -565,6 +557,84 @@
                 <%--}--%>
                 <%--}--%>
                 <%--}--%>
+
+                var lableList=document.getElementsByTagName("label");
+                for(var i=0;i<lableList.length;i++){
+                    if (lableList[i].id.indexOf("startTime") != -1 || lableList[i].id.indexOf("startDate") != -1) {
+                        var lableListValue = lableList[i].innerText;
+                        lableListValue = lableListValue * 1000;
+                        console.log(lableListValue);
+                        var timeArr = startTime2(lableListValue);
+                        console.log(timeArr);
+                        if (i % 2 == 0) {
+                            lableList[i].innerText = timeArr[0];
+                        } else {
+                            lableList[i].innerText = timeArr[1];
+                        }
+                    }
+                }
+                function getLocalTime(i,len) {
+                    //参数i为时区值数字，比如北京为东八区则输进8,西5输入-5
+                    if (typeof i !== 'number') return;
+                    var d = new Date();
+                    //本地时间与GMT时间的时间偏移差
+                    var offset = d.getTimezoneOffset() * 60000;
+                    //得到现在的格林尼治时间
+                    var utcTime = len + offset;
+                    return new Date(utcTime + 3600000 * i);
+                }
+
+                //时间戳按照时区转换成时间
+                function startTime2(dTimeStamp) {
+                    var datey = new Date();
+                    var doffset = datey.getTimezoneOffset() / 60;
+                    var i = doffset >= 0 ? -doffset : Math.abs(doffset);
+                    var localTime = String(getLocalTime(i, dTimeStamp));
+                    var arr = localTime.split(" ");
+                    switch (arr[1]) {
+                        case "Jan":
+                            arr[1] = "01";
+                            break;
+                        case "Feb":
+                            arr[1] = "02";
+                            break;
+                        case "Mar":
+                            arr[1] = "03";
+                            break;
+                        case "Apr":
+                            arr[1] = "04";
+                            break;
+                        case "May":
+                            arr[1] = "05";
+                            break;
+                        case "Jun":
+                            arr[1] = "06";
+                            break;
+                        case "Jul":
+                            arr[1] = "07";
+                            break;
+                        case "Aug":
+                            arr[1] = "08";
+                            break;
+                        case "Sep":
+                            arr[1] = "09";
+                            break;
+                        case "Oct":
+                            arr[1] = "10";
+                            break;
+                        case "Nov":
+                            arr[1] = "11";
+                            break;
+                        case "Dec":
+                            arr[1] = "12";
+                            break;
+                    }
+                    var arr1=arr[4].split(":");
+                    var startTime=arr[4]=arr1[0]+":"+arr1[1];
+                    var startDate=arr[3]+"-"+arr[1]+"-"+arr[2]
+                    var time=[startDate,startTime];
+                    return time;
+                }
 
             </SCRIPT>
         </bbNG:jsBlock>
@@ -594,7 +664,7 @@
                 <%--<bbNG:actionButton primary="true" url="javaScript:getCreateStatus();" title="查看创建课节失败数据"/>--%>
                 <%--</c:if>--%>
                 <c:if test="${isTeacher==true}">
-                    <bbNG:actionButton primary="true" url="javaScript:advanceSet();" title="创建非课表课"/>
+                    <bbNG:actionButton primary="true" url="javaScript:advanceSet();" title="创建classin课堂"/>
                 </c:if>
                 <bbNG:form id="searchForm" name="searchForm" action="" method="POST">
                     <span style="color: #ac1d2a">${tips}</span><br/>
@@ -638,10 +708,10 @@
                 ${classInfo.CLASS_NAME}
             </bbNG:listElement>
             <bbNG:listElement label="开课日期" name="download">
-                ${classInfo.STARTDATE}
+                <label id="startDate${classInfo.id}">${classInfo.START_TIME_STAMP}</label>
             </bbNG:listElement>
             <bbNG:listElement label="开课时间" name="start">
-                ${classInfo.START_TIME}
+                <label id="startTime${classInfo.id}">${classInfo.START_TIME_STAMP}</label>
             </bbNG:listElement>
             <bbNG:listElement label="课节时长" name="total">
                 ${classInfo.CLASS_TOTAL_TIME}
@@ -658,7 +728,6 @@
                                 <option value="${bbUser.userName},${bbUser.phone}"
                                         style="width: 50%">${bbUser.getUserName()}&nbsp;&nbsp;&nbsp;${bbUser.phone}</option>
                             </c:if>
-                            <%--<option >***************${bbUser.userName}&nbsp;&nbsp;&nbsp;${bbUser.phone}</option>--%>
                         </c:forEach>
                     </select>
                 </c:if>

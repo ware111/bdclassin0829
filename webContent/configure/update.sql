@@ -1,5 +1,7 @@
-alter table classin_course_class add CLASS_TIME_LENGTH NUMBER(38);
-alter table classin_course_class add  CLOSE_CLASS_DELAY NUMBER(38);
+----执行添加字段前，请检查以下字段，表中是否有这些字段
+
+alter table classin_course_class add CLASS_TIME_LENGTH integer default 14400;
+alter table classin_course_class add  CLOSE_CLASS_DELAY NUMBER(38) integer default 1200;
 alter table classin_course_class add CLASS_NAME VARCHAR2(80);
 alter table classin_course_class add  CLASS_TYPE VARCHAR2(30);
 alter table classin_course_class add START_TIME VARCHAR2(80);
@@ -11,10 +13,11 @@ alter table classin_course_class add END_TIME_STAMP VARCHAR2(80);
 alter table classin_course_class add LIVE NUMBER(38);
 alter table classin_course_class add RECORD NUMBER(38);
 alter table classin_course_class add REPLAY NUMBER(38);
-alter table classin_course_class add BB_COURSE_ID VARCHAR2(80);
+alter table classin_course_class add BB_COURSE_ID VARCHAR2(80),
 alter table classin_course_class add START_TIME_STAMP NUMBER(38);
 alter table classin_course_class add BB_USER_NAME VARCHAR2(80);
 alter table classin_course_class add USER_NAME VARCHAR2(80);
+alter table classin_course_class add STUDENTS_TOTAL INT;
 alter table classin_course_class modify class_name varchar2(200);
 
 update system_registry set registry_value='https://api.eeo.cn/partner/api/course.api.php?action=addTeacher' where registry_key='classin_addteacher_url';
@@ -27,16 +30,17 @@ update system_registry set registry_value='https://api.eeo.cn/partner/api/course
 update system_registry set registry_value='https://api.eeo.cn/partner/api/course.api.php?action=addClassStudentMultiple' where registry_key='classin_addclassstudent_url';
 update system_registry set registry_value='https://api.eeo.cn/partner/api/course.api.php?action=addCourseClass' where registry_key='classin_addcourseclass_url';
 update system_registry set registry_value='https://api.eeo.cn/partner/api/course.api.php?action=addCourse' where registry_key='classin_addcourse_url';
-update system_registry set registry_value='https://api.eeo.cn/partner/api/course.api.php?action=delCourseClass' where registry_key='classin_deletecourseclass_url';
 update system_registry set registry_value='TODO' where registry_key='classin_import_grade_url';
 update system_registry set registry_value='TODO' where registry_key='classin_class_activity_info_url';
 
+-----classin在线研讨室第一次升级为classin在线课堂时，注意下面两个sql，第一个语句要改为：insert into system_registry(pk1,registry_key,registry_value) values(system_registry_seq.nextval,'classin_deletecourseclassvideo_url','https://api.eeo.cn/partner/api/course.api.php?action=deleteClassVideo');
+update system_registry set registry_value='https://api.eeo.cn/partner/api/course.api.php?action=deleteClassVideo' where registry_key='classin_deletecourseclassvideo_url';
+update system_registry set registry_value='https://api.eeo.cn/partner/api/course.api.php?action=delCourseClass' where registry_key='classin_deletecourseclass_url';
 
 insert into system_registry(pk1,registry_key,registry_value)
 values(system_registry_seq.nextval,'classin_addstudent_url','https://api.eeo.cn/partner/api/course.api.php?action=addSchoolStudent');
 insert into system_registry(pk1,registry_key,registry_value)
 values(system_registry_seq.nextval,'classin_deleteclassstudent_url','https://api.eeo.cn/partner/api/course.api.php?action=delClassStudentMultiple');
-
 
 
 
@@ -49,6 +53,7 @@ increment by 1
 start with 1          
 nocache;             
 
+
 ---class_schedule_data表的触发器(如果之前没有新建成功，需要再次重建)
 create or replace trigger class_schedule_tg
 before insert on class_schedule_data for each row
@@ -56,36 +61,6 @@ begin
 select class_schedule_data_id.nextval into:new.id from dual;
 end;
 
-------------------------考勤模块
-
----学生考勤详情表
-create table student_detail(class_name varchar2(200),class_id varchar2(100),
-begin_time varchar2(100),end_time varchar2(100),student_bbid varchar2(100),
-teacher_phone varchar2(100),student_uid varchar2(200) unique,identity varchar2(10),
-class_sustain_time number(8,4),checkin varchar2(50),later varchar2(50),talk_time int,
-up_stage_times int,up_time int,down_stage_times int,down_time int,remove_times int,
-award_times int,up_hands_times int,impower_times int,impower_total_time number(8,4),
-responder_times int,responder_answer_times int,responder_selected_times int,answer_times int,answer_right_times int,video_time int);
-
----课节考勤表
-create table class_data(class_name varchar2(200),class_id varchar2(100) unique ,
-begin_time varchar2(100),end_time varchar2(100),teacher_bbid varchar2(100),
-teacher_phone varchar2(100),class_sustain_time number(8,4),checkin varchar2(50),
-later varchar2(50),student_checkin varchar2(50),student_later int,student_back int,
-text_ppt int,text_ppt_total number(8,4),audio_ppt_counts int,audio_ppt_total number(8,4),
-all_quiet_counts int,all_quiet_total number(8,4),remove_student_times int,
-remove_students int,award_times int,award_peoples int,up_hands_times int,
-up_hands_peoples int,impower_times int,impower_peoples int,impower_total_time number(8,4),
-desk_share_times int,desk_share_total number(8,4),timer_times int,responder_times int,
-answer_times int,anser_per_rate varchar2(50),blackboard_times int,text_cooperation int,
-text_total_time number(8,4),many_direction_share int,many_direction_share_total number(8,4),
-exploer_times int,exploer_total_time number(8,4),job_times int,compute_timer_times int,random_select_times int);
-
-alter table classin_course_class add students_total int;
-
-alter table class_schedule_data add sub_id VARCHAR2(100);
-
-alter table class_schedule_data rename column today_time_stamp to year_date;
 
 insert into system_registry(pk1,registry_key,registry_value)
 values(system_registry_seq.nextval,'classin_getcoursestudent_url','https://api.eeo.cn/partner/api/course.api.php?action=getCourseStudent');
@@ -93,11 +68,6 @@ values(system_registry_seq.nextval,'classin_getcoursestudent_url','https://api.e
 insert into system_registry(pk1,registry_key,registry_value)
 values(system_registry_seq.nextval,'classin_deletecoursestudent_url','https://api.eeo.cn/partner/api/course.api.php?action=delCourseStudent');
 
-create table lable_table(type varchar2(80),value varchar2(100),label_id varchar2(100),label_name varchar2(200));
-
-alter table classin_course_class add label_id varchar(200);
-
-alter table classin_course_class add label_name  varchar(200);
 
 insert into system_registry(pk1,registry_key,registry_value)
 values(system_registry_seq.nextval,'classin_label_url','https://api.eeo.cn/partner/api/course.api.php?action=addClassLabels');

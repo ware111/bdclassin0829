@@ -172,12 +172,13 @@
                             </div>
                             <div class="col-sm-3" style="padding-left:10px;">
                                 <select id="classType" style="width:100%;">
-                                    <%--<option value="课表课">课表课</option>--%>
-                                    <option value="小组会" selected="selected">小组会</option>
-                                        <option value="研讨课" selected="selected">研讨课</option>
-                                        <option value="答疑课" selected="selected">答疑课</option>
-                                        <option value="公开课" selected="selected">公开课</option>
-                                        <option value="其他" selected="selected">其他</option>
+                                        <%--<option value="课表课">课表课</option>--%>
+                                    <option value="课表课" selected="selected">课表课</option>
+                                    <option value="小组会">小组会</option>
+                                    <option value="研讨课">研讨课</option>
+                                    <option value="答疑课">答疑课</option>
+                                    <option value="公开课">公开课</option>
+                                    <option value="其他">其他</option>
                                 </select>
                             </div>
                             <div class="col-sm-2" style="padding-left:10px;">
@@ -421,6 +422,7 @@
                     done: function (value, date, endDate) {
                         my$("startTime").value = value;
                         time_date = this.date;
+                        computeOverTime();
                     }
                 });
             });
@@ -473,6 +475,7 @@
                                     done: function (value, date, endDate) {
                                         my$("startTime").value = value;
                                         time_date = this.date;
+                                        computeOverTime();
                                     }
                                 });
                             });
@@ -508,14 +511,17 @@
                 var live = document.getElementById('live').checked;
                 var record = document.getElementById('record').checked;
                 var replay = document.getElementById('replay').checked;
+
+                var startTimeStamp = Date.parse(startDate + " " + startTime) / 1000;
                 if (teacher == '请选择授课教师') {
                     document.getElementById("choiceTeacher").innerText = "请选择一个授课教师";
                 } else if (checkStartTime() != 1 || checkStartDate() != 1 || checkClassRoom() != 1) {
                     window.location.href = "${pageContext.request.contextPath}/classinCourseClass/store.do?className=" + className +
                         "&classType=" + classType + "&startDate=" + startDate + "&startTime=" + startTime + "&hour=" + hour + "&minute=" + minute +
                         "&teacher=" + teacher + "&assistantTeacher=" + assistantTeacher + "&bbCourseId=" + bbCourseId +
-                        "&isLive=" + live + "&isRecord=" + record + "&isReplay=" + replay;
+                        "&isLive=" + live + "&isRecord=" + record + "&isReplay=" + replay + "&startTimeStamp=" + startTimeStamp;
                 }
+
 
             }
 
@@ -623,7 +629,7 @@
             computeOverTime();
 
             function goBack() {
-                var courseId = document.getElementById("course_id").value;
+                var courseId = document.getElementsByName("course_id")[0].value;
                 window.location.href = "${pageContext.request.contextPath}/classinCourseClass/goBack.do?course_id=" + courseId
             }
 
@@ -632,9 +638,9 @@
                 var className = document.getElementById('className').value;
                 if (className == "") {
                     document.getElementById('checkClassName').innerText = "请输入教室名称"
-                } else if(className.length==50){
+                } else if (className.length == 50) {
                     document.getElementById('checkClassName').innerText = "教室名称最大长度为50"
-                }else{
+                } else {
                     document.getElementById('checkClassName').innerText = ""
                 }
 

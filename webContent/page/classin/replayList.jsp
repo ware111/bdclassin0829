@@ -39,7 +39,7 @@
 
             //返回
             function goBack() {
-                var courseId = document.getElementById("course_id").value;
+                var courseId = document.getElementsByName("course_id")[0].value;
                 window.location.href = "${pageContext.request.contextPath}/classinCourseClass/goBack.do?course_id=" + courseId
             }
            </SCRIPT>
@@ -60,11 +60,13 @@
 	            <bbNG:actionPanelButton type="SEARCH" alwaysOpen="true">
 	                <bbNG:form id="searchForm" name="searchForm" action="" method="POST">
 			            ${tips}<br/>
-		              <input type="hidden" name="course_id" id="course_id" value="<%=course_id%>">
 	                </bbNG:form>
 	            </bbNG:actionPanelButton>
 	        </bbNG:actionControlBar>
 	 	</bbNG:actionControlBar>
+
+		<input type="hidden" name="course_id" id="course_id" value="<%=course_id%>">
+		<input type="hidden" name="typeName" id="typeName" value="${type}">
 
 	 	<%if(isTeacher == false){
 	 	%>

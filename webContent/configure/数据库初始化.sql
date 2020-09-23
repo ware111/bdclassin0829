@@ -32,33 +32,28 @@ create table classin_course_class(
  START_TIME_STAMP NUMBER(38),
  BB_USER_NAME VARCHAR2(80),
  USER_NAME VARCHAR2(80),
- STUDENT_TATLA INT,
+ STUDENTS_TOTAL INT,
 CONSTRAINT PK_classin_course_class PRIMARY KEY (classin_course_id,classin_class_id)
 );
 
-
-
---课程表内，创建失败的课节
 create table class_schedule_data(ID INT ,content varchar2(200),result varchar2(100),
 reason varchar2(200),course_id varchar2(100),YEAR_DATE varchar2(100),SUB_ID VARCHAR2(100))
 --创建针对class_schedule_data表的触发器，实现id自增
 --(1)创建序列
 create sequence class_schedule_data_id
+
 minvalue 1             --自增字段最小值
 nomaxvalue           --最大值 没有就算nomaxvalue
 increment by 1      --每次增值1
 start with 1           --起始值
 nocache            --不缓存
---(2)为class_schedule_data表创建触发器，实现自增。
+--(2)为class_schedule_data表创建触发器，实现自增，如果有课表需求，则对接。
 create or replace trigger class_schedule_tg
 before insert on class_schedule_data for each row
 begin
 select class_schedule_data_id.nextval into:new.id from dual;
 end;
 
-
-alter table classin_course_class add class_time_length integer default 14400;
-alter table classin_course_class add close_class_delay integer default 1200;
 
 --课节课程表
 create table classin_course_timetable(
@@ -109,28 +104,6 @@ v_size int,
 delete_status varchar2(1)
 );
 
----学生考勤详情表
-create table student_detail(class_name varchar2(200),class_id varchar2(100),
-begin_time varchar2(100),end_time varchar2(100),student_bbid varchar2(100),
-teacher_phone varchar2(100),student_uid varchar2(200) unique,identity varchar2(10),
-class_sustain_time number(8,4),checkin varchar2(50),later varchar2(50),talk_time int,
-up_stage_times int,up_time int,down_stage_times int,down_time int,remove_times int,
-award_times int,up_hands_times int,impower_times int,impower_total_time number(8,4),
-responder_times int,responder_answer_times int,responder_selected_times int,answer_times int,answer_right_times int,video_time int);
-
----课节考勤表
-create table class_data(class_name varchar2(200),class_id varchar2(100) unique ,
-begin_time varchar2(100),end_time varchar2(100),teacher_bbid varchar2(100),
-teacher_phone varchar2(100),class_sustain_time number(8,4),checkin varchar2(50),
-later varchar2(50),student_checkin varchar2(50),student_later int,student_back int,
-text_ppt int,text_ppt_total number(8,4),audio_ppt_counts int,audio_ppt_total number(8,4),
-all_quiet_counts int,all_quiet_total number(8,4),remove_student_times int,
-remove_students int,award_times int,award_peoples int,up_hands_times int,
-up_hands_peoples int,impower_times int,impower_peoples int,impower_total_time number(8,4),
-desk_share_times int,desk_share_total number(8,4),timer_times int,responder_times int,
-answer_times int,anser_per_rate varchar2(50),blackboard_times int,text_cooperation int,
-text_total_time number(8,4),many_direction_share int,many_direction_share_total number(8,4),
-exploer_times int,exploer_total_time number(8,4),job_times int,compute_timer_times int,random_select_times int);
 
 ----    pku@bb#metc=2013
 --添加URL
@@ -175,10 +148,5 @@ values(system_registry_seq.nextval,'classin_import_grade_url','TODO');
 insert into system_registry(pk1,registry_key,registry_value) 
 values(system_registry_seq.nextval,'classin_class_activity_info_url','TODO');
 
-create table lable_table(type varchar2(80),value varchar2(100),label_id varchar2(100),label_name varchar2(200));
-
-alter table classin_course_class add label_name  varchar(200);
-
-alter table classin_course_class add label_id varchar(200);
 
 commit;
