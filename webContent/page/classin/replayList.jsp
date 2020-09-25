@@ -21,6 +21,7 @@
 	String courseName = bbSession.getGlobalKey("courseName");
 	String role = bbSession.getGlobalKey("role");
 	boolean isTeacher = SystemUtil.isTeacher();
+	boolean isAdministrator = SystemUtil.isAdministrator();
 	//out.clear();      //清空缓存的内容
     //out=pageContext.pushBody();  //更新PageContext的out属性的内容
 %>
@@ -68,13 +69,13 @@
 		<input type="hidden" name="course_id" id="course_id" value="<%=course_id%>">
 		<input type="hidden" name="typeName" id="typeName" value="${type}">
 
-	 	<%if(isTeacher == false){
+	 	<%if(isTeacher == false && isAdministrator == false){
 	 	%>
 	 		<h5>学生查看回放，请登录ClassIn客户端，找到对应课程和课节，点击观看回放即可。</h5><br/><br/><br/>
 	 		<img src="/webapps/bb-ClassIn-bb_bb60/images/tip.png">
 	 	<%
 	 	} %>     
-       <%if(isTeacher == true){%>
+       <%if(isTeacher == true || isAdministrator == true){%>
 		<bbNG:inventoryList collection="${classinCourseClassList}" initialSortCol="classinCourseId"  objectVar="classinClassInfo" className="com.blackboard.classin.entity.ClassinCourseClass" url="">
 		
 			<bbNG:listElement label="课节名称" name="classinClassName" isRowHeader="true">

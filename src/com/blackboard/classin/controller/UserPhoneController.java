@@ -193,7 +193,7 @@ public class UserPhoneController {
         UserPhone userPhone = userPhoneMapper.findByPhone(telephone);
         if (userPhone != null && !userPhone.getUserId().equals(userId)) {
             model.addAttribute("source", "来自BB的提示信息");
-            model.addAttribute("error", "该手机号已被其他账号绑定，请重新输入！");
+            model.addAttribute("error", "此手机号已经与"+userPhone.getUserId()+"绑定,"+"请用"+userPhone.getUserId()+"账号登陆教学网，进入classin课堂，解绑此手机号");
             model.addAttribute("type", type);
             return "/classin/tips";
         }

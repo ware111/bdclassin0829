@@ -29,7 +29,7 @@ public class DeleteInterceptor implements HandlerInterceptor{
 
 	        //访问之前先看session中有没有系统角色
 	        // 有则判断是否教师
-	        if(SystemUtil.isTeacher()){
+	        if(SystemUtil.isTeacher() || SystemUtil.isAdministrator()){
 	            return true;
 	        }else{
 	        	throw new Exception("您未登录或您没有执行该操作的权限！");

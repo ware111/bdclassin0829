@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 public class UniversalInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o) throws Exception {
-        if (SystemUtil.isTeacher() || SystemUtil.isStudent()){
+        if (SystemUtil.isTeacher() || SystemUtil.isStudent() || SystemUtil.isAdministrator()){
             return true;
         } else{
             throw new Exception("您还未登录，请登陆");

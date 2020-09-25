@@ -96,7 +96,9 @@
 
                 //解绑手机号
                 function disbindPhone() {
-                    if (confirm("是否解绑当前手机号？")) {
+                    var telephone = document.getElementById("currentUserTelephone").innerText;
+                    var userName = document.getElementById("userName").innerText;
+                    if (confirm("手机号"+telephone+"是否解绑账号"+userName)) {
                         var type = document.getElementById("typeName").value;
                         var identity = document.getElementById("isTeacher").innerText;
                         var course_id = document.getElementById("course_id").value;
@@ -140,13 +142,14 @@
                     for (var i = 0; i < data.length; i++) {
                         var currentTimeStamp = Date.parse(new Date()) / 1000;
                         var isTeacher = document.getElementById("isTeacher").innerText + "";
+                        var isAdministrator = document.getElementById("isAdministrator").innerText;
                         //alert(isTeacher);
                         //alert(111111)
                         currentTimeStamp = new Number(currentTimeStamp);
                         var startTimeStamp = new Number(data[i].START_TIME_STAMP);
                         var endTimeStamp = new Number(data[i].END_TIME_STAMP);
 
-                        if (isTeacher.indexOf("teacher") != -1) {
+                        if (isTeacher.indexOf("teacher") != -1 || isAdministrator.indexOf("administrator") != -1) {
                             // alert("老师判断");
                             if (currentTimeStamp < startTimeStamp - (20 * 60)) {
                                 intervalTimeArray[i] = startTimeStamp - (20 * 60) - currentTimeStamp;
@@ -663,7 +666,7 @@
                 <%--&lt;%&ndash;<c:if test="${isTeacher==true}">&ndash;%&gt;--%>
                 <%--<bbNG:actionButton primary="true" url="javaScript:getCreateStatus();" title="查看创建课节失败数据"/>--%>
                 <%--</c:if>--%>
-                <c:if test="${isTeacher==true}">
+                <c:if test="${isTeacher==true || isAdministrator == true}">
                     <bbNG:actionButton primary="true" url="javaScript:advanceSet();" title="创建classin课堂"/>
                 </c:if>
                 <bbNG:form id="searchForm" name="searchForm" action="" method="POST">
@@ -694,6 +697,17 @@
         <span hidden id="currentUserTelephone">
                 ${currentUserTelephone}
         </span>
+
+        <span hidden id="isAdministrator">
+                <c:if test="${isAdministrator==true}">
+                    administrator
+                </c:if>
+        </span>
+
+        <span hidden id="userName">
+                ${userName}
+        </span>
+
         <bbNG:inventoryList collection="${classList}" objectVar="classInfo" className="java.util.Map" url="">
 
             <bbNG:listElement label="序号" name="classinClassName" isRowHeader="true">
@@ -717,7 +731,7 @@
                 ${classInfo.CLASS_TOTAL_TIME}
             </bbNG:listElement>
             <bbNG:listElement label="授课教师" name="teacher">
-                <c:if test="${isTeacher==true}">
+                <c:if test="${isTeacher==true || isAdministrator == true}">
                     <select id="teacher${classInfo.CLASSIN_CLASS_ID}"
                             onclick="getTeacherOption(${classInfo.CLASSIN_CLASS_ID})"
                             onchange="editTeacher(${classInfo.CLASSIN_CLASS_ID})" style="width: 100%">
@@ -731,12 +745,12 @@
                         </c:forEach>
                     </select>
                 </c:if>
-                <c:if test="${isTeacher!=true}">
+                <c:if test="${isTeacher!=true && isAdministrator!=true}">
                     <span>${classInfo.TEACHER_NAME}</span>
                 </c:if>
             </bbNG:listElement>
             <bbNG:listElement label="助教" name="assistant">
-                <c:if test="${isTeacher==true}">
+                <c:if test="${isTeacher==true || isAdministrator == true}">
                     <select id="assistantTeacher${classInfo.CLASSIN_CLASS_ID}"
                             onchange="addAssistant(${classInfo.CLASSIN_CLASS_ID})" style="width: 100%">
                         <option value="${classInfo.ASSISTANT_NAME},${classInfo.ASSISTANT_PHONE}">${classInfo.ASSISTANT_NAME}&nbsp;&nbsp;&nbsp;${classInfo.ASSISTANT_PHONE}</option>
@@ -758,14 +772,14 @@
                         <%--}--%>
                     <%--</script>--%>
                 </c:if>
-                <c:if test="${isTeacher!=true}">
+                <c:if test="${isTeacher!=true && isAdministrator != true}">
                     <span>${classInfo.ASSISTANT_NAME}</span>
                 </c:if>
             </bbNG:listElement>
             <bbNG:listElement label="操作" name="action">
                     <%--<span id="${classInfo.CLASSIN_CLASS_ID}edit" onclick="editClass(${classInfo.CLASSIN_CLASS_ID})"--%>
                     <%--style="color: #210a04;cursor: pointer">保存</span>--%>
-                    <c:if test="${isTeacher==true}">
+                    <c:if test="${isTeacher==true || isAdministrator == true}">
                     <span id="${classInfo.CLASSIN_CLASS_ID}delete" onclick="deleteClass(${classInfo.CLASSIN_CLASS_ID})"
                           style="color: #f44b1c;cursor: pointer"></span>
                     </c:if>

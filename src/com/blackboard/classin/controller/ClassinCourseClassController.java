@@ -1,6 +1,8 @@
 package com.blackboard.classin.controller;
 
+import blackboard.base.BbList;
 import blackboard.data.course.Course;
+import blackboard.data.course.CourseMembership;
 import blackboard.data.user.User;
 import blackboard.persist.PersistenceException;
 import blackboard.platform.authentication.SessionManager;
@@ -80,6 +82,28 @@ public class ClassinCourseClassController {
     @Autowired
     private IBbCourseClassinCourse iBbCourseClassinCourse;
 
+
+//    @ResponseBody
+//    @RequestMapping("test.do")
+    public String test() throws IOException, PersistenceException {
+        class MyThread extends Thread{
+            @Override
+            public void run() {
+                try {
+                    iBbCourseClassinCourse.deleteCourseStudentByPhoneAndUid();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        new MyThread().start();
+//       SystemUtil.getStudentState("21");
+//        SystemUtil.getStudentState("121");
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("data","success");
+        return jsonObject.toJSONString();
+    }
 
     /**
      * 网页端报错请求
@@ -817,6 +841,10 @@ public class ClassinCourseClassController {
         List<BBUser> assistantTeachers = SystemUtil.getBbAssistantTeachers(bb_course_id, userPhoneMapper);
         List<BBUser> teachers = SystemUtil.getBbTeachers(bb_course_id, userPhoneMapper);
         boolean isTeacher = SystemUtil.isTeacher();
+        boolean isAdministrator = SystemUtil.isAdministrator();
+        String userName = SystemUtil.getCurrentUser().getUserName();
+        model.addAttribute("userName",userName);
+        model.addAttribute("isAdministrator",isAdministrator);
         model.addAttribute("isTeacher", isTeacher);
         model.addAttribute("classList", newClassList);
         model.addAttribute("assistantTeachers", assistantTeachers);
@@ -856,6 +884,10 @@ public class ClassinCourseClassController {
         List<BBUser> assistantTeachers = SystemUtil.getBbAssistantTeachers(bb_course_id, userPhoneMapper);
         List<BBUser> teachers = SystemUtil.getBbTeachers(bb_course_id, userPhoneMapper);
         boolean isTeacher = SystemUtil.isTeacher();
+        boolean isAdministrator = SystemUtil.isAdministrator();
+        String userName = SystemUtil.getCurrentUser().getUserName();
+        model.addAttribute("userName",userName);
+        model.addAttribute("isAdministrator",isAdministrator);
         model.addAttribute("isTeacher", isTeacher);
         model.addAttribute("classList", newClassList);
         model.addAttribute("assistantTeachers", assistantTeachers);

@@ -42,19 +42,26 @@
 
                 //处理课表信息集合
                 function handleData(data) {
+                    // alert("handleData");
                     data = data.data;
                     for (var i = 0; i < data.length; i++) {
                         var currentTimeStamp = Date.parse(new Date()) / 1000;
                         var isTeacher = document.getElementById("isTeacher").innerText + "";
+                        var isAdministrator = document.getElementById("isAdministrator").innerText;
+                        //alert(isTeacher);
+                        //alert(111111)
                         currentTimeStamp = new Number(currentTimeStamp);
                         var startTimeStamp = new Number(data[i].START_TIME_STAMP);
                         var endTimeStamp = new Number(data[i].END_TIME_STAMP);
-                        if (isTeacher.indexOf("teacher") != -1) {
+
+                        if (isTeacher.indexOf("teacher") != -1 || isAdministrator.indexOf("administrator") != -1) {
+                            // alert("老师判断");
                             if (currentTimeStamp < startTimeStamp - (20 * 60)) {
                                 intervalTimeArray[i] = startTimeStamp - (20 * 60) - currentTimeStamp;
                                 var classTotalTime = endTimeStamp - (startTimeStamp - (20 * 60));
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).innerText = "课节未开始";
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).setAttribute("tag", "notYet");
+                                // alert(data[i].CLASS_TYPE);
                                 if (data[i].CLASS_TYPE != '课表课') {
                                     document.getElementById(data[i].CLASSIN_CLASS_ID + "delete").innerText = "删除";
                                 }
@@ -62,6 +69,7 @@
                                     alterStatus(intervalTimeArray[i] * 1000, data[i].CLASSIN_CLASS_ID, classTotalTime * 1000);
                                 }
                             } else if (currentTimeStamp >= startTimeStamp - (20 * 60) && currentTimeStamp < endTimeStamp) {
+                                //  alert("进入教室");
                                 intervalTimeArray[i] = endTimeStamp - currentTimeStamp;
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).innerText = "进入教室";
                                 document.getElementById(data[i].CLASSIN_CLASS_ID + "delete").innerText = "";
@@ -574,7 +582,19 @@
         <span hidden id="currentUserTelephone">
                 ${currentUserTelephone}
         </span>
+
+        <span hidden id="isAdministrator">
+                <c:if test="${isAdministrator==true}">
+                    administrator
+                </c:if>
+        </span>
+
+        <span hidden id="userName">
+                ${userName}
+        </span>
+
         <bbNG:inventoryList collection="${classList}" objectVar="classInfo" className="java.util.Map" url="">
+
             <bbNG:listElement label="序号" name="classinClassName" isRowHeader="true">
                 ${classInfo.id}
             </bbNG:listElement>
@@ -596,24 +616,26 @@
                 ${classInfo.CLASS_TOTAL_TIME}
             </bbNG:listElement>
             <bbNG:listElement label="授课教师" name="teacher">
-                <c:if test="${isTeacher==true}">
+                <c:if test="${isTeacher==true || isAdministrator == true}">
                     <select id="teacher${classInfo.CLASSIN_CLASS_ID}"
+                            onclick="getTeacherOption(${classInfo.CLASSIN_CLASS_ID})"
                             onchange="editTeacher(${classInfo.CLASSIN_CLASS_ID})" style="width: 100%">
-                        <option value="${classInfo.TEACHER_NAME},${classInfo.TEACHER_PHONE}" style="width: 50%"> ${classInfo.TEACHER_NAME}&nbsp;&nbsp;&nbsp;${classInfo.TEACHER_PHONE}</option>
-                        <option id="teacherPhone${classInfo.CLASSIN_CLASS_ID}" hidden style="width: 50%">${classInfo.TEACHER_PHONE}</option>
+                        <option value="${classInfo.TEACHER_NAME},${classInfo.TEACHER_PHONE}">${classInfo.TEACHER_NAME}&nbsp;&nbsp;&nbsp;${classInfo.TEACHER_PHONE}</option>
+                        <option id="teacherPhone${classInfo.CLASSIN_CLASS_ID}" hidden>${classInfo.TEACHER_PHONE}</option>
                         <c:forEach items="${teachers}" var="bbUser">
                             <c:if test="${bbUser.phone!='   (请绑定手机号)' && (classInfo.TEACHER_PHONE != bbUser.phone)}">
-                                <option value="${bbUser.userName},${bbUser.phone}" style="width: 50%">${bbUser.userName}&nbsp;&nbsp;&nbsp;${bbUser.phone}</option>
+                                <option value="${bbUser.userName},${bbUser.phone}"
+                                        style="width: 50%">${bbUser.getUserName()}&nbsp;&nbsp;&nbsp;${bbUser.phone}</option>
                             </c:if>
                         </c:forEach>
                     </select>
                 </c:if>
-                <c:if test="${isTeacher!=true}">
+                <c:if test="${isTeacher!=true && isAdministrator!=true}">
                     <span>${classInfo.TEACHER_NAME}</span>
                 </c:if>
             </bbNG:listElement>
             <bbNG:listElement label="助教" name="assistant">
-                <c:if test="${isTeacher==true}">
+                <c:if test="${isTeacher==true || isAdministrator == true}">
                     <select id="assistantTeacher${classInfo.CLASSIN_CLASS_ID}"
                             onchange="addAssistant(${classInfo.CLASSIN_CLASS_ID})" style="width: 100%">
                         <option value="${classInfo.ASSISTANT_NAME},${classInfo.ASSISTANT_PHONE}">${classInfo.ASSISTANT_NAME}&nbsp;&nbsp;&nbsp;${classInfo.ASSISTANT_PHONE}</option>
@@ -626,29 +648,25 @@
                         </c:forEach>
                     </select>
                     <%--<script type="text/javascript">--%>
-                        <%--var assistantTeacherSelect = document.getElementById('assistantTeacher'+${classInfo.CLASSIN_CLASS_ID});--%>
-                        <%--var assistantTeacherIndex = assistantTeacherSelect.selectedIndex;--%>
-                        <%--var assistantTeacher = assistantTeacherSelect.options[assistantTeacherIndex].value;--%>
-                        <%--if (assistantTeacher.indexOf("1") != -1){--%>
-                            <%--//alert(assistantTeacher)--%>
-                            <%--assistantTeacherSelect.setAttribute("disabled","disabled");--%>
-                        <%--}--%>
-
-
+                    <%--var assistantTeacherSelect = document.getElementById('assistantTeacher' +${classInfo.CLASSIN_CLASS_ID});--%>
+                    <%--var assistantTeacherIndex = assistantTeacherSelect.selectedIndex;--%>
+                    <%--var assistantTeacher = assistantTeacherSelect.options[assistantTeacherIndex].value;--%>
+                    <%--if (assistantTeacher.indexOf("1") != -1) {--%>
+                    <%--//alert(assistantTeacher)--%>
+                    <%--assistantTeacherSelect.setAttribute("disabled", "disabled");--%>
+                    <%--}--%>
                     <%--</script>--%>
                 </c:if>
-                <c:if test="${isTeacher!=true}">
+                <c:if test="${isTeacher!=true && isAdministrator != true}">
                     <span>${classInfo.ASSISTANT_NAME}</span>
                 </c:if>
             </bbNG:listElement>
             <bbNG:listElement label="操作" name="action">
-                <c:if test="${isTeacher==true}">
-                    <%--<span id="${classInfo.CLASSIN_CLASS_ID}edit" onclick="editClass(${classInfo.CLASSIN_CLASS_ID})"--%>
-                          <%--style="color: #210a04;cursor: pointer">保存</span>--%>
-                    <c:if test="${isTeacher==true}">
+                <%--<span id="${classInfo.CLASSIN_CLASS_ID}edit" onclick="editClass(${classInfo.CLASSIN_CLASS_ID})"--%>
+                <%--style="color: #210a04;cursor: pointer">保存</span>--%>
+                <c:if test="${isTeacher==true || isAdministrator == true}">
                     <span id="${classInfo.CLASSIN_CLASS_ID}delete" onclick="deleteClass(${classInfo.CLASSIN_CLASS_ID})"
                           style="color: #f44b1c;cursor: pointer"></span>
-                    </c:if>
                 </c:if>
                 <button id="${classInfo.CLASSIN_CLASS_ID}" onclick="classBegin(${classInfo.CLASSIN_CLASS_ID})" tag="hasBegan"
                         style="cursor: pointer;background-color:#dadada;border-radius:3px;border-style:none;line-height:30px;width:80px;">

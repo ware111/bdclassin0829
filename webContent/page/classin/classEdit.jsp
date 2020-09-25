@@ -191,7 +191,7 @@
                             </div>
                             <div class='col-sm-3' style="padding-left:10px;">
                                 <div class='form-group date' style="position:relative;">
-                                    <input type="text" id="startDate" style="width:100%;">
+                                    <input type="text" id="startDate" style="width:100%;" onblur="checkStartDate()">
                                     <div style="position:absolute;top:20px;right:-5px;display:inline-block;">
                                         <input type="button" value="" id="test1">
                                         <span class="glyphicon glyphicon-calendar open_date"></span>
@@ -208,7 +208,7 @@
                             </div>
                             <div class='col-sm-3' style="padding-left:10px;">
                                 <div class="form-group" style="position:relative;">
-                                    <input type="text" id="startTime" style="width:100%;">
+                                    <input type="text" id="startTime" style="width:100%;" onblur="checkStartTime()">
                                     <div style="position:absolute;top:20px;right:-5px;display:inline-block;">
                                         <input type="button" id="test">
                                         <input type="button" id="test2" style="display:none;">
@@ -513,16 +513,12 @@
                 var replay = document.getElementById('replay').checked;
 
                 var startTimeStamp = Date.parse(startDate + " " + startTime) / 1000;
-                if (teacher == '请选择授课教师') {
-                    document.getElementById("choiceTeacher").innerText = "请选择一个授课教师";
-                } else if (checkStartTime() != 1 || checkStartDate() != 1 || checkClassRoom() != 1) {
+                if (checkStartTime() != 1 && checkStartDate() != 1 && checkClassRoom() != 1 && checkTeacher() != 1) {
                     window.location.href = "${pageContext.request.contextPath}/classinCourseClass/store.do?className=" + className +
                         "&classType=" + classType + "&startDate=" + startDate + "&startTime=" + startTime + "&hour=" + hour + "&minute=" + minute +
                         "&teacher=" + teacher + "&assistantTeacher=" + assistantTeacher + "&bbCourseId=" + bbCourseId +
                         "&isLive=" + live + "&isRecord=" + record + "&isReplay=" + replay + "&startTimeStamp=" + startTimeStamp;
                 }
-
-
             }
 
             //检查是否输入教室名称
@@ -533,7 +529,7 @@
                     $("#checkClassName").css("color", "red");
                     return 1;
                 } else {
-                    document.getElementById('checkClassName').innerText = ""
+                    document.getElementById('checkClassName').innerText = "";
                     return 0;
                 }
             }
@@ -557,7 +553,8 @@
             function checkStartDate() {
                 var startDate = document.getElementById('startDate').value;
                 if (startDate == "") {
-                    document.getElementById('checkStartDate').innerText = "请选择日期或者输入'xxxx-xx-xx'格式的日期"
+                    document.getElementById('checkStartDate').innerText = "请选择日期或者输入'xxxx-xx-xx'格式的日期";
+                    $("#checkStartDate").css("color", "red");
                     return 1;
                 } else {
                     document.getElementById('checkStartDate').innerText = "";
@@ -631,19 +628,6 @@
             function goBack() {
                 var courseId = document.getElementsByName("course_id")[0].value;
                 window.location.href = "${pageContext.request.contextPath}/classinCourseClass/goBack.do?course_id=" + courseId
-            }
-
-            //检查是否输入教室名称
-            function checkClassRoom() {
-                var className = document.getElementById('className').value;
-                if (className == "") {
-                    document.getElementById('checkClassName').innerText = "请输入教室名称"
-                } else if (className.length == 50) {
-                    document.getElementById('checkClassName').innerText = "教室名称最大长度为50"
-                } else {
-                    document.getElementById('checkClassName').innerText = ""
-                }
-
             }
         </script>
 

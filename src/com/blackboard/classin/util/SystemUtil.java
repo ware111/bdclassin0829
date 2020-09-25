@@ -1,6 +1,7 @@
 package com.blackboard.classin.util;
 
 
+import blackboard.base.BbList;
 import blackboard.data.course.Course;
 import blackboard.data.course.CourseMembership;
 import blackboard.data.user.User;
@@ -475,6 +476,16 @@ public class SystemUtil {
                 }
             }
             return "fail";
+    }
+
+    //获取学生的状态
+    public static BbList<CourseMembership> getStudentState(String courseId) throws PersistenceException {
+        Id id = Id.generateId(Course.DATA_TYPE, Integer.parseInt(courseId));
+        BbList<CourseMembership> courseMemberships = CourseMembershipDbLoader.Default.getInstance().loadByCourseId(id);
+        for (CourseMembership cm : courseMemberships){
+            System.out.println("-----------------------------------"+cm.getUserId()+cm.getIsAvailable());
+        }
+        return courseMemberships;
     }
 
 }

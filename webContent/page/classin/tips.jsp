@@ -87,7 +87,7 @@
                 </c:if>
                 <c:if test="${errno == null }">
                 	<span style="font-size: 15px;">${source}</span><br/>
-	                <span style="font-size: 15px;">提示信息: ${error}</span>
+					<span style="color: #FF0000;font-size: 15px;">提示信息: ${error}</span>
                 </c:if>
                 <c:if test="${noregist != null }">
                 	<br/><span style="font-size: 15px;"><a href="http://www.eeo.cn/cn/download.html" target="_blank">点击此处</a>下载客户端并注册</span>

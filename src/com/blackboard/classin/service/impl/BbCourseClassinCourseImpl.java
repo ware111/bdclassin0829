@@ -1,5 +1,6 @@
 package com.blackboard.classin.service.impl;
 
+import blackboard.base.BbList;
 import blackboard.data.course.Course;
 import blackboard.data.course.CourseMembership;
 import blackboard.data.user.User;
@@ -418,6 +419,19 @@ public class BbCourseClassinCourseImpl implements IBbCourseClassinCourse {
                                 } else {
                                     try {
                                         CourseMembership cmp = CourseMembershipDbLoader.Default.getInstance().loadByCourseAndUserId(course.getId(), user.getId());
+                                            if (!cmp.getIsAvailable()) {
+                                                log.info(user.getUserName() + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!state" + cmp.getIsAvailable());
+                                                log.info("userId====>" + userId + "not use");
+                                                StringBuilder sb = new StringBuilder();
+                                                sb.append(param1)
+                                                        .append("&safeKey=" + SystemUtil.MD5Encode(Constants.SECRET + currentLoignTime))
+                                                        .append("&timeStamp=" + currentLoignTime)
+                                                        .append("&").append(param4)
+                                                        .append("&courseId=" + classinCourseId)
+                                                        .append("&studentUid=" + classinUid);
+                                                String resultDeleteCourseStudentString = HttpClient.doPost(classin_deletecoursestudent_url, sb.toString());
+                                                log.info("bbCourseId=" + bbCourseId + "==>" + userId + "===>resultDeleteCourseStudentString===>" + resultDeleteCourseStudentString);
+                                            }
                                     } catch (KeyNotFoundException e) {
                                         log.info("bbCourseId===>" + course.getCourseId() + "&userId====>" + user.getUserName() + "注册关系不存在");
                                         //没有注册关系，需要删除
