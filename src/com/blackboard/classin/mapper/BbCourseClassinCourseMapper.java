@@ -13,4 +13,6 @@ public interface BbCourseClassinCourseMapper {
 
 	List<BbCourseClassinCourse> findAllBbClassInCourse();
 
+	String findByClassinCourseId(String classInCourseId);
+
 }

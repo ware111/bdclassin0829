@@ -17,4 +17,8 @@
     <select id="findAllBbClassInCourse" resultMap="BaseResultMap">
     	select bb_course_id,classin_course_id from bb_course_classin_course
     </select>
+
+    <select id="findByClassinCourseId" parameterType="java.lang.String" resultType="java.lang.String">
+    	select bb_course_id from bb_course_classin_course where classin_course_id=#{classInCourseId}
+    </select>
 </mapper>

@@ -83,8 +83,8 @@ public class ClassinCourseClassController {
     private IBbCourseClassinCourse iBbCourseClassinCourse;
 
 
-//    @ResponseBody
-//    @RequestMapping("test.do")
+    @ResponseBody
+    @RequestMapping("test.do")
     public String test() throws IOException, PersistenceException {
         class MyThread extends Thread{
             @Override
@@ -117,6 +117,20 @@ public class ClassinCourseClassController {
         return "/classin/tips";
     }
 
+
+    /**
+     * 汇总出勤数据
+     *
+     * @author panhaiming
+     * @date 20200904
+     */
+    @ResponseBody
+    @RequestMapping(value = "receiveCheckinData.do", method = RequestMethod.POST)
+    public String summaryCheckinData(@RequestBody String datas) throws PersistenceException {
+
+
+        return "";
+    }
 
     /**
      * 获取课节页面所需的默认值

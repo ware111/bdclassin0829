@@ -7,6 +7,8 @@ import com.blackboard.classin.entity.UserPhone;
 import com.blackboard.classin.entity.UserPhoneName;
 
 public interface UserPhoneMapper {
+
+	UserPhone findByClassinUid(String classinUid);
 	UserPhone findPhoneByUserId(String userId);
 
 	void save(Map<String, String> paramMap);

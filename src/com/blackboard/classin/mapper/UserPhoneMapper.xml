@@ -6,7 +6,11 @@
         <result column="phone" property="phone" jdbcType="VARCHAR" />
         <result column="classin_uid" property="classinUid" jdbcType="VARCHAR" />
     </resultMap>
-    
+
+    <select id="findByClassinUid" parameterType="java.lang.String" resultMap="BaseResultMap">
+    	select user_id,phone,classin_uid from user_phone where classin_uid = #{classinUid}
+    </select>
+
     <select id="findPhoneByUserId" parameterType="java.lang.String" resultMap="BaseResultMap">
     	select user_id,phone,classin_uid from user_phone where user_id = #{userId}
     </select>

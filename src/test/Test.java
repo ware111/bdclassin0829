@@ -1,11 +1,14 @@
 package test;
 
+import blackboard.data.user.User;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.blackboard.classin.controller.ClassinCourseClassController;
 import com.blackboard.classin.entity.ClassBean;
 import com.blackboard.classin.entity.ClassinCourseClass;
 import com.blackboard.classin.entity.UserPhone;
+import com.blackboard.classin.util.SystemUtil;
+import org.springframework.util.LinkedMultiValueMap;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -35,118 +38,227 @@ public class Test {
         }
     }
     public static void main(String[] args) throws IOException {
-        String datas="{\n" +
-                "    \"ClassID\": 25672,\n" +
-                "    \"CourseID\" : 116576,\n" +
-                "    \"Cmd\" : \"End\",\n" +
-                "    \"CloseTime\" : 1499718000,\n" +
-                "    \"StartTime\" : 1499653800,\n" +
-                "    \"SID\" : 1000082,\n" +
-                "    \"Data\" : {\n" +
-                "        \"inoutEnd\" : {\n" +
-                "            \"1002646\" : {\n" +
-                "                \"Total\" : 965,\n" +
-                "                \"Details\" : [\n" +
-                "                    {\n" +
-                "                        \"Type\" : \"In\",\n" +
-                "                        \"Device\": 0,\n" +
-                "                        \"Time\" : 1499673085\n" +
-                "                    },\n" +
-                "                    {\n" +
-                "                        \"Type\" : \"Out\",\n" +
-                "                        \"Time\" : 1499674050\n" +
-                "                    }\n" +
-                "                ],\n" +
-                "                \"Identity\": 1\n" +
-                "            },\n" +
-                "            \"1002647\" : {\n" +
-                "                \"Total\" : 964,\n" +
-                "                \"Details\" : [\n" +
-                "                    {\n" +
-                "                        \"Type\" : \"In\",\n" +
-                "                        \"Device\": 0,\n" +
-                "                        \"Time\" : 1499673094\n" +
-                "                    },\n" +
-                "                    {\n" +
-                "                        \"Type\" : \"Out\",\n" +
-                "                        \"Time\" : 1499674058\n" +
-                "                    }\n" +
-                "                ],\n" +
-                "                \"Identity\": 3\n" +
-                "            },\n" +
-                "            \"1002648\" : {\n" +
-                "                \"Total\" : 827,\n" +
-                "                \"Details\" : [\n" +
-                "                    {\n" +
-                "                        \"Type\" : \"In\",\n" +
-                "                        \"Device\": 0,\n" +
-                "                        \"Time\" : 1499673196\n" +
-                "                    },\n" +
-                "                    {\n" +
-                "                        \"Type\" : \"Out\",\n" +
-                "                        \"Time\" : 1499674023\n" +
-                "                    }\n" +
-                "                ],\n" +
-                "                \"Identity\": 1\n" +
-                "            }\n" +
-                "        }\n" +
-                "    }\n" +
-                "}\n";
+        FileInputStream fileInputStream = new FileInputStream("D:\\json.txt");
+        byte[] data = new byte[100000];
+        String datas="";
+        while (fileInputStream.read(data) != -1){
+            datas = new String(data);
+        }
+       // System.out.println(datas);
         HashMap<String, String> paraMap = new HashMap<>();
         JSONObject totalJson = JSONObject.parseObject(datas);
+        int courseID = (int) totalJson.get("CourseID");
         int classID = (int) totalJson.get("ClassID");
-//        ClassinCourseClass classInfo = classinCourseClassMapper.findByClassId(classID);
-//        String className = classInfo.getClassName();
-//        String closeTime = (String) totalJson.get("CloseTime");
-//        String startTime = (String) totalJson.get("StartTime");
-//        String teacherBBId = classInfo.getUserName();
-//        String teacherPhone = classInfo.getTeacherPhone();
-        JSONObject dataJson = (JSONObject) totalJson.get("Data");
-
-       // JSONObject dataJson = JSONObject.parseObject(data+"");
-        JSONObject inOutEndJson = (JSONObject) dataJson.get("inoutEnd");
-//        UserPhone userPhone = userPhoneMapper.findByPhone(teacherPhone);
-//        String teacherUid = userPhone.getClassinUid();
-     //   JSONObject inOutEndJson = JSONObject.parseObject(inoutEnd);
-        JSONObject inOutUIDJson = (JSONObject) inOutEndJson.get(1002646+"");
-        //JSONObject inOutUIDJson = JSONObject.parseObject(uid);
-        int total_time = (int) inOutUIDJson.get("Total");
+        long closeTime = (int) totalJson.get("CloseTime");
+        long startTime = (int) totalJson.get("StartTime")-1200;
+        JSONObject dataJson = (JSONObject)totalJson.get("Data");;
+        JSONObject inOutEndJson = (JSONObject)dataJson.get("inoutEnd");
         String checkin="";
-        if (total_time!=0){
-            checkin = "出勤";
-        }else {
-            checkin = "缺勤";
-        }
-        JSONArray detailsArray = (JSONArray) inOutUIDJson.get("Details");
-        for (Object json : detailsArray){
-            JSONObject parse = (JSONObject) JSONObject.parse(json.toString());
-            System.out.println(parse.get("Type"));
-        }
-        Process hostname = Runtime.getRuntime().exec("hostname");
-        BufferedReader stdInput = new BufferedReader(new
-                InputStreamReader(hostname.getInputStream()));
-        String s;
-        while ((s = stdInput.readLine()) != null) {
-            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>主机名ip地址"+s);
-        }
+        String late="";
+        String back="";
 
-        String format = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss"));
-        Date date = null;
-        try {
-            date = new SimpleDateFormat("yyyy-MM-dd").parse(format+"00:00:00");
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        long timestamp = date.getTime()/1000;
-        System.out.println(timestamp);
 
-        int i = 0;
-        while (i < 5){
-            if (i==2){
+        Set<Map.Entry<String, Object>> users = inOutEndJson.entrySet();
+        //出勤学生数
+        int checkinStudent = users.size();
+
+        //学生迟到总数
+        int laterTotal=0;
+
+        //学生早退总数
+        int leaveEarly=0;
+        Iterator<Map.Entry<String, Object>> iterator = users.iterator();
+        while (iterator.hasNext()){
+            String uid = iterator.next().getKey();
+            if (uid.equals("123")){
                 continue;
+            } else {
+                JSONObject inOutJson = (JSONObject)inOutEndJson.get(uid) ;
+                JSONArray inOutArray = (JSONArray) inOutJson.get("Details");
+                JSONObject inObject = (JSONObject) inOutArray.get(0);
+                long inTime = Long.valueOf(inObject.get("Time").toString());
+                if (inTime > startTime){
+                    laterTotal++;
+                }
+                JSONObject outObject = (JSONObject) inOutArray.get(inOutArray.size() - 1);
+                long outTime = Long.valueOf(outObject.get("Time").toString());
+                if (outTime < closeTime){
+                    leaveEarly++;
+                }
             }
-            i++;
         }
+        JSONObject tickOutJson = (JSONObject) dataJson.get("kickoutEnd");
+        //移出学生人数
+        int tickOutPeoples = tickOutJson.size();
+
+        //移出学生次数
+        int tickOutCount=0;
+        Iterator<Map.Entry<String, Object>> tickoutIterator = tickOutJson.entrySet().iterator();
+        while (tickoutIterator.hasNext()){
+            String uid = tickoutIterator.next().getKey();
+            JSONArray uidJsonArray = (JSONArray) tickOutJson.get(uid);
+            tickOutCount += uidJsonArray.size();
+        }
+        JSONObject awardJson = (JSONObject) dataJson.get("awardEnd");
+        //奖励人数
+        int awardPeoples = awardJson.size();
+        //奖励次数
+        int awardCount=0;
+        Iterator<Map.Entry<String, Object>> awardIterator = awardJson.entrySet().iterator();
+        while (awardIterator.hasNext()){
+            String uid = awardIterator.next().getKey();
+            JSONObject uidJsonArray = (JSONObject) awardJson.get(uid);
+            int total = (int)uidJsonArray.get("Total");
+            awardCount += total;
+        }
+        JSONObject handsupJson = (JSONObject) dataJson.get("handsupEnd");
+        //举手人数
+        int handsupPeoples = handsupJson.size();
+        //举手次数
+        int handsupCount=0;
+        Iterator<Map.Entry<String, Object>> handsupIterator = handsupJson.entrySet().iterator();
+        while (handsupIterator.hasNext()){
+            String uid = handsupIterator.next().getKey();
+            JSONObject uidJsonArray = (JSONObject) handsupJson.get(uid);
+            int total = (int)uidJsonArray.get("Total");
+            handsupCount += total;
+        }
+
+        JSONObject authorizeJson = (JSONObject) dataJson.get("authorizeEnd");
+        //举手人数
+        int authorizePeoples = authorizeJson.size();
+        //举手次数
+        int authorizeCount=0;
+        int authorizeTime=0;
+        Iterator<Map.Entry<String, Object>> authorizeIterator = authorizeJson.entrySet().iterator();
+        while (authorizeIterator.hasNext()){
+            String uid = authorizeIterator.next().getKey();
+            JSONObject uidJsonArray = (JSONObject) authorizeJson.get(uid);
+            int total = (int)uidJsonArray.get("Count");
+            int totalTime = (int)uidJsonArray.get("Total");
+            authorizeTime += totalTime;
+            authorizeCount += total;
+        }
+
+        JSONObject screenshareJson = (JSONObject) dataJson.get("screenshareEnd");
+        //举手人数
+        int screenshareTime=0;
+        //举手次数
+        int screenshareCount=0;
+        screenshareTime= (int)screenshareJson.get("Total");
+        screenshareCount = (int)screenshareJson.get("Count");
+
+        JSONObject timerJson = (JSONObject) dataJson.get("timerEnd");
+        //定时器次数
+        int timerCount=0;
+        //计时器次数
+        int computeTimerCount=0;
+        timerCount= (int)timerJson.get("Count");
+        computeTimerCount = (int)timerJson.get("Timing_Count");
+
+        JSONObject diceJson = (JSONObject) dataJson.get("diceEnd");
+        //定时器次数
+        int diceCount=0;
+        diceCount= (int)diceJson.get("Count");
+        JSONObject responderJson = (JSONObject) dataJson.get("responderEnd");
+        //抢答器次数
+        int responderCount=0;
+        responderCount= (int)responderJson.get("Count");
+
+        JSONObject answerJson = (JSONObject) dataJson.get("answerEnd");
+        //抢答器次数
+        int answerCount=0;
+
+        answerCount= (int)answerJson.get("Count");
+        double averageAccuracy=0;
+        averageAccuracy= new Double(answerJson.get("AverageAccuracy")+"");
+
+        JSONObject smallboardJson = (JSONObject) dataJson.get("smallboardEnd");
+        //抢答器次数
+        int smallboardCount=0;
+
+        smallboardCount= (int)smallboardJson.get("Count");
+        int totalTime=0;
+        totalTime= (int)smallboardJson.get("Total");
+
+//        ArrayList<Integer> integers = new ArrayList<>();
+//        LinkedHashSet<Integer> integers1 = new LinkedHashSet<>();
+//        integers1.add(1);
+//        integers1.add(1);
+//        integers.add(1);
+//        integers.add(1);
+//        for (int a : integers1){
+//            System.out.println(a);
+//        }
+
+        InputStream resource = ClassinCourseClassController.class.getClassLoader().getResourceAsStream("FileFormat.properties");
+        Properties properties = new Properties();
+        properties.load(resource);
+        String textFile = properties.getProperty("textFile");
+        String av = properties.getProperty("av");
+
+        JSONObject coursewareJson = (JSONObject) dataJson.get("sharewidgetEnd");
+        //文本课件使用时长
+        int textCoursewareTime=0;
+        //文本课件使用数量
+        int textCoursewareCount=0;
+        //音视频课件使用时长
+        int avCoursewareTime=0;
+        //音视频课件使用数量
+        int avCoursewareCount=0;
+
+        LinkedHashSet<String> avFileNames = new LinkedHashSet<>();
+        LinkedHashSet<String> textFileNames = new LinkedHashSet<>();
+        JSONArray coursewareArray = (JSONArray) coursewareJson.get("Files");
+        for (Object file:coursewareArray){
+            JSONObject fileJson = (JSONObject) file;
+            String fileName = (String) fileJson.get("FileName");
+            String format = fileName.substring(fileName.indexOf(".")+1);
+            int endTime = (int) fileJson.get("EndTime");
+            int beginTime = (int) fileJson.get("StartTime");
+            int duration = endTime - beginTime;
+            if (av.contains(format)) {
+                avCoursewareTime+=duration;
+                avFileNames.add(format);
+            }else if (textFile.contains(format)){
+                textFileNames.add(format);
+                textCoursewareTime+=duration;
+            }
+        }
+
+        avCoursewareCount = avFileNames.size();
+        textCoursewareCount = textFileNames.size();
+        System.out.println(avCoursewareCount);
+        System.out.println(avCoursewareTime);
+        System.out.println(textCoursewareCount);
+        System.out.println(textCoursewareTime);
+//        System.out.println(smallboardCount);
+//        System.out.println(totalTime);
+//        Process hostname = Runtime.getRuntime().exec("hostname");
+//        BufferedReader stdInput = new BufferedReader(new
+//                InputStreamReader(hostname.getInputStream()));
+//        String s;
+//        while ((s = stdInput.readLine()) != null) {
+//            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>主机名ip地址"+s);
+//        }
+//
+//        String format = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss"));
+//        Date date = null;
+//        try {
+//            date = new SimpleDateFormat("yyyy-MM-dd").parse(format+"00:00:00");
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
+//        long timestamp = date.getTime()/1000;
+//        System.out.println(timestamp);
+
+//        int i = 0;
+//        while (i < 5){
+//            if (i==2){
+//                continue;
+//            }
+//            i++;
+//        }
         //JSONObject inOutDetaiJson = JSONObject.parseObject(details);
 //        JSONArray detailsArray = JSONObject.parseArray(details);
 //        String wrongDataPath = System.getProperty("user.dir");

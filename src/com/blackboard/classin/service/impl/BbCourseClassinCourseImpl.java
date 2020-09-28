@@ -370,6 +370,7 @@ public class BbCourseClassinCourseImpl implements IBbCourseClassinCourse {
                         Map<String, String> data = courseStudentPOJO.getData();
                         data.forEach((telephone, userId) -> {
                             UserPhone userInfo = userPhoneMapper.findByPhone(telephone);
+                            userId = userInfo.getUserId();
                             String uid = "";
                             if (userInfo == null) {
                                 try {

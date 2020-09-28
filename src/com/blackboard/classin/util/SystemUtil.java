@@ -488,4 +488,23 @@ public class SystemUtil {
         return courseMemberships;
     }
 
+    /**
+     * 获取课程下学生的数量
+     * @date 20200921
+     * @author panhaiming
+     *
+     * */
+    public static int getStudents(String bbCourseId) throws PersistenceException {
+        Course course = getCourseBybbCourseId(bbCourseId);
+        Id id = course.getId();
+        BbList<User> users = UserDbLoader.Default.getInstance().loadByCourseId(id);
+        CourseMembershipDbLoader courseMembershipDbLoader = CourseMembershipDbLoader.Default.getInstance();
+        List<CourseMembership.Role> roleList = new ArrayList<>();
+        roleList.add(CourseMembership.Role.TEACHING_ASSISTANT);
+        roleList.add(CourseMembership.Role.INSTRUCTOR);
+        List<CourseMembership> memberships = courseMembershipDbLoader.loadByCourseIdAndRoles(id, roleList);
+        int size = users.size()-memberships.size();
+        return size;
+    }
+
 }
