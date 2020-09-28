@@ -1,29 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="992ca7fd-32f7-404b-874f-294548831d3c" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/config/FileFormat.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/blackboard/classin/entity/ClassCondition.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/blackboard/classin/service/CheckinRelationDataService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/blackboard/classin/service/impl/CheckinRelationDataImp.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bb-classin.war" beforeDir="false" afterPath="$PROJECT_DIR$/bb-classin.war" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/controller/ClassinCourseClassController.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/controller/ClassinCourseClassController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/mapper/BbCourseClassinCourseMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/mapper/BbCourseClassinCourseMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/mapper/BbCourseClassinCourseMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/mapper/BbCourseClassinCourseMapper.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/service/impl/BbCourseClassinCourseImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/service/impl/BbCourseClassinCourseImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/util/SystemUtil.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/util/SystemUtil.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/test/Test$MyTread.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/test/Test$MyTread.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/test/Test.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/test/Test.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/controller/ClassinCourseClassController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/controller/ClassinCourseClassController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/mapper/BbCourseClassinCourseMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/mapper/BbCourseClassinCourseMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/mapper/BbCourseClassinCourseMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/mapper/BbCourseClassinCourseMapper.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/mapper/UserPhoneMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/mapper/UserPhoneMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/mapper/UserPhoneMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/mapper/UserPhoneMapper.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/service/impl/BbCourseClassinCourseImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/service/impl/BbCourseClassinCourseImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/util/SystemUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/util/SystemUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/Test.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/Test.java" afterDir="false" />
-    </list>
+    <list default="true" id="992ca7fd-32f7-404b-874f-294548831d3c" name="Default" comment="" />
     <ignored path="$PROJECT_DIR$/bin/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -46,17 +24,17 @@
       <file leaf-file-name="ClassinCourseClassController.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/blackboard/classin/controller/ClassinCourseClassController.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="395">
+            <state relative-caret-position="638">
               <caret line="129" selection-start-line="129" selection-end-line="129" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CheckinRelationDataImp.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="CheckinRelationDataImp.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/blackboard/classin/service/impl/CheckinRelationDataImp.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="445">
-              <caret line="282" column="28" selection-start-line="282" selection-start-column="28" selection-end-line="282" selection-end-column="28" />
+            <state relative-caret-position="5629">
+              <caret line="487" column="74" lean-forward="true" selection-start-line="487" selection-start-column="74" selection-end-line="487" selection-end-column="74" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -82,7 +60,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FileFormat.properties" pinned="false" current-in-tab="false">
+      <file leaf-file-name="FileFormat.properties" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/config/FileFormat.properties">
           <provider selected="true" editor-type-id="text-editor" />
         </entry>
@@ -453,12 +431,12 @@
       <workItem from="1600957276300" duration="1014000" />
       <workItem from="1601030070430" duration="4297000" />
       <workItem from="1601034377103" duration="2021000" />
-      <workItem from="1601175570438" duration="42574000" />
+      <workItem from="1601175570438" duration="42909000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="141861000" />
+    <option name="totallyTimeSpent" value="142196000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
@@ -484,7 +462,7 @@
       <window_info anchor="bottom" id="Run" order="2" weight="0.16504854" />
       <window_info anchor="bottom" id="Version Control" order="12" sideWeight="0.4995958" weight="0.32897195" />
       <window_info anchor="bottom" id="Spring" order="7" />
-      <window_info anchor="bottom" id="Terminal" order="8" sideWeight="0.4968017" weight="0.1639698" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.4968017" visible="true" weight="0.1639698" />
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.5555556" weight="0.3651386" />
       <window_info id="Web" order="5" side_tool="true" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32901832" />
@@ -820,9 +798,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/config/FileFormat.properties">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/test/Test.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="447">
@@ -1027,22 +1002,25 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/blackboard/classin/controller/ClassinCourseClassController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="395">
-          <caret line="129" selection-start-line="129" selection-end-line="129" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/blackboard/classin/service/impl/CheckinRelationDataImp.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="445">
-          <caret line="282" column="28" selection-start-line="282" selection-start-column="28" selection-end-line="282" selection-end-column="28" />
+        <state relative-caret-position="5629">
+          <caret line="487" column="74" lean-forward="true" selection-start-line="487" selection-start-column="74" selection-end-line="487" selection-end-column="74" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/blackboard/classin/controller/ClassinCourseClassController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="638">
+          <caret line="129" selection-start-line="129" selection-end-line="129" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/FileFormat.properties">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
   </component>
 </project>
