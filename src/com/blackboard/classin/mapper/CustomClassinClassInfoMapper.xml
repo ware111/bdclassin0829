@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blackboard.classin.mapper.CustomClassinClassInfoMapper">
+    <resultMap id="BaseResultMap" type="com.blackboard.classin.entity.CustomClassinClassInfo">
+        <id column="classin_class_id" property="classinClassId" jdbcType="VARCHAR"/>
+        <result column="clasin_course_id" property="classinCourseId" jdbcType="VARCHAR"/>
+        <result column="class_name" property="className" jdbcType="VARCHAR"/>
+        <result column="class_type" property="classType" jdbcType="VARCHAR"/>
+        <result column="start_date" property="startDate" jdbcType="VARCHAR"/>
+        <result column="start_time" property="startTime" jdbcType="VARCHAR"/>
+        <result column="class_total_time" property="classTotalTime" jdbcType="VARCHAR"/>
+        <result column="teacher" property="teacher" jdbcType="VARCHAR"/>
+        <result property="assistantTeacher" column="assistant_teacher" jdbcType="VARCHAR"/>
+        <result column="time_stamp" property="timeStamp" jdbcType="INTEGER"/>
+        <result column="telephone" property="telephone" jdbcType="VARCHAR"/>
+        <result column="live_url" property="liveURL" jdbcType="VARCHAR"/>
+        <result column="record" property="record" jdbcType="INTEGER"/>
+        <result column="live" property="live" jdbcType="INTEGER"/>
+        <result column="replay" property="replay" jdbcType="INTEGER"/>
+    </resultMap>
+    <sql id="column_list">
+        classin_class_id,classin_course_id,class_name,class_type,start_time,start_date,class_total_time,teacher,assistant_teacher,telephone,time_stamp,live_url,record,live,replay
+    </sql>
+    <insert id="save" parameterType="com.blackboard.classin.entity.CustomClassinClassInfo">
+        insert into custom_classin_class_info (<include refid="column_list"/>) VALUES (#{classinClassId},#{classinCourseId},#{className},#{classType},
+        #{startTime},#{startDate},#{classTotalTime},#{teacher},#{assistantTeacher},#{telephone},#{timeStamp},#{liveURL},#{record},#{replay},#{live})
+    </insert>
+    <select id="findClassByClassId" parameterType="java.lang.String" resultType="com.blackboard.classin.entity.CustomClassinClassInfo">
+        select * from  custom_classin_class_info where telephone=#{telephone} and time_stamp >= #{timeStamp};
+    </select>
+</mapper>

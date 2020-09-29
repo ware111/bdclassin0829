@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blackboard.classin.mapper.SystemRegistryMapper" >
+
+    <select id="getClassinURLConfigs" parameterType="java.lang.String" resultType="com.blackboard.classin.entity.SystemRegistry">
+        select REGISTRY_KEY registryKey,REGISTRY_VALUE registryValue
+        from SYSTEM_REGISTRY where  REGISTRY_KEY like #{conditionStr}
+    </select>
+
+    <insert id="save" parameterType="java.lang.String">
+        insert into SYSTEM_REGISTRY(PK1,REGISTRY_KEY,REGISTRY_VALUE) 
+        values(system_registry_seq.nextval,#{registryKey},#{registryValue})
+    </insert>
+
+    <update id="modify" parameterType="java.lang.String">
+        update SYSTEM_REGISTRY set REGISTRY_VALUE = #{registryValue} where REGISTRY_KEY = #{registryKey}
+    </update>
+
+    <select id="getClassinEntranceURL" resultType="java.lang.String">
+        select REGISTRY_VALUE registryValue
+        from SYSTEM_REGISTRY where  REGISTRY_KEY = 'classin_entrance_url'
+    </select>
+
+    <select id="getClassinImportGradeURL" resultType="java.lang.String">
+        select REGISTRY_VALUE registryValue
+        from SYSTEM_REGISTRY where  REGISTRY_KEY = 'classin_import_grade_url'
+    </select>
+
+    <select id="getClassinClassActivityInfoURL" resultType="java.lang.String">
+        select REGISTRY_VALUE registryValue
+        from SYSTEM_REGISTRY where  REGISTRY_KEY = 'classin_class_activity_info_url'
+    </select>
+    
+    <select id="getClassinAddCourseURL" resultType="java.lang.String">
+        select REGISTRY_VALUE registryValue
+        from SYSTEM_REGISTRY where  REGISTRY_KEY = 'classin_addcourse_url'
+    </select>
+
+    <select id="getClassinAddCourseClassURL" resultType="java.lang.String">
+        select REGISTRY_VALUE registryValue
+        from SYSTEM_REGISTRY where  REGISTRY_KEY = 'classin_addcourseclass_url'
+    </select>
+    
+    <select id="getURLByKey" parameterType="java.lang.String" resultType="java.lang.String">
+    	select REGISTRY_VALUE registryValue
+        from SYSTEM_REGISTRY where  REGISTRY_KEY = #{registryKey}
+    </select>
+
+</mapper>

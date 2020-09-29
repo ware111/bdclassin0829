@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blackboard.classin.mapper.BbClassInInfoMapper" >
+    <resultMap id="BaseResultMap" type="com.blackboard.classin.entity.BbClassInInfo" >
+        <id column="pk1" property="pk1" jdbcType="INTEGER" />
+        <result column="bb_course_id" property="bbCourseId" jdbcType="VARCHAR" />
+        <result column="classin_course_id" property="classInCourseId" jdbcType="VARCHAR" />
+        <result column="classin_class_id" property="classInClassId" jdbcType="VARCHAR" />
+        <result column="dtcreated" property="dtCreated" jdbcType="DATE" />
+        <result column="expire_status" property="expireStatus" jdbcType="VARCHAR" />
+    </resultMap>
+    <sql id="Base_Column_List" >
+        pk1, bb_course_id,classin_course_id,classin_class_id,dtcreated,expire_status
+    </sql>
+    <select id="findByBbCourseId" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select
+        <include refid="Base_Column_List" />
+        from bb_classin_course_class
+        where expire_status = '0'
+        and bb_course_id = #{bbCourseId}
+    </select>
+    
+    <update id="setBbClassInToExpired" parameterType="java.lang.Integer">
+    	update bb_classin_course_class set expire_status = '1' where pk1 = #{pk1}
+    </update>
+    
+    <insert id="save" parameterType="com.blackboard.classin.entity.BbClassInInfo">
+    	
+    	INSERT INTO bb_classin_course_class (PK1,bb_course_id,classin_course_id,classin_class_id,dtcreated,expire_status) 
+			select bb_classin_course_class_seq.nextval,#{bbCourseId},#{classInCourseId},#{classInClassId},#{dtCreated},#{expireStatus}
+		from dual where not exists(select bb_course_id from bb_classin_course_class where bb_course_id=#{bbCourseId} and expire_status=0)
+    	 
+    </insert>
+    
+    <select id="countIsCreatingCourseClass" parameterType="java.lang.String" resultType="java.lang.Integer">
+    	select count(*) from t_creating_Course_Class where course_id = #{course_id}
+    </select>
+    
+    <insert id="insertCreatingCourseClass" parameterType="java.lang.String">
+    	insert into t_creating_Course_Class values(#{course_id})
+    </insert>
+    
+    <delete id="deleteCreatingCourseClass" parameterType="java.lang.String">
+    	delete from t_creating_Course_Class where course_id = #{course_id}
+    </delete>
+</mapper>

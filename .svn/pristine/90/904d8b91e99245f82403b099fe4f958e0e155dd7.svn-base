@@ -1,0 +1,146 @@
+package test;
+
+import com.alibaba.fastjson.JSONObject;
+import com.blackboard.classin.entity.ClassBean;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class Test {
+    static class MyTread extends Thread{
+        int j;
+
+        public int getJ() {
+            return j;
+        }
+
+        public void setJ(int j) {
+            this.j = j;
+        }
+
+        @Override
+        public void run() {
+            for (int i = 0; i < 10; i++) {
+                System.out.println(j);
+            }
+        }
+    }
+    public static void main(String[] args) {
+        String datas = "{\"name\":\"tom\"}";
+        Object o = JSONObject.toJSON(datas);
+        JSONObject jsonObject = new JSONObject();
+        JSONObject jsonObject1 = JSONObject.parseObject(datas);
+        System.out.println(jsonObject1.get("name"));
+//        MyTread myTread = new MyTread();
+//        myTread.setJ(1);
+//        myTread.start();
+//        new MyTread().start();
+//        new Date(1599062400);
+//        SimpleDateFormat date11 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        String s = 1599062400 + "000";
+//        Long aLong = Long.valueOf(s);
+//        String format11 = date11.format(new Date(aLong));
+//        String todayTime= format11;
+//        System.out.println(todayTime);
+//        new Thread(){
+//            @Override
+//            public void run() {
+//                for (int i = 0; i < 1000; i++){
+//                    System.out.println(Thread.currentThread().getId());
+//                }
+//            }
+//        }.start();
+//        Test test = new Test();
+//        ClassBean bean = new ClassBean();
+//        bean.setClass_number("123");
+//        Object o = JSONObject.toJSON(bean);
+//        System.out.println(o.toString());
+//        new Timer().schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//                System.out.println(123);
+//            }
+//        },0,5000);
+//        String s = test.testGoto();
+//        System.out.println(s);
+//        test.test();
+//        JSONArray jsonArray = new JSONArray();
+//        JSONObject jsonObject = new JSONObject();
+//        jsonObject.put("name","tom");
+//        jsonArray.add(jsonObject);
+//        System.out.println(jsonArray);
+//        String str = "AdministratorBlackboard 23612390033";
+//        String[] split = str.split(" ");
+//        System.out.println(split[1]);
+//        HashMap<String, String> stringStringHashMap = new HashMap<>();
+//        stringStringHashMap.put("name","tom");
+//        String s = JSONObject.toJSON(stringStringHashMap).toString();
+//        Object parse = JSONObject.parse(s);
+//        long timeStamp = TimeStampUtil.getTimeStamp("2020-08-11 18:30:00");
+//        System.out.println("2020-08-11 18:30:00".split(" ")[0]);
+//        HashMap<String, String> stringStringHashMap = new HashMap<>();
+//        System.out.println(stringStringHashMap.get("key"));
+//        String data = HttpClient.doGet("https://coursehqy.pku.edu.cn/v2/schedule/get-course-list?kcwybm=126-04831420-0006170389-1");
+//        ClassScheduleBean classScheduleBean = JSONObject.parseObject(data, ClassScheduleBean.class);
+//        System.out.println(classScheduleBean.getList().size());
+    }
+    int i = 0;
+    int j = 1;
+    int[] k={1,2,3,4};
+    int m = 0;
+    int n = 0;
+    public String testGoto(){
+
+        System.out.println(123);
+        fag:
+
+        for(; i <2;i++){
+            if (i==2){
+                break fag;
+            }
+        }
+        return i+"";
+    }
+    public void test() {
+//        System.out.println(m);
+        n++;
+        if (n==2){
+            n=0;
+           // System.out.println(m);
+            return;
+        }
+        while (m < k.length) {
+            if (k[m]>3) {
+                //System.out.println(123);
+            } else {
+                if (n==0) {
+                    System.out.println("m" + m);
+                }
+               // i = 1;
+//                if ()
+                if (m>=k.length){
+                    break;
+                }
+                System.out.println(m);
+                test();
+                if (m>=k.length){
+                    break;
+                }
+                i = 0;
+
+                if (n==0) {
+                    System.out.println("i" + i + "m" + m);
+                }
+
+            }
+            //System.out.println(1234);
+
+            m++;
+        }
+    }
+}
+
+
+

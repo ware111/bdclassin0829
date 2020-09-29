@@ -1,0 +1,22 @@
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 字典表的映射文件 -->
+<mapper namespace="com.blackboard.classin.mapper.TimerTaskMapper">
+
+<insert id="insertTimerTaskInfo" parameterType="com.blackboard.classin.entity.TimerTaskBean" >
+	insert into bb_timerTask_info
+	(
+	name,
+	status,
+	createTime
+	)
+	values
+	(
+	#{name},
+	#{status},
+	to_date(#{createtime},'yyyyMMdd')
+	)
+</insert>
+
+</mapper>

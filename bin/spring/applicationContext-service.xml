@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:context="http://www.springframework.org/schema/context" 
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:aop="http://www.springframework.org/schema/aop" 
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:task="http://www.springframework.org/schema/task" 
+    xmlns:mvc="http://www.springframework.org/schema/mvc" 
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+    http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+    http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+    http://www.springframework.org/schema/task  
+	http://www.springframework.org/schema/task/spring-task-3.2.xsd">
+
+    <!-- 配置包扫描器，扫描带@Service注解的类 -->
+    <context:component-scan base-package="com.blackboard.classin.service"/>
+    <!-- 扫描定时任务 -->
+    <!-- <context:component-scan base-package="com.blackboard.classin.task" />
+    <mvc:annotation-driven />
+    <task:annotation-driven />
+	 -->
+	<!-- <bean name="baseHandlerException" class="com.blackboard.classin.exception.CustomExceptionResolver"/> -->
+    <!--配置包扫描-->
+    <context:component-scan base-package="com.blackboard.classin.task" />
+
+    <!--<task:scheduled-tasks>-->
+        <!--<task:scheduled ref="classScheduleDataMapper" method="abc("/>-->
+    <!--</task:scheduled-tasks>-->
+    
+    <!-- 定时任务配置 scheduler 方式 注解 -->
+    <task:executor id="executor" pool-size="5"/>
+    <task:scheduler id="scheduler" pool-size="10"/>
+    <task:annotation-driven executor="executor" scheduler="scheduler"/>
+</beans>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blackboard.classin.mapper.BbClassInUserMapper" >
+    <resultMap id="BaseResultMap" type="com.blackboard.classin.entity.BbClassInUserInfo" >
+        <id column="pk1" property="pk1" jdbcType="INTEGER" />
+        <result column="bb_user_id" property="bbUserId" jdbcType="VARCHAR" />
+        <result column="classin_uid" property="classinUid" jdbcType="VARCHAR" />
+        <result column="telephone" property="telephone" jdbcType="VARCHAR" />
+        <result column="dtcreated" property="dtcreated" jdbcType="DATE" />
+    </resultMap>
+    <sql id="Base_Column_List" >
+        pk1, bb_user_id,classin_uid,telephone,dtcreated
+    </sql>
+    <select id="getByTelephone" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select
+        <include refid="Base_Column_List" />
+        from bb_classin_user
+        where telephone=#{telephone}
+    </select>
+    
+    <insert id="save" parameterType="com.blackboard.classin.entity.BbClassInInfo">
+    	insert into bb_classin_user
+    	values(bb_classin_user_seq.nextval,#{bbUserId},#{classinUid},#{telephone},#{dtcreated})
+    </insert>
+</mapper>

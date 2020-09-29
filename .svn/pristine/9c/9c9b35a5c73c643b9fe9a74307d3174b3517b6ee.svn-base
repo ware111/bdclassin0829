@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blackboard.classin.mapper.ClassinClassMeetingMapper" >
+
+	<insert id="save" parameterType="com.blackboard.classin.entity.ClassinClassMeeting">
+		insert into classin_course_class_meeting values(#{classinCourseId},#{classinClassId},#{dtCreated},#{teacherPhone},#{assistantPhone},#{expireStatus},#{liveURL})
+	</insert>
+	
+	<select id="findByClassinCourseId" parameterType="java.lang.String" resultType="com.blackboard.classin.entity.ClassinClassMeeting">
+		select 
+    		classin_course_id classinCourseId,classin_class_id classinClassId, dtcreated dtCreated,
+    		teacher_phone teacherPhone ,assistant_phone assistantPhone ,expire_status expireStatus,live_url liveURL
+    	from classin_course_class_meeting 
+    	where classin_course_id = #{classinCourseId} and expire_status = '0'
+	</select>
+	
+	<update id="updateToExpired" parameterType="java.util.Map">
+    	update classin_course_class_meeting set expire_status = '1' where classin_course_id = #{classinCourseId} and classin_class_id = #{classinClassId}
+    </update>
+    
+    <select id="getLiveURLByClassId" parameterType="java.util.Map" resultType="java.lang.String">
+    	select live_url liveURl from  classin_course_class_meeting where classin_course_id = #{classinCourseId} and classin_class_id = #{classinClassId}
+    </select>
+    <update id="updateAssistantPhone" parameterType="java.util.Map">
+    	update classin_course_class_meeting 
+    		set assistant_phone=#{assistantPhone}
+		where classin_course_id = #{classinCourseId} and classin_class_id = #{classinClassId}
+    </update>
+</mapper>

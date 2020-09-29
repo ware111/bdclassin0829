@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest xmlns="http://www.blackboard.com/bb-manifest-plugin.xsd"
+		  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		  xsi:schemaLocation="http://www.blackboard.com/bb-manifest-plugin.xsd ">
+	<!-- core extension information -->
+	<plugin>
+		<name value="ClassIn课堂"/>
+		<handle value="ClassIn"/>
+		<description value="bb-plugin"/>
+		<default-locale value="zh_CN"/>
+		<version value="2.0.1"/>
+		<webapp-type value="javaext"/>
+		<requires>
+			<bbversion value="9.1.82223.0"/>
+		</requires>
+		<vendor>
+			<id value="bb"/>
+			<name value="Beijing Blackboard"/>
+			<url value="http://www.myinstitution.edu/"/>
+			<description value="TODO Description of Institution"/>
+		</vendor>
+		<http-actions>
+      		<config value="page/config/configPage.jsp"/>
+    	</http-actions>
+		<application-defs>
+			<application handle="ClassIn" type="shared"
+						 use-ssl="false" can-allow-guest="false"
+						 name="plugin.name" small-icon="" large-icon="">
+				<links>
+					<!-- ClassIn成绩导入 -->
+					<link>
+						<type value="course_tool"/>
+						<name value="plugin.grade.desc"/>
+						<url value="index.jsp" />
+						<description value="plugin.grade.desc" />
+					</link>
+					<!-- ClassIn活动数据 -->
+					<link>
+						<type value="course_tool"/>
+						<name value="plugin.activity.desc"/>
+						<url value="index.jsp" />
+						<description value="plugin.activity.desc" />
+					</link>
+					<!-- ClassIn课堂入口 -->
+                    <link>
+                        <type value="tool"/>
+                        <name value="plugin.name.classin.course"/>
+                        <url value="userPhone/isBindPhone.do" />
+                        <description value="plugin.desc.name" />
+                    </link>
+                    <!-- ClassIn研讨室入口 -->
+                    <!-- <link>
+                        <type value="tool"/>
+                        <name value="plugin.meeting.room.name"/>
+                        <url value="userPhone/isBindPhone.do?type=meetingroom" />
+                        <description value="plugin.meeting.room.desc.name" />
+                    </link> -->
+                </links>
+			</application>
+		</application-defs>
+
+		<!-- code permissions required for proper operation -->
+		<permissions>
+			<permission type="attribute" name="user.authinfo" actions="get"/>
+			<permission type="attribute" name="user.personalinfo" actions="get,set"/>
+			<permission type="java.net.SocketPermission" name="*" actions="accept,connect,listen,resolve"/>
+			<permission type="java.lang.reflect.ReflectPermission" name="suppressAccessChecks"/>
+			<permission type="java.lang.RuntimePermission" name="createSecurityManager"/>
+			<permission type="java.lang.RuntimePermission" name="getenv.test.jdbc.driverClassName"/>
+			<permission type="java.lang.RuntimePermission" name="getenv.test.jdbc.url"/>
+			<permission type="java.lang.RuntimePermission" name="getenv.test.jdbc.username"/>
+			<permission type="java.lang.RuntimePermission" name="getenv.test.jdbc.password"/>
+			<permission type="java.lang.RuntimePermission" name="getenv.driverClassName"/>
+			<permission type="java.lang.RuntimePermission" name="getenv.db.url"/>
+			<permission type="java.lang.RuntimePermission" name="getenv.db.username"/>
+			<permission type="java.lang.RuntimePermission" name="getenv.db.password"/>
+			<permission type="java.lang.RuntimePermission" name="getenv.maxActive"/>
+			<permission type="java.lang.RuntimePermission" name="getenv.taskName"/>
+			<permission type="java.lang.RuntimePermission" name="getenv.appointIP"/>
+			<permission type="java.lang.RuntimePermission" name="createClassLoader"/>
+			<permission type="java.lang.RuntimePermission" name="getenv.spring.liveBeansView.mbeanDomain"/>
+			<permission type="java.lang.RuntimePermission" name="getenv.spring.profiles.active"/>
+			<permission type="java.lang.RuntimePermission" name="getenv.spring.profiles.default"/>
+			<permission type="java.util.PropertyPermission" name="*" actions="read,write"/>
+			<permission type="java.io.FilePermission" name="&amp;lt;&amp;lt;ALL FILES&amp;gt;&amp;gt;"
+						actions="read,write,delete,execute"/>
+			<permission type="blackboard.data.AttributePermission" name="sessionmanager" actions="get,set"/>
+			<permission type="blackboard.persist.PersistPermission" name="gradableitem" actions="create,modify,delete"/>
+
+
+			<permission type="blackboard.persist.PersistPermission" name="content" actions="create"/>
+			<permission type="persist" name="Gradebook" actions="create,modify,delete"/>
+			<permission type="persist" name="Outcome" actions="create,load,persist,delete"/>
+			<permission type="persist" name="OutcomeDefinition" actions="create,load,persist,delete"/>
+			<permission type="persist" name="coursecategorymembership" actions="create,modify,delete"/>
+			<permission type="persist" name="outcomedefinitioncategory" actions="create,load,persist,delete"/>
+			<permission type="persist" name="outcomedefinitioncategory" actions="create,load,persist,delete"/>
+		</permissions>
+	</plugin>
+</manifest>

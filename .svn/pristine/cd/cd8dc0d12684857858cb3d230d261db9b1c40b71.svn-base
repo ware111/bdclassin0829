@@ -1,0 +1,4 @@
+spring.corePoolSize=5
+spring.keepAliveSeconds=200
+spring.maxPoolSize=10
+spring.queueCapacity=20

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--<!– 自动扫描 –>-->
+    <context:component-scan base-package="com.test1"/>
+    <context:component-scan base-package="com.test2"/>
+    <context:component-scan base-package="com.test3"/>
+ 
+    <!--<!– 监听数据库方法配置 –>-->
+    <bean id="test1Service" class="com.test1.service.Test1Service" init-method="findList"/>
+    <bean id="test2Service" class="com.test2.service.Test2Service" init-method="findList"/>
+    <bean id="test3Service" class="com.test3.service.Test3Service" init-method="findList"/>
+ 
+ 
+ 
+    <!-- 第二种方式：加载多个properties文件 -->
+    <bean id="configProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="locations">
+            <list>
+                <value>classpath:jdbc.properties</value>
+            </list>
+        </property>
+        <property name="fileEncoding" value="UTF-8"/>
+    </bean>
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer">
+        <property name="properties" ref="configProperties"/>
+    </bean>
+ 
+     <!--<!–oracle配置数据源–>-->
+    <bean id="dataSource_oracle" class="org.apache.commons.dbcp.BasicDataSource"
+          destroy-method="close">
+        <property name="driverClassName" value="${driverClasss}"/>
+        <property name="url" value="${jdbcUrl}"/>
+        <property name="username" value="test1"/>
+        <property name="password" value="test1"/>
+        <!-- 初始化连接大小 -->
+        <property name="initialSize" value="${initialSize}"></property>
+        <!-- 连接池最大数量 -->
+        <property name="maxActive" value="${maxActive}"></property>
+        <!-- 连接池最大空闲 -->
+        <property name="maxIdle" value="${maxIdle}"></property>
+        <!-- 连接池最小空闲 -->
+        <property name="minIdle" value="${minIdle}"></property>
+        <!-- 获取连接最大等待时间 -->
+        <property name="maxWait" value="${maxWait}"></property>
+    </bean>
+ 
+    <!-- mybatis和spring完美整合，不需要mybatis的配置映射文件 -->
+    <bean id="sqlSessionFactory1" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource_oracle"/>
+        <!-- 自动扫描mapping.xml文件 -->
+        <property name="mapperLocations" value="classpath:mapping/test1/*.xml"></property>
+    </bean>
+ 
+    <!-- DAO接口所在包名，Spring会自动查找其下的类 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.test1.dao"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory1"></property>
+    </bean>
+ 
+     <!--(事务管理)transaction manager, use JtaTransactionManager for global tx-->
+    <bean id="transactionManager1" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource_oracle"/>
+    </bean>
+ 
+    <!-- (事务管理)transaction manager, use JtaTransactionManager for global tx -->
+    <tx:annotation-driven transaction-manager="transactionManager1"/>
+ 
+ 
+     <!--sqlserver配置数据源-->
+    <bean id="dataSource_sq1" class="org.apache.commons.dbcp.BasicDataSource"
+          destroy-method="close">
+        <property name="driverClassName" value="${sq1DriverClasss}"/>
+        <property name="url" value="${sq1JdbcUrl}"/>
+        <property name="username" value="${sq1Username}"/>
+        <property name="password" value="${sq1Password}"/>
+        <!-- 初始化连接大小 -->
+        <property name="initialSize" value="${initialSize}"></property>
+        <!-- 连接池最大数量 -->
+        <property name="maxActive" value="${maxActive}"></property>
+        <!-- 连接池最大空闲 -->
+        <property name="maxIdle" value="${maxIdle}"></property>
+        <!-- 连接池最小空闲 -->
+        <property name="minIdle" value="${minIdle}"></property>
+        <!-- 获取连接最大等待时间 -->
+        <property name="maxWait" value="${maxWait}"></property>
+    </bean>
+    <!-- mybatis和spring完美整合，不需要mybatis的配置映射文件 -->
+    <bean id="sqlSessionFactorySq1" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource_sq1"/>
+        <!-- 自动扫描mapping.xml文件 -->
+        <property name="mapperLocations" value="classpath:mapping/test2/*.xml"></property>
+    </bean>
+ 
+    <!-- DAO接口所在包名，Spring会自动查找其下的类 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.test2.dao"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactorySq1"></property>
+    </bean>
+ 
+     <!--(事务管理)transaction manager, use JtaTransactionManager for global tx-->
+    <bean id="transactionManagerSq1" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource_sq1"/>
+    </bean>
+ 
+    <!-- (事务管理)transaction manager, use JtaTransactionManager for global tx -->
+    <tx:annotation-driven transaction-manager="transactionManagerSq1"/>
+ 
+     <!--sqlserver配置数据源-->
+    <bean id="dataSource_invt" class="org.apache.commons.dbcp.BasicDataSource"
+          destroy-method="close">
+        <property name="driverClassName" value="${sq2DriverClasss}"/>
+        <property name="url" value="${sq2JdbcUrl}"/>
+        <property name="username" value="${sq2Username}"/>
+        <property name="password" value="${sq2Password}"/>
+        <!-- 初始化连接大小 -->
+        <property name="initialSize" value="${initialSize}"></property>
+        <!-- 连接池最大数量 -->
+        <property name="maxActive" value="${maxActive}"></property>
+        <!-- 连接池最大空闲 -->
+        <property name="maxIdle" value="${maxIdle}"></property>
+        <!-- 连接池最小空闲 -->
+        <property name="minIdle" value="${minIdle}"></property>
+        <!-- 获取连接最大等待时间 -->
+        <property name="maxWait" value="${maxWait}"></property>
+    </bean>
+     <!--mybatis和spring完美整合，不需要mybatis的配置映射文件-->
+    <bean id="sqlSessionFactorySq2" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource_sq2"/>
+        <!-- 自动扫描mapping.xml文件 -->
+        <property name="mapperLocations" value="classpath:mapping/test3/*.xml"></property>
+    </bean>
+ 
+    <!-- DAO接口所在包名，Spring会自动查找其下的类 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.test3.dao"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactorySq2"></property>
+    </bean>
+ 
+     <!--(事务管理)transaction manager, use JtaTransactionManager for global tx-->
+    <bean id="transactionManagerSq2" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource_sq2"/>
+    </bean>
+ 
+     <!--(事务管理)transaction manager, use JtaTransactionManager for global tx-->
+    <tx:annotation-driven transaction-manager="transactionManagerSq2"/>

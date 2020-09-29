@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blackboard.classin.mapper.ClassinCourseClassMapper" >
+
+	<!--private String className;-->
+	<!--private String classType;-->
+	<!--private String startTime;-->
+	<!--private String classTotalTime;-->
+	<!--private String startDate;-->
+	<!--private String teacherName;-->
+	<!--private String assistantName;-->
+	<!--private int timeStamp;-->
+	<!--private int live;-->
+	<!--private int replay;-->
+	<!--private int record;-->
+
+	<!--只更新授课老师的课节信息-->
+    <update id="editClassTeacher" parameterType="java.util.Map">
+        UPDATE classin_course_class set TEACHER_NAME=#{teacherName},USER_NAME=#{userName},TEACHER_PHONE=#{teacherPhone},LIVE_URL=#{liveURL}
+        where CLASSIN_CLASS_ID=#{classId}
+    </update>
+
+    <!--同时更新授课老师/助教老师的课节信息-->
+	<update id="editAssistantTeacher" parameterType="java.util.Map">
+		UPDATE classin_course_class set TEACHER_NAME=#{teacherName},TEACHER_PHONE=#{teacherPhone},
+		ASSISTANT_NAME=#{assistantName},ASSISTANT_PHONE=#{assistantPhone},LIVE_URL=#{liveURL} where CLASSIN_CLASS_ID=#{classId}
+	</update>
+
+	<!--只更新授课老师手机号-->
+	<update id="editTeacher" parameterType="java.util.Map">
+		UPDATE  classin_course_class set TEACHER_PHONE=#{teacherPhone} where bb_course_id=#{bbCourseId}
+	</update>
+
+	<!--只更新助教手机号-->
+	<update id="editAssistant" parameterType="java.util.Map">
+		UPDATE classin_course_class set ASSISTANT_PHONE=#{teacherPhone} where bb_course_id=#{bbCourseId}
+	</update>
+
+    <select id="findByClassinCourseId" parameterType="java.lang.String" resultType="com.blackboard.classin.entity.ClassinCourseClass">
+    	select 
+    		class_name className,class_type classType,start_time startTime,class_total_time classTotalTime,start_date startDate,
+    		teacher_name teacherName,end_time_stamp endTimeStamp,start_time_stamp startTimeStamp,record,live,replay,assistant_name assistantName,
+    		classin_course_id classinCourseId,classin_class_id classinClassId, dtcreated dtCreated,
+    		teacher_phone teacherPhone ,assistant_phone assistantPhone ,expire_status expireStatus,
+    		live_url liveURL,live_info liveInfo,delete_status deleteStatus,
+    		class_time_length classTimeLength,close_class_delay closeClassDelay,bb_course_id bbCourseId
+    	from classin_course_class 
+    	where classin_course_id=#{classinCourseId} 
+    	and expire_status = '0' and delete_status = 'N'
+    </select>
+
+	<select id="findByBBCourseId" parameterType="java.lang.String" resultType="java.lang.String" >
+		select count(bb_course_id) from classin_course_class group by bb_course_id having bb_course_id=#{bbCourseId}
+	</select>
+
+	<select id="findClassinIdByBBCourseId" parameterType="java.util.Map" resultType="java.util.Map" >
+		select classin_class_id,classin_course_id,end_time_stamp,user_name from classin_course_class where bb_course_id=#{bbCourseId} and end_time_stamp &gt;= #{currentTimeStamp}
+	</select>
+    
+    <select id="findByClassId" parameterType="java.lang.String" resultType="com.blackboard.classin.entity.ClassinCourseClass">
+    	select 
+    		class_name className,class_type classType,start_time startTime,class_total_time classTotalTime,start_date startDate,
+    		teacher_name teacherName,end_time_stamp endTimeStamp,start_time_stamp startTimeStamp,record,live,replay,assistant_name assistantName,
+    		classin_course_id classinCourseId,classin_class_id classinClassId, dtcreated dtCreated,
+    		teacher_phone teacherPhone ,assistant_phone assistantPhone ,expire_status expireStatus,
+    		live_url liveURL,live_info liveInfo,delete_status deleteStatus,
+    		class_time_length classTimeLength,close_class_delay closeClassDelay,bb_course_id bbCourseId,students_total
+    	from classin_course_class 
+    	where classin_class_id=#{classinClassId}
+    </select>
+
+    <insert id="save" parameterType="java.util.Map">
+    	insert into classin_course_class(class_name,class_type,start_time,class_total_time,start_date,teacher_name,
+    	 end_time_stamp,start_time_stamp,record,live,replay,assistant_name,classin_course_id,classin_class_id, dtcreated,
+    		teacher_phone,assistant_phone,
+    		live_url,bb_course_id,expire_status,delete_status,user_name,students_total,label_id,label_name)
+    	values(#{className},#{classType},#{startTime},#{classTotalTime},#{startDate},#{teacherName},
+    	#{endTimeStamp},#{startTimeStamp},#{record},#{live},#{replay},#{assistantName},#{classinCourseId},#{classinClassId},
+    	#{dtCreated},#{teacherPhone},#{assistantPhone},#{liveURL},#{bbCourseId},#{expireStatus},#{deleteStatus},#{userName},#{studentsTotal},#{labelId},#{labelName})
+    </insert>
+    
+    <update id="updateToExpired" parameterType="java.util.Map">
+    	update classin_course_class set expire_status = '1' where classin_course_id = #{classinCourseId} and classin_class_id = #{classinClassId}
+    </update>
+    
+    <update id="updateAssistantPhone" parameterType="java.util.Map">
+    	update classin_course_class 
+    		set assistant_phone=#{assistantPhone}
+		where classin_course_id = #{classinCourseId} and classin_class_id = #{classinClassId}
+    </update>
+    
+    <select id="getReplayList" parameterType="java.util.Map" resultType="com.blackboard.classin.entity.ClassinCourseClass">
+    	select class_name className,class_type classType,start_time startTime,start_time_stamp,class_total_time classTotalTime,
+    	start_date startDate,teacher_name teacherName,end_time_stamp endTimeStamp,record,live,replay,assistant_name,
+    	classin_course_id classinCourseId,classin_class_id classinClassId, dtcreated dtCreated,
+    		teacher_phone teacherPhone ,assistant_phone assistantPhone ,expire_status expireStatus,
+    		live_url liveURL,live_info liveInfo,delete_status deleteStatus,
+    		class_time_length classTimeLength,close_class_delay closeClassDelay,bb_course_id bbCourseId,start_time_stamp startTimeStamp
+    	from classin_course_class
+    	where bb_course_id = #{bbCourseId}
+    	and live_url is not null
+    	and delete_status = 'N'
+    	and end_time_stamp &lt; #{currentTimeStamp}
+    	order by dtcreated desc
+    </select>
+    
+    <update id="delete" parameterType="java.lang.String">
+    	update classin_course_class set delete_status = 'Y' where classin_class_id = #{classinClassId}
+    </update>
+    
+    <update id="updateClassToDelay" parameterType="com.blackboard.classin.entity.ClassinCourseClass">
+    	update classin_course_class 
+	    	set expire_status = '0',
+	    	class_time_length=#{classTimeLength},
+	    	close_class_delay=#{closeClassDelay}
+	    where classin_class_id = #{classinClassId}
+    </update>
+	<select id="getClassList" resultType="java.util.Map" parameterType="java.util.Map">
+		select class_name,class_type,start_time,start_time_stamp,end_time_stamp,class_total_time,start_date startDate,teacher_name,assistant_name,classin_course_id,classin_class_id,dtcreated,
+    		teacher_phone,assistant_phone from classin_course_class where bb_course_id = #{bbCourseId} AND end_time_stamp &gt;= #{todayTimaStamp} order by start_time_stamp asc
+	</select>
+
+	<select id="getClassStatus" resultType="java.util.Map" parameterType="java.util.Map">
+		select teacher_name,class_type,classin_class_id,start_time_stamp,end_time_stamp,user_name from classin_course_class where bb_course_id = #{bbCourseId} AND end_time_stamp &gt;= #{currentTimeStamp} order by start_time_stamp asc
+	</select>
+
+	<update id="deleteClass" parameterType="java.lang.String">
+    	DELETE FROM classin_course_class where classin_class_id=#{0} AND classin_course_id=#{1}
+	</update>
+</mapper>
