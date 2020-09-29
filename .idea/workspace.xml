@@ -405,16 +405,15 @@
       <workItem from="1601030070430" duration="4297000" />
       <workItem from="1601034377103" duration="2021000" />
       <workItem from="1601175570438" duration="42909000" />
-      <workItem from="1601290943167" duration="322000" />
+      <workItem from="1601290943167" duration="566000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="142518000" />
+    <option name="totallyTimeSpent" value="142762000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -428,7 +427,7 @@
       <window_info anchor="bottom" id="Run" order="2" weight="0.16504854" />
       <window_info anchor="bottom" id="Version Control" order="12" sideWeight="0.4995958" weight="0.32897195" />
       <window_info anchor="bottom" id="Spring" order="7" />
-      <window_info anchor="bottom" id="Terminal" order="8" sideWeight="0.4968017" weight="0.1637931" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.4968017" visible="true" weight="0.16289105" />
       <window_info id="Capture Tool" order="6" />
       <window_info id="Designer" order="1" />
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.5555556" weight="0.3651386" />
