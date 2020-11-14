@@ -64,7 +64,7 @@
     		classin_course_id classinCourseId,classin_class_id classinClassId, dtcreated dtCreated,
     		teacher_phone teacherPhone ,assistant_phone assistantPhone ,expire_status expireStatus,
     		live_url liveURL,live_info liveInfo,delete_status deleteStatus,
-    		class_time_length classTimeLength,close_class_delay closeClassDelay,bb_course_id bbCourseId,students_total
+    		class_time_length classTimeLength,close_class_delay closeClassDelay,bb_course_id bbCourseId,students_total studentTotal,user_name userName,label_id labelId,label_name labelName
     	from classin_course_class 
     	where classin_class_id=#{classinClassId}
     </select>
@@ -117,7 +117,7 @@
     </update>
 	<select id="getClassList" resultType="java.util.Map" parameterType="java.util.Map">
 		select class_name,class_type,start_time,start_time_stamp,end_time_stamp,class_total_time,start_date startDate,teacher_name,assistant_name,classin_course_id,classin_class_id,dtcreated,
-    		teacher_phone,assistant_phone from classin_course_class where bb_course_id = #{bbCourseId} AND end_time_stamp &gt;= #{todayTimaStamp} order by start_time_stamp asc
+    		teacher_phone,assistant_phone,user_name from classin_course_class where bb_course_id = #{bbCourseId} AND end_time_stamp &gt;= #{todayTimaStamp} order by start_time_stamp asc
 	</select>
 
 	<select id="getClassStatus" resultType="java.util.Map" parameterType="java.util.Map">
@@ -127,4 +127,12 @@
 	<update id="deleteClass" parameterType="java.lang.String">
     	DELETE FROM classin_course_class where classin_class_id=#{0} AND classin_course_id=#{1}
 	</update>
+
+	<select id="getSummaryDataByClassType" resultType="java.util.Map">
+		select class_type,count(class_type) total from classin_course_class group by class_type
+	</select>
+
+	<select id="getClassType" parameterType="java.lang.String" resultType="java.lang.String">
+		select class_type from classin_course_class where classin_class_id = #{classId}
+	</select>
 </mapper>

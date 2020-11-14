@@ -41,7 +41,8 @@ insert into system_registry(pk1,registry_key,registry_value)
 values(system_registry_seq.nextval,'classin_addstudent_url','https://api.eeo.cn/partner/api/course.api.php?action=addSchoolStudent');
 insert into system_registry(pk1,registry_key,registry_value)
 values(system_registry_seq.nextval,'classin_deleteclassstudent_url','https://api.eeo.cn/partner/api/course.api.php?action=delClassStudentMultiple');
-
+insert into system_registry(pk1,registry_key,registry_value)
+values(system_registry_seq.nextval,'classin_addcourseclassmultiple_url','https://api.eeo.cn/partner/api/course.api.php?action=addCourseClassMultiple');
 
 
 create table class_schedule_data(ID INT,content varchar2(200),result varchar2(100),reason varchar2(200),course_id varchar2(100),today_time_stamp varchar2(100))

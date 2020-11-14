@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blackboard.classin.mapper.StudentDetailMapper" >
+    <insert id="saveStudentDetail" parameterType="com.blackboard.classin.entity.StudentDetail">
+      insert into student_detail_json values(#{courseId},#{className},#{classId},#{startTime},#{closeTime},
+      #{studentBBId},#{studentName},#{studentPhone},#{studentUid},#{identity},#{studentInClassTime},#{checkin},#{late},
+      #{back},#{awardCount},#{handsupCount},#{authorizeCount}, #{answerCount},#{answerCorrectTimes},#{json},#{teacherInClassTime})
+    </insert>
+
+    <select id="getCourseStudentData" parameterType="java.util.Map" resultType="com.blackboard.classin.entity.StudentDetail">
+        select COURSE_ID courseId, CLASS_NAME className, CLASS_ID classId, BEGIN_TIME startTime, END_TIME closeTime,
+        STUDENT_BBID studentBBId, STUDENT_PHONE studentPhone, STUDENT_NAME studentName, STUDENT_UID studentUid,IDENTITY identity,STUDENT_ATTEND_DURATION studentInClassTime,
+        CHECKIN checkin, LATER late, leave_early back, AWARD_TIMES awardCount, HANDSUP_TIMES handsupCount,AUTHORIZE_TIMES authorizeCount,
+        ANSWER_TIMES answerCount,answer_correct_times answerCorrectTimes,MERGE_COLUMN json,teacher_attend_duration teacherInClassTime
+        from student_detail_json where begin_time &gt;= #{beginTime} and end_time &lt;= #{endTime} and course_id=#{courseId}  order by class_id desc
+    </select>
+
+    <select id="getClassStudentData" parameterType="java.util.Map" resultType="com.blackboard.classin.entity.StudentDetail">
+        select COURSE_ID courseId, CLASS_NAME className, CLASS_ID classId, BEGIN_TIME startTime, END_TIME closeTime,
+        STUDENT_BBID studentBBId, STUDENT_PHONE studentPhone, STUDENT_NAME studentName, STUDENT_UID studentUid,IDENTITY identity,STUDENT_ATTEND_DURATION studentInClassTime,
+        CHECKIN checkin, LATER late, leave_early back, AWARD_TIMES awardCount, HANDSUP_TIMES handsupCount,AUTHORIZE_TIMES authorizeCount,
+        ANSWER_TIMES answerCount,answer_correct_times answerCorrectTimes,MERGE_COLUMN json,teacher_attend_duration teacherInClassTime
+        from student_detail_json where class_id=#{classId}
+    </select>
+
+    <select id="getCourseCheckinStudentTotal" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select sum(STUDENT_CHECKIN) from class_data_json where COURSE_ID=#{courseId}
+    </select>
+
+</mapper>

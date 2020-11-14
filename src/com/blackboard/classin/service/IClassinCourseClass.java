@@ -1,5 +1,6 @@
 package com.blackboard.classin.service;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,5 +16,7 @@ public interface IClassinCourseClass {
 
 	void saveClassLen(Map<String, Object> paramMap);
 
+	List<Map<String,Object>> getSummaryDataByClassType();
 
+	String getClassType(String classId);
 }

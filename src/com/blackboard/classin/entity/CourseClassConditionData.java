@@ -5,19 +5,22 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.blackboard.classin.util.SystemUtil;
 
+import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-public class ClassCondition {
+public class CourseClassConditionData {
     private String courseId;
     private String className;
-    private long closeTim;
+    private String classId;
+    private long closeTime;
     private long startTime;
     private String teacherBBId;
     private String teacherName;
     private String teacherPhone;
-    private String teacheInClass;
+    //教师实际授课时长
+    private String teacheInClassTime;
     private String checkin="";
     private String late="";
     private String back="";
@@ -74,11 +77,98 @@ public class ClassCondition {
     //答题器次数
     private int answerCount;
     //答题器平均正确率
-    private double averageAccuracy;
+    private String averageAccuracy;
     //小黑板使用次数
     private int smallboardCount;
-    //小黑帮使用时长
+    //小黑板使用时长
     private int totalTime;
+    //其他合并字段
+    private String json;
+    //出勤率
+    private double checkinRate;
+    //课节类型
+    private String classType;
+    //助教bbId
+    private String assistantBBid;
+    //助教电话
+    private String assistantPhone;
+    //助教姓名
+    private String assistantName;
+    //助教出勤时长
+    private String assistantInClassTime;
+    private int id;
+
+    public String getAssistantInClassTime() {
+        return assistantInClassTime;
+    }
+
+    public void setAssistantInClassTime(String assistantInClassTime) {
+        this.assistantInClassTime = assistantInClassTime;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getAssistantBBid() {
+        return assistantBBid;
+    }
+
+    public void setAssistantBBid(String assistantBBid) {
+        this.assistantBBid = assistantBBid;
+    }
+
+    public String getAssistantName() {
+        return assistantName;
+    }
+
+    public void setAssistantName(String assistantName) {
+        this.assistantName = assistantName;
+    }
+
+    public String getAssistantPhone() {
+        return assistantPhone;
+    }
+
+    public void setAssistantPhone(String assistantPhone) {
+        this.assistantPhone = assistantPhone;
+    }
+
+    public String getClassType() {
+        return classType;
+    }
+
+    public void setClassType(String classType) {
+        this.classType = classType;
+    }
+
+    public double getCheckinRate() {
+        return checkinRate;
+    }
+
+    public void setCheckinRate(double checkinRate) {
+        this.checkinRate = checkinRate;
+    }
+
+    public String getJson() {
+        return json;
+    }
+
+    public void setJson(String json) {
+        this.json = json;
+    }
+
+    public String getClassId() {
+        return classId;
+    }
+
+    public void setClassId(String classId) {
+        this.classId = classId;
+    }
 
     public String getCourseId() {
         return courseId;
@@ -95,15 +185,12 @@ public class ClassCondition {
     public void setClassName(String className) {
         this.className = className;
     }
-
-    public long getCloseTim() {
-        return closeTim;
+    public long getCloseTime() {
+        return closeTime;
     }
-
-    public void setCloseTim(long closeTim) {
-        this.closeTim = closeTim;
+    public void setCloseTime(long closeTime) {
+        this.closeTime = closeTime;
     }
-
     public long getStartTime() {
         return startTime;
     }
@@ -136,12 +223,12 @@ public class ClassCondition {
         this.teacherPhone = teacherPhone;
     }
 
-    public String getTeacheInClass() {
-        return teacheInClass;
+    public String getTeacheInClassTime() {
+        return teacheInClassTime;
     }
 
-    public void setTeacheInClass(String teacheInClass) {
-        this.teacheInClass = teacheInClass;
+    public void setTeacheInClassTime(String teacheInClassTime) {
+        this.teacheInClassTime = teacheInClassTime;
     }
 
     public String getCheckin() {
@@ -376,11 +463,11 @@ public class ClassCondition {
         this.answerCount = answerCount;
     }
 
-    public double getAverageAccuracy() {
+    public String getAverageAccuracy() {
         return averageAccuracy;
     }
 
-    public void setAverageAccuracy(double averageAccuracy) {
+    public void setAverageAccuracy(String averageAccuracy) {
         this.averageAccuracy = averageAccuracy;
     }
 

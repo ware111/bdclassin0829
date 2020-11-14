@@ -8,7 +8,7 @@ create table bb_course_classin_course(
 create table classin_course_class(
  CLASSIN_COURSE_ID VARCHAR2(32),
  CLASSIN_CLASS_ID VARCHAR2(32),
- DTCREATED NUMBER(38),
+ DTCREATED VARCHAR2(20) not null,
  TEACHER_PHONE VARCHAR2(20),
  ASSISTANT_PHONE VARCHAR2(20),
  EXPIRE_STATUS VARCHAR2(1),
@@ -33,6 +33,8 @@ create table classin_course_class(
  BB_USER_NAME VARCHAR2(80),
  USER_NAME VARCHAR2(80),
  STUDENTS_TOTAL INT,
+ label_name  varchar(200),
+ label_id varchar(200),
 CONSTRAINT PK_classin_course_class PRIMARY KEY (classin_course_id,classin_class_id)
 );
 
@@ -104,6 +106,46 @@ v_size int,
 delete_status varchar2(1)
 );
 
+---课节考勤表
+create table class_data(course_id varchar2(200),class_name varchar2(200),class_id varchar2(100) unique ,
+begin_time varchar2(100),end_time varchar2(100),teacher_bbid varchar2(100),
+teacher_phone varchar2(100),teacher_name varchar2(200),teacher_attend_length number(8,4),checkin varchar2(50),
+later varchar2(50),leave_early varchar2(50),student_total int,student_checkin varchar2(50),student_later int,student_leave_early int,
+text_files int,text_file_total_duration number(8,4),audio_video_files int,audio_video_total_duration number(8,4),
+muteall_times int,muteall_total_duration number(8,4),remove_student_times int,
+remove_students int,award_times int,award_students int,handsup_times int,
+hansup_students int,authorize_times int,authorize_students int,authorize_total_duration number(8,4),
+desk_share_times int,desk_share_total_duration number(8,4),count_down_times int,dice_times int,responder_times int,
+answer_times int,average_accuracy varchar2(50),blackboard_times int,blackboard_total_duration int,timer_times int;
+
+
+---课节考勤表json版
+create table class_data_json(course_id varchar2(200),class_name varchar2(200),class_id varchar2(100) unique ,
+begin_time varchar2(100),end_time varchar2(100),teacher_bbid varchar2(100),
+teacher_phone varchar2(100),teacher_name varchar2(200),assistant_phone varchar2(100),assistant_name varchar2(200),assistant_attend_length number(8,4),teacher_attend_length number(8,4),checkin varchar2(50),
+later varchar2(50),leave_early varchar2(50),student_total int,student_checkin varchar2(50),student_later int,student_leave_early int,
+award_times int,award_students int,handsup_times int,hansup_students int,authorize_times int,authorize_students int,
+answer_times int,average_accuracy varchar2(50), merge_column varchar2(3000));
+
+---学生考勤详情表
+create table student_detail(course_id varchar2(200), class_name varchar2(200),class_id varchar2(100),
+begin_time varchar2(100),end_time varchar2(100),student_bbid varchar2(100) unique,student_name varchar2(200),
+student_phone varchar2(100),student_uid varchar2(200) unique,identity varchar2(10),
+student_attend_duration number(8,4),checkin varchar2(50),later varchar2(50),leave_early varchar2(50),speaking_duration int,
+up_stage_times int,up_duration int,down_stage_times int,down_duration int,remove_times int,
+award_times int,handsup_times int,authorize_times int,authorize_total_duration number(8,4),
+responder_times int,responder_answer_times int,responder_selected_times int,answer_times int,
+answer_collect_times int,camera_duration number(8,4));
+
+
+---学生考勤详情表json版
+create table student_detail_json(course_id varchar2(200), class_name varchar2(200),class_id varchar2(100),
+begin_time varchar2(100),end_time varchar2(100),student_bbid varchar2(100) ,student_name varchar2(300),
+student_phone varchar2(100),student_uid varchar2(200),identity varchar2(10),
+student_attend_duration number(9,4),checkin varchar2(50),later varchar2(50),leave_early varchar2(50),award_times int,handsup_times int,authorize_times int,
+answer_times int,answer_correct_times int, merge_column varchar2(4000),teacher_attend_duration NUMBER(9,4),unique(class_id,student_uid,student_bbid));
+
+
 
 ----    pku@bb#metc=2013
 --添加URL
@@ -130,8 +172,10 @@ insert into system_registry(pk1,registry_key,registry_value)
 values(system_registry_seq.nextval,'classin_addclassstudent_url','https://api.eeo.cn/partner/api/course.api.php?action=addClassStudentMultiple');
 insert into system_registry(pk1,registry_key,registry_value) 
 values(system_registry_seq.nextval,'classin_addcourseclass_url','https://api.eeo.cn/partner/api/course.api.php?action=addCourseClass');
+insert into system_registry(pk1,registry_key,registry_value)
+values(system_registry_seq.nextval,'classin_addcourseclass_url','https://api.eeo.cn/partner/api/course.api.php?action=addCourseClassMultiple');
 insert into system_registry(pk1,registry_key,registry_value) 
-values(system_registry_seq.nextval,'classin_addcourse_url','https://api.eeo.cn/partner/api/course.api.php?action=addCourse');
+values(system_registry_seq.nextval,'classin_addcourseclassmultiple_url','https://api.eeo.cn/partner/api/course.api.php?action=addCourseClassMultiple');
 insert into system_registry(pk1,registry_key,registry_value)
 values(system_registry_seq.nextval,'classin_deletecourseclass_url','https://api.eeo.cn/partner/api/course.api.php?action=delCourseClass');
 insert into system_registry(pk1,registry_key,registry_value)
@@ -147,6 +191,11 @@ insert into system_registry(pk1,registry_key,registry_value)
 values(system_registry_seq.nextval,'classin_import_grade_url','TODO');
 insert into system_registry(pk1,registry_key,registry_value) 
 values(system_registry_seq.nextval,'classin_class_activity_info_url','TODO');
+create table lable_table(type varchar2(80),value varchar2(100),label_id varchar2(100),label_name varchar2(200));
+
+alter table classin_course_class add label_name  varchar(200);
+
+alter table classin_course_class add label_id varchar(200);
 
 
 commit;

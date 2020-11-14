@@ -210,7 +210,7 @@ public class TimerTaskImp implements TimerTaskService {
 
                                 String courseId = "courseId=" + classInCourseId;
 //                                User user = SystemUtil.getUserByUserId(bean.getTeacher());
-                                String courseClassName = bbCourse.getCourseId() + "_" + bbCourse.getTitle() + "_" + TimeStampUtil.getMonthDay();
+                                String courseClassName = bbCourse.getCourseId() + "_" + bbCourse.getTitle();
                                 String className = "className=" + courseClassName+"_"+TimeStampUtil.getCurrentTime();
                                 long startTimeStamp = TimeStampUtil.getTimeStamp(list.get(k).getCourse_begin());
                                 long endTimeStamp = TimeStampUtil.getTimeStamp(list.get(k).getCourse_over());

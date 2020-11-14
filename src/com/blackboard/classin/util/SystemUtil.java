@@ -18,10 +18,7 @@ import blackboard.platform.context.Context;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.alibaba.fastjson.JSONObject;
 import com.blackboard.classin.constants.Constants;
@@ -33,6 +30,7 @@ import com.blackboard.classin.mapper.SystemRegistryMapper;
 import com.blackboard.classin.mapper.UserPhoneMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.org.apache.bcel.internal.generic.NEW;
+import org.codehaus.jackson.util.InternCache;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
@@ -41,28 +39,27 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class SystemUtil {
 
-	public static JSONObject buildResultMap(int errno, String error){
-		JSONObject jsonObject1 = new JSONObject();
-		JSONObject jsonObject2 = new JSONObject();
-		
-		jsonObject2.put("errno", errno);  
-		jsonObject2.put("error", error);
-		
-		jsonObject1.put("error_info",jsonObject2 );
+    public static JSONObject buildResultMap(int errno, String error) {
+        JSONObject jsonObject1 = new JSONObject();
+        JSONObject jsonObject2 = new JSONObject();
+
+        jsonObject2.put("errno", errno);
+        jsonObject2.put("error", error);
+
+        jsonObject1.put("error_info", jsonObject2);
         return jsonObject1;
     }
-	
-	public static void main(String[] args) {
-		//System.out.println(buildResultMap(1,"aa"));
+
+    public static void main(String[] args) {
+        //System.out.println(buildResultMap(1,"aa"));
 //		System.out.println(LicenseUtil.getHashValue("Snnu@edu"));
 //		int vDurationMin = (Integer.parseInt("28") / 60) + 1;
 //		System.out.println(vDurationMin);
-		System.out.println(getlinkNo());
-	}
-	
+        System.out.println(getlinkNo());
+    }
+
     /**
-     * @param plainText
-     *            明文
+     * @param plainText 明文
      * @return 32位密文
      */
     public static String MD5Encode(String plainText) {
@@ -102,16 +99,17 @@ public class SystemUtil {
         String secret = "";
         String key = "yst&#bpii*9d^i97kkyI";
         secret = MD5Encode(userId + timeCheck + key);
-        return secret.equalsIgnoreCase(pstr)?true:false;
+        return secret.equalsIgnoreCase(pstr) ? true : false;
     }
 
 
     /**
      * 根据课程PK获取课程对象
+     *
      * @param course_id
      * @return
      */
-    public static Course getCourseById(String course_id){
+    public static Course getCourseById(String course_id) {
 
         CourseDbLoader courseDbLoader = null;
         int pk1 = Integer.valueOf(course_id.split("_")[1]);
@@ -122,10 +120,10 @@ public class SystemUtil {
         } catch (PersistenceException e) {
             return null;
         }
-        try{
+        try {
             courseDbLoader = CourseDbLoader.Default.getInstance();
             course = courseDbLoader.loadById(cId);
-        }catch(PersistenceException p){
+        } catch (PersistenceException p) {
             p.printStackTrace();
         }
         return course;
@@ -134,10 +132,11 @@ public class SystemUtil {
 
     /**
      * 查询某一个bb课程ID所对应的课程
+     *
      * @param bbCousrId
      * @return
      */
-    public static Course getCourseBybbCourseId(String bbCousrId){
+    public static Course getCourseBybbCourseId(String bbCousrId) {
 
         CourseDbLoader courseDbLoader = null;
 //        int pk1 = Integer.valueOf(course_id.split("_")[1]);
@@ -148,62 +147,65 @@ public class SystemUtil {
 //        } catch (PersistenceException e) {
 //            return null;
 //        }
-        try{
+        try {
             courseDbLoader = CourseDbLoader.Default.getInstance();
             course = courseDbLoader.loadByCourseId(bbCousrId);
-        }catch(PersistenceException p){
+        } catch (PersistenceException p) {
             p.printStackTrace();
         }
         return course;
     }
 
-    
-    /**
-	 * 判断是否管理员
-	 * @return
-	 */
-	public static boolean isAdministrator() {
-		Context _ctx = BbServiceManager.getContextManager().getContext();
-		Id userPk = _ctx.getUserId();
-		UserDbLoader userDbLoader = null;
-		try {
-			userDbLoader = UserDbLoader.Default.getInstance();
-			User user = userDbLoader.loadById(userPk);
 
-			// 获取用户的系统角色
-			User.SystemRole role = user.getSystemRole();
-			// 系统管理员有权限进入系统
-			if (role.getFieldName().equals("SYSTEM_ADMIN")) {
-				System.out.println(" user "+user.getId() +" is Admin,Classin");
-				return true;
-			}
-		}catch(Exception e){
-			return false;
-		}
-		return false;
-	}
+    /**
+     * 判断是否管理员
+     *
+     * @return
+     */
+    public static boolean isAdministrator() {
+        Context _ctx = BbServiceManager.getContextManager().getContext();
+        Id userPk = _ctx.getUserId();
+        UserDbLoader userDbLoader = null;
+        try {
+            userDbLoader = UserDbLoader.Default.getInstance();
+            User user = userDbLoader.loadById(userPk);
+
+            // 获取用户的系统角色
+            User.SystemRole role = user.getSystemRole();
+            // 系统管理员有权限进入系统
+            if (role.getFieldName().equals("SYSTEM_ADMIN")) {
+                System.out.println(" user " + user.getId() + " is Admin,Classin");
+                return true;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return false;
+    }
 
     /**
      * 判断当前用户在课程中是否是教师
+     *
      * @param courseId
      * @return
      */
     public static boolean isTeacher() {
-    	
-    	//获取课程当前的用户的注册关系
+
+        //获取课程当前的用户的注册关系
         Context _ctx = BbServiceManager.getContextManager().getContext();
         CourseMembership courseMembership = _ctx.getCourseMembership();
         //该用户注册了课程并且是该课程的教师、助教角色
-        if(courseMembership != null 
-        		&& (courseMembership.getRoleAsString().equals("INSTRUCTOR") 
-        				|| courseMembership.getRoleAsString().equals("TEACHING_ASSISTANT"))) {
-        	return true;
+        if (courseMembership != null
+                && (courseMembership.getRoleAsString().equals("INSTRUCTOR")
+                || courseMembership.getRoleAsString().equals("TEACHING_ASSISTANT"))) {
+            return true;
         }
-    	return false;
+        return false;
     }
 
     /**
      * 判断当前用户在课程中是否是授课教师
+     *
      * @param courseId
      * @return
      */
@@ -213,7 +215,7 @@ public class SystemUtil {
         Context _ctx = BbServiceManager.getContextManager().getContext();
         CourseMembership courseMembership = _ctx.getCourseMembership();
         //该用户注册了课程并且是该课程的教师、助教角色
-        if(courseMembership != null
+        if (courseMembership != null
                 && (courseMembership.getRoleAsString().equals("INSTRUCTOR"))) {
             return true;
         }
@@ -222,6 +224,7 @@ public class SystemUtil {
 
     /**
      * 判断当前用户在课程中是否是助教老师
+     *
      * @param courseId
      * @return
      */
@@ -231,7 +234,7 @@ public class SystemUtil {
         Context _ctx = BbServiceManager.getContextManager().getContext();
         CourseMembership courseMembership = _ctx.getCourseMembership();
         //该用户注册了课程并且是该课程的教师、助教角色
-        if(courseMembership != null
+        if (courseMembership != null
                 && (courseMembership.getRoleAsString().equals("TEACHING_ASSISTANT"))) {
             return true;
         }
@@ -240,28 +243,30 @@ public class SystemUtil {
 
     /**
      * 获取当前用户信息
+     *
      * @return
      */
     public static User getCurrentUser() {
-    	
-    	//使用BB API获取已登录的用户信息
+
+        //使用BB API获取已登录的用户信息
         Context _ctx = BbServiceManager.getContextManager().getContext();
         Id userPk = _ctx.getUserId();
-        System.out.println("=========================="+userPk);
+        System.out.println("==========================" + userPk);
         User user = null;
         UserDbLoader uloader = null;
         try {
-			uloader = UserDbLoader.Default.getInstance();
-			user = uloader.loadById(userPk);
-		} catch (PersistenceException e) {
-			e.printStackTrace();
-		}
-    	return user;
+            uloader = UserDbLoader.Default.getInstance();
+            user = uloader.loadById(userPk);
+        } catch (PersistenceException e) {
+            e.printStackTrace();
+        }
+        return user;
     }
 
 
     /**
      * 根据用户名获取用户信息
+     *
      * @return
      */
     public static User getUserByUserName(String userName) {
@@ -279,9 +284,10 @@ public class SystemUtil {
         }
         return user;
     }
-    
+
     /**
      * 生成随机6位数字
+     *
      * @return
      */
     public static String getlinkNo() {
@@ -303,97 +309,76 @@ public class SystemUtil {
 
     /**
      * 获取姓名
+     *
      * @author panhaiming
      * @date 20200820
-     * */
-    public  String getName(String name){
+     */
+    public String getName(String name) {
         return name;
     }
 
     /**
      * 查询是否是课程下学生
+     *
      * @return
      */
-	public static boolean isStudent() {
-		//获取课程当前的用户的注册关系
+    public static boolean isStudent() {
+        //获取课程当前的用户的注册关系
         Context _ctx = BbServiceManager.getContextManager().getContext();
         CourseMembership courseMembership = _ctx.getCourseMembership();
         //该用户注册了课程并且是该课程的教师、助教角色
-        if(courseMembership != null 
-        		&& (courseMembership.getRoleAsString().equals("STUDENT"))) {
-        	return true;
+        if (courseMembership != null
+                && (courseMembership.getRoleAsString().equals("STUDENT"))) {
+            return true;
         }
-    	return false;
-	}
-	
-	/**
-	 * 根据课程ID获取课程
-	 * @param courseId
-	 * @return
-	 */
-	public static Course getCourseByCourseId(String courseId) {
-		try {
-			Course course = CourseDbLoader.Default.getInstance().loadByCourseId(courseId);
-			return course;
-		} catch (KeyNotFoundException e) {
-			return null;
-		} catch (PersistenceException e) {
-			return null;
-		}
-	}
-	
-	/**
-	 * 根据userID获取用户
-	 * @param courseId
-	 * @return
-	 */
-	public static User getUserByUserId(String userId) {
-		try {
-			User user = UserDbLoader.Default.getInstance().loadByUserName(userId);
-			return user;
-		} catch (KeyNotFoundException e) {
-			return null;
-		} catch (PersistenceException e) {
-			return null;
-		}
-	}
+        return false;
+    }
 
-	//获取Bb下老师
-	public static List<BBUser> getBbTeachers(String courseId, UserPhoneMapper userPhoneMapper) throws PersistenceException, IOException {
-        CourseMembershipDbLoader courseMembershipDbLoader  =CourseMembershipDbLoader.Default.getInstance();
-        List<CourseMembership.Role> roleList= new ArrayList<>();
+    /**
+     * 根据课程ID获取课程
+     *
+     * @param courseId
+     * @return
+     */
+    public static Course getCourseByCourseId(String courseId) {
+        try {
+            Course course = CourseDbLoader.Default.getInstance().loadByCourseId(courseId);
+            return course;
+        } catch (KeyNotFoundException e) {
+            return null;
+        } catch (PersistenceException e) {
+            return null;
+        }
+    }
+
+    /**
+     * 根据userID获取用户
+     *
+     * @param courseId
+     * @return
+     */
+    public static User getUserByUserId(String userId) {
+        try {
+            User user = UserDbLoader.Default.getInstance().loadByUserName(userId);
+            return user;
+        } catch (KeyNotFoundException e) {
+            return null;
+        } catch (PersistenceException e) {
+            return null;
+        }
+    }
+
+    //获取Bb下老师
+    public static List<BBUser> getBbTeachers(String courseId, UserPhoneMapper userPhoneMapper) throws PersistenceException, IOException {
+        CourseMembershipDbLoader courseMembershipDbLoader = CourseMembershipDbLoader.Default.getInstance();
+        List<CourseMembership.Role> roleList = new ArrayList<>();
         roleList.add(CourseMembership.Role.INSTRUCTOR);
-        Id course_Id=Id.generateId(Course.DATA_TYPE, Integer.parseInt(courseId));
+        Id course_Id = Id.generateId(Course.DATA_TYPE, Integer.parseInt(courseId));
         List<CourseMembership> memberships = courseMembershipDbLoader.loadByCourseIdAndRoles(course_Id, roleList);
         ArrayList<BBUser> users = new ArrayList<>();
         String phone = "";
         int i = 0;
-        for (CourseMembership courseMembership: memberships) {
-            User user = UserDbLoader.Default.getInstance().loadById(courseMembership.getUserId());
-            BBUser bbUser = new BBUser();
-            UserPhone userPhone = userPhoneMapper.findPhoneByUserId(user.getUserName());
-            if (userPhone != null ) {
-                phone = userPhone.getPhone();
-                bbUser.setPhone(phone);
-            } else {
-                bbUser.setPhone("   (请绑定手机号)");
-            }
-            bbUser.setUserName(user.getFamilyName()+user.getMiddleName()+user.getGivenName());
-            users.add(bbUser);
-        }
-        return users;
-    }
-
-    //获取Bb下助教
-    public static List<BBUser> getBbAssistantTeachers(String courseId,UserPhoneMapper userPhoneMapper) throws PersistenceException, IOException {
-        CourseMembershipDbLoader courseMembershipDbLoader  =CourseMembershipDbLoader.Default.getInstance();
-        List<CourseMembership.Role> roleListAssistant= new ArrayList<>();
-        roleListAssistant.add(CourseMembership.Role.TEACHING_ASSISTANT);
-        Id course_Id=Id.generateId(Course.DATA_TYPE, Integer.parseInt(courseId));
-        List<CourseMembership> memberships = courseMembershipDbLoader.loadByCourseIdAndRoles(course_Id, roleListAssistant);
-        ArrayList<BBUser> users = new ArrayList<>();
-        String phone = "";
-        for (CourseMembership courseMembership: memberships) {
+        for (CourseMembership courseMembership : memberships) {
             User user = UserDbLoader.Default.getInstance().loadById(courseMembership.getUserId());
             BBUser bbUser = new BBUser();
             UserPhone userPhone = userPhoneMapper.findPhoneByUserId(user.getUserName());
@@ -403,97 +388,138 @@ public class SystemUtil {
             } else {
                 bbUser.setPhone("   (请绑定手机号)");
             }
-            bbUser.setUserName(user.getFamilyName()+user.getMiddleName()+user.getGivenName());
+            bbUser.setUserName(user.getFamilyName() + user.getMiddleName() + user.getGivenName());
             users.add(bbUser);
         }
         return users;
     }
 
-    public static void  getUid(UserPhone user, SystemRegistryMapper systemRegistryMapper,UserPhoneMapper userPhoneMapper) throws IOException {
-            long currentCreateClassTime = System.currentTimeMillis() / 1000;
-            String sID = "SID=" + Constants.SID;
-            String safeKey = "safeKey=" + SystemUtil.MD5Encode(Constants.SECRET + currentCreateClassTime);
-            String timeStamp = "timeStamp=" + currentCreateClassTime;
-            String nickname = "nickname=" + user.getUserId();
-            String param_pwd = "password=" + "password";
-            String param_telephone = "telephone=" + user.getPhone();
-            String param_identity = "";
-
-            StringBuilder strsBuilder = new StringBuilder();
-            strsBuilder.append(sID).append("&").append(safeKey).append("&").append(timeStamp).append("&").append(param_telephone)
-                    .append("&").append(nickname).append("&").append(param_pwd).append("&");
-
-            String classin_register_url = systemRegistryMapper.getURLByKey("classin_register_url");
-            String resultRegisterMapStr = HttpClient.doPost(classin_register_url, strsBuilder.toString());
-            ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, Object> resultRegisterMap = new HashMap<String, Object>();
-            if (resultRegisterMapStr != null && !"".equals(resultRegisterMapStr)) {
-                resultRegisterMap = objectMapper.readValue(resultRegisterMapStr, Map.class);
-                //解析返回的数据
-                Map<String, Object> errorInfo = (Map<String, Object>) resultRegisterMap.get("error_info");
-                String errno = errorInfo.get("errno").toString();
-                String error = errorInfo.get("error").toString();
-                String classinUid;
-                UserPhone userInfo = new UserPhone();
-                if ("1".equals(errno) || "135".equals(errno)) {
-                    classinUid = resultRegisterMap.get("data").toString();
-                    userInfo.setClassinUid(classinUid);
-                    userInfo.setUserId(user.getUserId());
-                    userInfo.setPhone(user.getPhone());
-                    userPhoneMapper.updatePhone(userInfo);
-                }
+    //获取Bb下助教
+    public static List<BBUser> getBbAssistantTeachers(String courseId, UserPhoneMapper userPhoneMapper) throws PersistenceException, IOException {
+        CourseMembershipDbLoader courseMembershipDbLoader = CourseMembershipDbLoader.Default.getInstance();
+        List<CourseMembership.Role> roleListAssistant = new ArrayList<>();
+        roleListAssistant.add(CourseMembership.Role.TEACHING_ASSISTANT);
+        Id course_Id = Id.generateId(Course.DATA_TYPE, Integer.parseInt(courseId));
+        List<CourseMembership> memberships = courseMembershipDbLoader.loadByCourseIdAndRoles(course_Id, roleListAssistant);
+        ArrayList<BBUser> users = new ArrayList<>();
+        String phone = "";
+        for (CourseMembership courseMembership : memberships) {
+            User user = UserDbLoader.Default.getInstance().loadById(courseMembership.getUserId());
+            BBUser bbUser = new BBUser();
+            UserPhone userPhone = userPhoneMapper.findPhoneByUserId(user.getUserName());
+            if (userPhone != null) {
+                phone = userPhone.getPhone();
+                bbUser.setPhone(phone);
+            } else {
+                bbUser.setPhone("   (请绑定手机号)");
             }
+            bbUser.setUserName(user.getFamilyName() + user.getMiddleName() + user.getGivenName());
+            users.add(bbUser);
+        }
+        return users;
     }
 
-    public static String retriveStudentUid(String phone,SystemRegistryMapper systemRegistryMapper) throws IOException {
-            long currentCreateClassTime = System.currentTimeMillis() / 1000;
-            String sID = "SID=" + Constants.SID;
-            String safeKey = "safeKey=" + SystemUtil.MD5Encode(Constants.SECRET + currentCreateClassTime);
-            String timeStamp = "timeStamp=" + currentCreateClassTime;
-            String nickname = "nickname=" + phone;
-            String param_pwd = "password=" + "password";
-            String param_telephone = "telephone=" + phone;
+    /**
+     * 获取uid
+     *
+     * @author panhaiming
+     * @date 2020-08-20
+     **/
+    public static void getUid(UserPhone user, SystemRegistryMapper systemRegistryMapper, UserPhoneMapper userPhoneMapper) throws IOException {
+        long currentCreateClassTime = System.currentTimeMillis() / 1000;
+        String sID = "SID=" + Constants.SID;
+        String safeKey = "safeKey=" + SystemUtil.MD5Encode(Constants.SECRET + currentCreateClassTime);
+        String timeStamp = "timeStamp=" + currentCreateClassTime;
+        String nickname = "nickname=" + user.getUserId();
+        String param_pwd = "password=" + "password";
+        String param_telephone = "telephone=" + user.getPhone();
+        String param_identity = "";
 
-            StringBuilder strsBuilder = new StringBuilder();
-            strsBuilder.append(sID).append("&").append(safeKey).append("&").append(timeStamp).append("&").append(param_telephone)
-                    .append("&").append(nickname).append("&").append(param_pwd).append("&");
+        StringBuilder strsBuilder = new StringBuilder();
+        strsBuilder.append(sID).append("&").append(safeKey).append("&").append(timeStamp).append("&").append(param_telephone)
+                .append("&").append(nickname).append("&").append(param_pwd).append("&");
 
-            String classin_register_url = systemRegistryMapper.getURLByKey("classin_register_url");
-            String resultRegisterMapStr = HttpClient.doPost(classin_register_url, strsBuilder.toString());
-            ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, Object> resultRegisterMap = new HashMap<String, Object>();
-            if (resultRegisterMapStr != null && !"".equals(resultRegisterMapStr)) {
-                resultRegisterMap = objectMapper.readValue(resultRegisterMapStr, Map.class);
-                //解析返回的数据
-                Map<String, Object> errorInfo = (Map<String, Object>) resultRegisterMap.get("error_info");
-                String errno = errorInfo.get("errno").toString();
-                String error = errorInfo.get("error").toString();
-                String classinUid;
-                UserPhone userInfo = new UserPhone();
-                if ("1".equals(errno) || "135".equals(errno)) {
-                    classinUid = resultRegisterMap.get("data").toString();
-                    return classinUid;
-                }
+        String classin_register_url = systemRegistryMapper.getURLByKey("classin_register_url");
+        String resultRegisterMapStr = HttpClient.doPost(classin_register_url, strsBuilder.toString());
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> resultRegisterMap = new HashMap<String, Object>();
+        if (resultRegisterMapStr != null && !"".equals(resultRegisterMapStr)) {
+            resultRegisterMap = objectMapper.readValue(resultRegisterMapStr, Map.class);
+            //解析返回的数据
+            Map<String, Object> errorInfo = (Map<String, Object>) resultRegisterMap.get("error_info");
+            String errno = errorInfo.get("errno").toString();
+            String error = errorInfo.get("error").toString();
+            String classinUid;
+            UserPhone userInfo = new UserPhone();
+            if ("1".equals(errno) || "135".equals(errno)) {
+                classinUid = resultRegisterMap.get("data").toString();
+                userInfo.setClassinUid(classinUid);
+                userInfo.setUserId(user.getUserId());
+                userInfo.setPhone(user.getPhone());
+                userPhoneMapper.updatePhone(userInfo);
             }
-            return "fail";
+        }
     }
 
-    //获取学生的状态
+    /**
+     * 获取学生uid
+     *
+     * @author panhaiming
+     * @date 2020-08-20
+     **/
+    public static String retriveStudentUid(String phone, SystemRegistryMapper systemRegistryMapper) throws IOException {
+        long currentCreateClassTime = System.currentTimeMillis() / 1000;
+        String sID = "SID=" + Constants.SID;
+        String safeKey = "safeKey=" + SystemUtil.MD5Encode(Constants.SECRET + currentCreateClassTime);
+        String timeStamp = "timeStamp=" + currentCreateClassTime;
+        String nickname = "nickname=" + phone;
+        String param_pwd = "password=" + "password";
+        String param_telephone = "telephone=" + phone;
+
+        StringBuilder strsBuilder = new StringBuilder();
+        strsBuilder.append(sID).append("&").append(safeKey).append("&").append(timeStamp).append("&").append(param_telephone)
+                .append("&").append(nickname).append("&").append(param_pwd).append("&");
+
+        String classin_register_url = systemRegistryMapper.getURLByKey("classin_register_url");
+        String resultRegisterMapStr = HttpClient.doPost(classin_register_url, strsBuilder.toString());
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> resultRegisterMap = new HashMap<String, Object>();
+        if (resultRegisterMapStr != null && !"".equals(resultRegisterMapStr)) {
+            resultRegisterMap = objectMapper.readValue(resultRegisterMapStr, Map.class);
+            //解析返回的数据
+            Map<String, Object> errorInfo = (Map<String, Object>) resultRegisterMap.get("error_info");
+            String errno = errorInfo.get("errno").toString();
+            String error = errorInfo.get("error").toString();
+            String classinUid;
+            UserPhone userInfo = new UserPhone();
+            if ("1".equals(errno) || "135".equals(errno)) {
+                classinUid = resultRegisterMap.get("data").toString();
+                return classinUid;
+            }
+        }
+        return "fail";
+    }
+
+    /**
+     * 获取学生的状态
+     * @author panhaiming
+     * @date 2020-09-10
+     */
     public static BbList<CourseMembership> getStudentState(String courseId) throws PersistenceException {
         Id id = Id.generateId(Course.DATA_TYPE, Integer.parseInt(courseId));
         BbList<CourseMembership> courseMemberships = CourseMembershipDbLoader.Default.getInstance().loadByCourseId(id);
-        for (CourseMembership cm : courseMemberships){
-            System.out.println("-----------------------------------"+cm.getUserId()+cm.getIsAvailable());
+        for (CourseMembership cm : courseMemberships) {
+            System.out.println("-----------------------------------" + cm.getUserId() + cm.getIsAvailable());
         }
         return courseMemberships;
     }
 
     /**
      * 获取课程下学生的数量
+     *
      * @date 20200921
      * @author panhaiming
-     *
-     * */
+     */
     public static int getStudents(String bbCourseId) throws PersistenceException {
         Course course = getCourseBybbCourseId(bbCourseId);
         Id id = course.getId();
@@ -503,8 +529,63 @@ public class SystemUtil {
         roleList.add(CourseMembership.Role.TEACHING_ASSISTANT);
         roleList.add(CourseMembership.Role.INSTRUCTOR);
         List<CourseMembership> memberships = courseMembershipDbLoader.loadByCourseIdAndRoles(id, roleList);
-        int size = users.size()-memberships.size();
+        int size = users.size() - memberships.size();
         return size;
     }
 
+    /**
+     * 获取课程下学生
+     * @author panhaiming
+     * @date 2020-09-10
+     */
+    public static List<String> getBBStudentName(String courseId) throws PersistenceException {
+        Course course = getCourseBybbCourseId(courseId);
+        Id id = course.getId();
+        ArrayList<String> userNames = new ArrayList<>();
+        BbList<CourseMembership> courseMemberships = CourseMembershipDbLoader.Default.getInstance().loadByCourseIdAndRole(id,CourseMembership.Role.STUDENT);
+        for (CourseMembership cm : courseMemberships) {
+            UserDbLoader uloader = null;
+            try {
+                uloader = UserDbLoader.Default.getInstance();
+                User user = uloader.loadById(cm.getUserId());
+                userNames.add(user.getUserName());
+            } catch (PersistenceException e) {
+                e.printStackTrace();
+            }
+
+        }
+        return userNames;
+    }
+
+    /**
+     * @author panhaiming
+     * @date 20201109
+     * 使用 Map按value进行排序
+     */
+    public static Map<String, Integer> sortMapByValue(Map<String, Integer> oriMap) {
+        if (oriMap == null || oriMap.isEmpty()) {
+            return null;
+        }
+        Map<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
+        List<Map.Entry<String, Integer>> entryList = new ArrayList<Map.Entry<String, Integer>>(
+                oriMap.entrySet());
+        Collections.sort(entryList, new MapValueComparator());
+
+        Iterator<Map.Entry<String, Integer>> iter = entryList.iterator();
+        Map.Entry<String, Integer> tmpEntry = null;
+        while (iter.hasNext()) {
+            tmpEntry = iter.next();
+            sortedMap.put(tmpEntry.getKey(), tmpEntry.getValue());
+        }
+        return sortedMap;
+    }
 }
+
+    class MapValueComparator implements Comparator<Map.Entry<String, Integer>> {
+
+        @Override
+        public int compare(Map.Entry<String, Integer> me1, Map.Entry<String, Integer> me2) {
+
+            return me1.getValue().compareTo(me2.getValue());
+        }
+    }

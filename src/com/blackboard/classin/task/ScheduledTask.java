@@ -57,13 +57,13 @@ public class ScheduledTask {
      * @author panhaiming
      * @date 20200905
      */
-//    @Scheduled(cron = "0 0 4 * * *")
+    @Scheduled(cron = "0 0 4 ? * SUN")
     public void deleteStudentTask() throws IOException {
         Process hostname = Runtime.getRuntime().exec("hostname");
         BufferedReader stdInput = new BufferedReader(new
                 InputStreamReader(hostname.getInputStream()));
         String hostName;
-        String targetHostName = GetServiceHostNameUtil.getHostName();
+        String targetHostName = GetServiceHostNameUtil.getSecondHostName();
         while ((hostName = stdInput.readLine()) != null) {
             log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>主机名ip地址" + hostName);
             if (hostName.equals(targetHostName)) {

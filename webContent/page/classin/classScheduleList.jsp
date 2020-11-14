@@ -29,6 +29,7 @@
             <SCRIPT type="text/javascript">
                 var courseId=document.getElementById("course_id").value;
                 var intervalTimeArray = new Array();
+                var classStatus=[];
                 refresh();
                 initSeleted();
 
@@ -42,41 +43,38 @@
 
                 //处理课表信息集合
                 function handleData(data) {
-                    // alert("handleData");
                     data = data.data;
                     for (var i = 0; i < data.length; i++) {
                         var currentTimeStamp = Date.parse(new Date()) / 1000;
                         var isTeacher = document.getElementById("isTeacher").innerText + "";
                         var isAdministrator = document.getElementById("isAdministrator").innerText;
-                        //alert(isTeacher);
-                        //alert(111111)
                         currentTimeStamp = new Number(currentTimeStamp);
                         var startTimeStamp = new Number(data[i].START_TIME_STAMP);
                         var endTimeStamp = new Number(data[i].END_TIME_STAMP);
 
                         if (isTeacher.indexOf("teacher") != -1 || isAdministrator.indexOf("administrator") != -1) {
-                            // alert("老师判断");
                             if (currentTimeStamp < startTimeStamp - (20 * 60)) {
                                 intervalTimeArray[i] = startTimeStamp - (20 * 60) - currentTimeStamp;
                                 var classTotalTime = endTimeStamp - (startTimeStamp - (20 * 60));
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).innerText = "课节未开始";
+                                classStatus[i]=0;
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).setAttribute("tag", "notYet");
                                 // alert(data[i].CLASS_TYPE);
                                 if (data[i].CLASS_TYPE != '课表课') {
                                     document.getElementById(data[i].CLASSIN_CLASS_ID + "delete").innerText = "删除";
                                 }
                                 if (intervalTimeArray[i] * 1000 < 24 * 60 * 60 * 1000) {
-                                    alterStatus(intervalTimeArray[i] * 1000, data[i].CLASSIN_CLASS_ID, classTotalTime * 1000);
+                                    alterStatus(intervalTimeArray[i] * 1000, data[i].CLASSIN_CLASS_ID, classTotalTime * 1000,classStatus[i]);
                                 }
                             } else if (currentTimeStamp >= startTimeStamp - (20 * 60) && currentTimeStamp < endTimeStamp) {
-                                //  alert("进入教室");
                                 intervalTimeArray[i] = endTimeStamp - currentTimeStamp;
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).innerText = "进入教室";
+                                classStatus[i]=1;
                                 document.getElementById(data[i].CLASSIN_CLASS_ID + "delete").innerText = "";
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).setAttribute("tag", "hasBegan");
                                 var lastTime = endTimeStamp - currentTimeStamp;
                                 if (lastTime * 1000 < 24 * 60 * 60 * 1000) {
-                                    alterStatus(lastTime * 1000, data[i].CLASSIN_CLASS_ID);
+                                    alterStatus(lastTime * 1000, data[i].CLASSIN_CLASS_ID,classTotalTime * 1000,classStatus[i]);
                                 }
                             }
                         } else {
@@ -84,38 +82,39 @@
                                 intervalTimeArray[i] = startTimeStamp - (10 * 60) - currentTimeStamp;
                                 var classTotalTime = endTimeStamp - (startTimeStamp - (10 * 60));
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).innerText = "课节未开始";
+                                classStatus[i]=0;
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).setAttribute("tag", "notYet");
                                 if (intervalTimeArray[i] * 1000 < 24 * 60 * 60 * 1000) {
-                                    alterStatus(intervalTimeArray[i] * 1000, data[i].CLASSIN_CLASS_ID, classTotalTime * 1000);
+                                    alterStatus(intervalTimeArray[i] * 1000, data[i].CLASSIN_CLASS_ID, classTotalTime * 1000,classStatus[i]);
                                 }
                             } else if (currentTimeStamp >= startTimeStamp - (10 * 60) && currentTimeStamp < endTimeStamp) {
                                 intervalTimeArray[i] = endTimeStamp - currentTimeStamp;
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).innerText = "进入教室";
+                                classStatus[i]=1;
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).setAttribute("tag", "hasBegan");
                                 var lastTime = endTimeStamp - currentTimeStamp;
                                 if (lastTime * 1000 < 24 * 60 * 60 * 1000) {
-                                    alterStatus(lastTime * 1000, data[i].CLASSIN_CLASS_ID);
+                                    alterStatus(lastTime * 1000, data[i].CLASSIN_CLASS_ID,classTotalTime * 1000,classStatus[i]);
                                 }
                             }
                         }
                     }
-
                 }
 
 
                 //改变课节状态
-                function alterStatus(interval, classID, classTotalTime) {
+                function alterStatus(interval, classID, classTotalTime,status) {
                     setInterval(function flush() {
                         var elementById = document.getElementById(classID + "");
                         var text = elementById.innerText;
-                        if (text == "进入教室" && elementById.getAttribute("tag") == "hasBegan") {
+                        if (status==1 && elementById.getAttribute("tag") == "hasBegan") {
                             document.getElementById(classID + "").innerText = "课节已结束";
                             document.getElementById(classID + "delete").innerText = "";
-                        } else if (text == "课节未开始") {
+                        } else if (status == 0) {
                             text = document.getElementById(classID + "").innerText = "进入教室";
                             document.getElementById(classID + "delete").innerText = "";
                             setInterval(function lastFlush() {
-                                if (text == "进入教室" && elementById.getAttribute("tag") == "notYet") {
+                                if (status == 1 && elementById.getAttribute("tag") == "notYet") {
                                     document.getElementById(classID + "").innerText = "课节已结束";
                                     document.getElementById(classID + "delete").innerText = "";
                                 }
@@ -149,21 +148,24 @@
                 }
 
                 //进入教室
-                function classBegin(classinClassId) {
+                function classBegin(classinClassId,id){
+                    id--;
                     var identity = document.getElementById("isTeacher").innerText;
                     var text = document.getElementById(classinClassId).innerText;
                     if (identity.indexOf("teacher") != -1) {
-                        var teacherSelect = document.getElementById('teacher'+classinClassId);
+                        var assistantTeacherSelect = document.getElementById('assistantTeacher' + classinClassId);
+                        var assistantTeacherIndex = assistantTeacherSelect.selectedIndex;
+                        var assistantContent = assistantTeacherSelect.options[assistantTeacherIndex].text;
+                        var teacherSelect = document.getElementById('teacher' + classinClassId);
                         var teacherIndex = teacherSelect.selectedIndex;
                         var teacher = teacherSelect.options[teacherIndex].value;
                         var teacherInfo = teacher;
-                        var assistPhone = document.getElementById("assistantPhone"+classinClassId).innerText;
-                        var teacherPhone = document.getElementById("teacherPhone"+classinClassId).innerText;
+                        var assistPhone = document.getElementById("assistantPhone" + classinClassId).innerText;
+                        var teacherPhone = document.getElementById("teacherPhone" + classinClassId).innerText;
                         var currentUserPhone = document.getElementById("currentUserTelephone").innerText;
                         currentUserPhone = currentUserPhone.trim();
                         if (assistPhone.indexOf(currentUserPhone) != -1 || teacherPhone.indexOf(currentUserPhone) != -1) {
-
-                            if (text == "进入教室") {
+                            if (classStatus[id] == 1) {
                                 jQuery.ajax({
                                     type: "GET",
                                     url: "${pageContext.request.contextPath}/classinCourseClass/turnIntoClassRoom.do",
@@ -189,12 +191,12 @@
                                         //alert("ajax请求完成")
                                     }
                                 });
-                            } else if (text == "课节未开始") {
+                            } else if (classStatus[id] == 0) {
                                 alert("课节未开始");
                             } else {
                                 alert("课节已结束");
                             }
-                        } else if( (assistPhone != "" || assistPhone == "") ){
+                        } else if (assistPhone != "" || assistPhone == "") {
                             jQuery.ajax({
                                 type: "GET",
                                 url: "${pageContext.request.contextPath}/classinCourseClass/addClassStudent.do",
@@ -206,7 +208,7 @@
                                     if (data.errno != "1" && data.errno != "166") {
                                         alert(data.errno + data.error);
                                     } else {
-                                        if (text == "进入教室") {  //getClassScheduleList.do
+                                        if (classStatus[id] == 1) {  //getClassScheduleList.do
                                             jQuery.ajax({
                                                 type: "GET",
                                                 url: "${pageContext.request.contextPath}/classinCourseClass/turnIntoClassRoom.do",
@@ -232,7 +234,7 @@
                                                     //alert("ajax请求完成")
                                                 }
                                             });
-                                        } else if (text == "课节未开始") {
+                                        } else if (classStatus[id] == 0) {
                                             alert("课节未开始");
                                         } else {
                                             alert("课节已结束");
@@ -244,58 +246,7 @@
                                 }
                             })
                         }
-                        <%--} else if (assistPhone == ""){--%>
-                            <%--jQuery.ajax({--%>
-                                <%--type:"GET",--%>
-                                <%--url:"${pageContext.request.contextPath}/classinCourseClass/addClassAssitant.do",--%>
-                                <%--data:{"classId":classinClassId,"listenClass":"listen"},--%>
-                                <%--async:true,--%>
-                                <%--cache:true,--%>
-                                <%--dataType:"json",--%>
-                                <%--success:function (data) {--%>
-                                    <%--if (data.errno == "1"){--%>
-                                        <%--if (text == "进入教室") {--%>
-                                            <%--jQuery.ajax({--%>
-                                                <%--type: "GET",--%>
-                                                <%--url: "${pageContext.request.contextPath}/classinCourseClass/turnIntoClassRoom.do",--%>
-                                                <%--data: {--%>
-                                                    <%--"classId": classinClassId,--%>
-                                                <%--},     // data参数是可选的，有多种写法，也可以直接在url参数拼接参数上去，例如这样：url:"getUser?id="+val,--%>
-                                                <%--async: true,   // 异步，默认开启，也就是$.ajax后面的代码是不是跟$.ajx里面的代码一起执行--%>
-                                                <%--cache: true,  // 表示浏览器是否缓存被请求页面,默认是 true--%>
-                                                <%--dataType: "json",   // 返回浏览器的数据类型，指定是json格式，前端这里才可以解析json数据--%>
-                                                <%--success: function (data) {--%>
-                                                    <%--if (data.condition != "error") {--%>
-                                                        <%--window.location.href="${pageContext.request.contextPath}/classinCourseClass/getClassScheduleList.do";--%>
-                                                        <%--window.open("https://www.eeo.cn/client/invoke/index.html?" + data.condition);--%>
-                                                    <%--} else if (data.source == "classin提示您----") {--%>
-                                                        <%--window.open("${pageContext.request.contextPath}/page/classin/tips.jsp?source=" + data.source + "&" + "errno=" + data.errorno + "&error=" + data.error);--%>
-                                                    <%--} else {--%>
-                                                        <%--window.open("${pageContext.request.contextPath}/page/classin/tips.jsp?source=" + data.source + "&error=" + data.error);--%>
-                                                    <%--}--%>
-                                                <%--},--%>
-                                                <%--error: function () {--%>
-                                                    <%--alert("发生错误123~");--%>
-                                                <%--},--%>
-                                                <%--complete: function () {--%>
-                                                    <%--//alert("ajax请求完成")--%>
-                                                <%--}--%>
-                                            <%--});--%>
-                                        <%--} else if (text == "课节未开始") {--%>
-                                            <%--alert("课节未开始");--%>
-                                        <%--} else {--%>
-                                            <%--alert("课节已结束");--%>
-                                        <%--}--%>
-                                    <%--}else {--%>
-                                        <%--alert(data.errno+data.error);--%>
-                                    <%--}--%>
-                                <%--},--%>
-                                <%--error:function () {--%>
-
-                                <%--}--%>
-                            <%--});--%>
-                        <%--}--%>
-                    } else{
+                    } else {
                         jQuery.ajax({
                             type: "GET",
                             url: "${pageContext.request.contextPath}/classinCourseClass/addCourseStudent.do",
@@ -307,7 +258,7 @@
                                 if (data.errno != "1" && data.errno != "163") {
                                     alert(data.errno + data.error);
                                 } else {
-                                    if (text == "进入教室") {
+                                    if (classStatus[id] == 1) {
                                         jQuery.ajax({
                                             type: "GET",
                                             url: "${pageContext.request.contextPath}/classinCourseClass/turnIntoClassRoom.do",
@@ -333,7 +284,7 @@
                                                 //alert("ajax请求完成")
                                             }
                                         });
-                                    } else if (text == "课节未开始") {
+                                    } else if (classStatus[id] == 0) {
                                         alert("课节未开始");
                                     } else {
                                         alert("课节已结束");
@@ -341,7 +292,7 @@
                                 }
                             },
                             error: function () {
-                                alert("系统错误"+classinClassId);
+                                alert("系统错误")
                             }
                         })
                     }
@@ -668,7 +619,7 @@
                     <span id="${classInfo.CLASSIN_CLASS_ID}delete" onclick="deleteClass(${classInfo.CLASSIN_CLASS_ID})"
                           style="color: #f44b1c;cursor: pointer"></span>
                 </c:if>
-                <button id="${classInfo.CLASSIN_CLASS_ID}" onclick="classBegin(${classInfo.CLASSIN_CLASS_ID})" tag="hasBegan"
+                <button id="${classInfo.CLASSIN_CLASS_ID}" onclick="classBegin(${classInfo.CLASSIN_CLASS_ID},${classInfo.id})" tag="hasBegan"
                         style="cursor: pointer;background-color:#dadada;border-radius:3px;border-style:none;line-height:30px;width:80px;">
                     进入教室
                 </button>

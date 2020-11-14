@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -194,5 +195,17 @@ public class ClassinCourseClassImpl implements IClassinCourseClass{
 		
 		classinCourseClassMapper.updateClassToDelay(classinCourseClass);
 	}
-	
+
+	@Override
+	public List<Map<String, Object>> getSummaryDataByClassType() {
+		List<Map<String, Object>> classTypeSummary = classinCourseClassMapper.getSummaryDataByClassType();
+		return classTypeSummary;
+	}
+
+    @Override
+    public String getClassType(String classId) {
+        String classType = classinCourseClassMapper.getClassType(classId);
+        return classType;
+    }
+
 }

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.blackboard.classin.mapper.ClassConditionMapper" >
+    <insert id="saveClassCondition" parameterType="com.blackboard.classin.entity.CourseClassConditionData">
+      insert into class_data_json values(#{courseId},#{className},#{classId},#{startTime},#{closeTime},#{teacherBBId},
+      #{teacherPhone},#{teacherName},#{teacheInClassTime},#{checkin},#{late},#{back},#{studentTotal},#{checkinStudent},
+      #{laterTotal},#{leaveEarly},#{awardCount},#{awardPeoples},#{handsupCount},#{handsupPeoples},#{authorizeCount},
+      #{authorizePeoples},#{answerCount},#{averageAccuracy},#{json},#{assistantName},#{assistantPhone},#{assistantInClassTime})
+    </insert>
+    <select id="getCourseData" parameterType="java.util.Map" resultType="com.blackboard.classin.entity.CourseClassConditionData">
+        select COURSE_ID courseId, CLASS_NAME className, CLASS_ID classId, BEGIN_TIME startTime, END_TIME closeTime,
+        TEACHER_BBID teacherBBId, TEACHER_PHONE teacherPhone, TEACHER_NAME teacherName, TEACHER_ATTEND_LENGTH teacheInClassTime,
+        CHECKIN checkin, LATER late, LEAVE_EARLY back,STUDENT_TOTAL studentTotal, STUDENT_CHECKIN checkinStudent, STUDENT_LATER laterTotal,
+        STUDENT_LEAVE_EARLY leaveEarly, AWARD_TIMES awardCount, AWARD_STUDENTS awardPeoples, HANDSUP_TIMES handsupCount, HANSUP_STUDENTS handsupPeoples,
+        AUTHORIZE_TIMES authorizeCount, AUTHORIZE_STUDENTS authorizePeoples, ANSWER_TIMES answerCount, AVERAGE_ACCURACY averageAccuracy, MERGE_COLUMN json,
+        assistant_name assistantName,assistant_phone assistantPhone,ASSISTANT_ATTEND_LENGTH assistantInClassTime
+        from class_data_json where begin_time &gt;= #{beginTime} and end_time &lt;= #{endTime} and course_id=#{courseId}
+    </select>
+
+    <select id="getCourseCheckAndRate" resultType="java.util.Map" parameterType="java.lang.String">
+        select tmp.studentTotal studentTotal,to_char(tmp.studentCheckin/tmp.studentTotal,'fm9999990.9999') rate from (select sum(student_total) studentTotal,
+        sum(student_checkin) studentCheckin from class_data_json where course_id=#{courseId}) tmp
+    </select>
+    
+    <select id="getKeBiaoKeCheckRate" resultType="java.lang.String" parameterType="java.lang.String">
+        select to_char (sum(student_checkin)/sum(student_total),'fm9999990.9999') rate from class_data_json where  class_id in(select classin_class_id from
+        classin_course_class where class_type='课表课') and course_id=#{courseId}
+    </select>
+
+    <select id="getCourseAllData" parameterType="java.lang.String" resultType="com.blackboard.classin.entity.CourseClassConditionData">
+        select COURSE_ID courseId, CLASS_NAME className, CLASS_ID classId, BEGIN_TIME startTime, END_TIME closeTime,
+        TEACHER_BBID teacherBBId, TEACHER_PHONE teacherPhone, TEACHER_NAME teacherName, TEACHER_ATTEND_LENGTH teacheInClassTime,
+        CHECKIN checkin, LATER late, LEAVE_EARLY back,STUDENT_TOTAL studentTotal, STUDENT_CHECKIN checkinStudent, STUDENT_LATER laterTotal,
+        STUDENT_LEAVE_EARLY leaveEarly, AWARD_TIMES awardCount, AWARD_STUDENTS awardPeoples, HANDSUP_TIMES handsupCount, HANSUP_STUDENTS handsupPeoples,
+        AUTHORIZE_TIMES authorizeCount, AUTHORIZE_STUDENTS authorizePeoples, ANSWER_TIMES answerCount, AVERAGE_ACCURACY averageAccuracy, MERGE_COLUMN json,
+        STUDENT_CHECKIN/STUDENT_TOTAL*100 checkinRate from class_data_json where course_id=#{courseId} order by BEGIN_TIME desc
+    </select>
+
+    <select id="getPageClassData" parameterType="java.util.Map" resultType="com.blackboard.classin.entity.CourseClassConditionData">
+        select COURSE_ID courseId, CLASS_NAME className, CLASS_ID classId, BEGIN_TIME startTime, END_TIME closeTime,
+        TEACHER_BBID teacherBBId, TEACHER_PHONE teacherPhone, TEACHER_NAME teacherName, TEACHER_ATTEND_LENGTH teacheInClassTime,
+        CHECKIN checkin, LATER late, LEAVE_EARLY back,STUDENT_TOTAL studentTotal, STUDENT_CHECKIN checkinStudent, STUDENT_LATER laterTotal,
+        STUDENT_LEAVE_EARLY leaveEarly, AWARD_TIMES awardCount, AWARD_STUDENTS awardPeoples, HANDSUP_TIMES handsupCount, HANSUP_STUDENTS handsupPeoples,
+        AUTHORIZE_TIMES authorizeCount, AUTHORIZE_STUDENTS authorizePeoples, ANSWER_TIMES answerCount, AVERAGE_ACCURACY averageAccuracy, MERGE_COLUMN json,
+        STUDENT_CHECKIN/STUDENT_TOTAL*100 checkinRate from (select rownum r,tmp1.* from (select COURSE_ID, CLASS_NAME, CLASS_ID, BEGIN_TIME, END_TIME,
+        TEACHER_BBID, TEACHER_PHONE, TEACHER_NAME, TEACHER_ATTEND_LENGTH,
+        CHECKIN, LATER, LEAVE_EARLY,STUDENT_TOTAL, STUDENT_CHECKIN, STUDENT_LATER,
+        STUDENT_LEAVE_EARLY, AWARD_TIMES, AWARD_STUDENTS, HANDSUP_TIMES, HANSUP_STUDENTS,
+        AUTHORIZE_TIMES, AUTHORIZE_STUDENTS, ANSWER_TIMES, AVERAGE_ACCURACY, MERGE_COLUMN,
+        STUDENT_CHECKIN/STUDENT_TOTAL*100 from class_data_json where course_id=#{courseId} order by BEGIN_TIME desc) tmp1)tmp2 where tmp2.r > #{beginRow} and tmp2.r &lt; #{endRow}
+    </select>
+    <select id="getLastPageData" resultType="com.blackboard.classin.entity.CourseClassConditionData">
+        select COURSE_ID courseId, CLASS_NAME className, CLASS_ID classId, BEGIN_TIME startTime, END_TIME closeTime,
+        TEACHER_BBID teacherBBId, TEACHER_PHONE teacherPhone, TEACHER_NAME teacherName, TEACHER_ATTEND_LENGTH teacheInClassTime,
+        CHECKIN checkin, LATER late, LEAVE_EARLY back,STUDENT_TOTAL studentTotal, STUDENT_CHECKIN checkinStudent, STUDENT_LATER laterTotal,
+        STUDENT_LEAVE_EARLY leaveEarly, AWARD_TIMES awardCount, AWARD_STUDENTS awardPeoples, HANDSUP_TIMES handsupCount, HANSUP_STUDENTS handsupPeoples,
+        AUTHORIZE_TIMES authorizeCount, AUTHORIZE_STUDENTS authorizePeoples, ANSWER_TIMES answerCount, AVERAGE_ACCURACY averageAccuracy, MERGE_COLUMN json,
+        STUDENT_CHECKIN/STUDENT_TOTAL*100 checkinRate from (select rownum r,tmp1.* from (select COURSE_ID, CLASS_NAME, CLASS_ID, BEGIN_TIME, END_TIME,
+        TEACHER_BBID, TEACHER_PHONE, TEACHER_NAME, TEACHER_ATTEND_LENGTH,
+        CHECKIN, LATER, LEAVE_EARLY,STUDENT_TOTAL, STUDENT_CHECKIN, STUDENT_LATER,
+        STUDENT_LEAVE_EARLY, AWARD_TIMES, AWARD_STUDENTS, HANDSUP_TIMES, HANSUP_STUDENTS,
+        AUTHORIZE_TIMES, AUTHORIZE_STUDENTS, ANSWER_TIMES, AVERAGE_ACCURACY, MERGE_COLUMN,
+        STUDENT_CHECKIN/STUDENT_TOTAL*100 from class_data_json where course_id=#{courseId} order by BEGIN_TIME desc) tmp1)tmp2 where tmp2.r =(select max(rownum) from class_data_json)
+    </select>
+
+    <select id="getDataRows" resultType="java.lang.Integer" parameterType="java.lang.String">
+        select count(*) from class_data_json where course_id = #{courseId}
+    </select>
+
+</mapper>

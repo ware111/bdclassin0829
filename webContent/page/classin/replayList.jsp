@@ -54,10 +54,10 @@
 	        		<img src="/webapps/bb-ClassIn-bb_bb60/images/qrCode.jpg" style="height:60px;width:60px;">
            	<bbNG:pageTitleBar title="ClassIn课堂"></bbNG:pageTitleBar>
        	</bbNG:pageHeader>
-       
+
 		<bbNG:actionControlBar>
 	        <bbNG:actionControlBar>
-	
+
 	            <bbNG:actionPanelButton type="SEARCH" alwaysOpen="true">
 	                <bbNG:form id="searchForm" name="searchForm" action="" method="POST">
 			            ${tips}<br/>
@@ -74,18 +74,18 @@
 	 		<h5>学生查看回放，请登录ClassIn客户端，找到对应课程和课节，点击观看回放即可。</h5><br/><br/><br/>
 	 		<img src="/webapps/bb-ClassIn-bb_bb60/images/tip.png">
 	 	<%
-	 	} %>     
+	 	} %>
        <%if(isTeacher == true || isAdministrator == true){%>
 		<bbNG:inventoryList collection="${classinCourseClassList}" initialSortCol="classinCourseId"  objectVar="classinClassInfo" className="com.blackboard.classin.entity.ClassinCourseClass" url="">
-		
+
 			<bbNG:listElement label="课节名称" name="classinClassName" isRowHeader="true">
 					课节<%=classinClassInfo.getDtCreated()%>
 	        </bbNG:listElement>
-	        
+
 	        <bbNG:listElement label="分段查看" name="view_part">
 	                <a href="/webapps/bb-ClassIn-bb_bb60/video/findVediosByClassId.do?classinClassId=${classinClassInfo.getClassinClassId()}&course_id=<%=course_id %>&expire_status=${classinClassInfo.expireStatus}">查看</a>
 	        </bbNG:listElement>
-	        
+
 	        <bbNG:listElement label="观看回放" name="replay">
 	                <a href="${classinClassInfo.liveURL}" target="_blank">观看回放</a>
 	        </bbNG:listElement>

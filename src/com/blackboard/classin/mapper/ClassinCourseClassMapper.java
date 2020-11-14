@@ -41,5 +41,6 @@ public interface ClassinCourseClassMapper {
 	//编辑助教老师
 	void editAssistant(Map<String, Object> paraMap);
 
-
+	List<Map<String,Object>> getSummaryDataByClassType();
+	String getClassType(String classId);
 }

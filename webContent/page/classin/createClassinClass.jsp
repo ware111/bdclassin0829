@@ -44,9 +44,17 @@
         <bbNG:jsBlock>
             <SCRIPT type="text/javascript">
                 var courseId = document.getElementById("course_id").value;
+                document.getElementById("listContainer_itemcount").style.display="none";
+                var pageNow=document.getElementById("pageNumber").innerText;
                 var intervalTimeArray = new Array();
-                refresh();
+                var classStatus = [];
+                // alert(pageNow);
+                refresh(pageNow);
                 initSeleted();
+                if(Number(document.getElementById("pageNumber").innerText)==Number(document.getElementById("pageNumTotal").innerText)){
+                    document.getElementById("nextBtn").disabled=true;
+                    document.getElementById("lasttBtn").disabled=true;
+                }
 
                 //让全部select标签选第一项
                 function initSeleted() {
@@ -75,10 +83,10 @@
                     window.location.href = "${pageContext.request.contextPath}/classinCourseClass/create.do?course_id=" + course_id + "&type=" + typeName;
                 }
 
-                //获取课节列表
-                function getClassList() {
-                    var course_id = document.getElementById("course_id").value;
-                    window.location.href = "${pageContext.request.contextPath}/classinCourseClass/getClassScheduleList.do?course_id=" + course_id;
+                //刷新当前页
+                function refreshCurrrentPage() {
+                    window.location.href="${pageContext.request.contextPath}/classinCourseClass/getHomeClassList.do?course_id="+courseId+"&page="+pageNow;
+                    refresh(pageNow);
                 }
 
                 //获取历史回放
@@ -94,11 +102,36 @@
                     window.location.href = "${pageContext.request.contextPath}/classinCourseClass/editClass.do?course_id=" + course_id + "&type=" + type;
                 }
 
+                //显示教学数据
+                function getEducationData() {
+                    var type = document.getElementById("typeName").value;
+                    var course_id = document.getElementById("course_id").value;
+                    jQuery.ajax({
+                        type:"GET",
+                        url:"${pageContext.request.contextPath}/classinCourseClass/getData.do",
+                        data:{courseId:course_id},
+                        async:true,
+                        cache:true,
+                        dataType:"json",
+                        success:function (data) {
+                            if (data.data == 1){
+                                window.location.href = "${pageContext.request.contextPath}/classinCourseClass/getCourseClassData.do?courseId=" + course_id;
+                            } else {
+                                alert("暂无教学数据");
+                            }
+                        },
+                        error:function () {
+                            alert("网络错误");
+                        }
+                    });
+
+                }
+
                 //解绑手机号
                 function disbindPhone() {
                     var telephone = document.getElementById("currentUserTelephone").innerText;
                     var userName = document.getElementById("userName").innerText;
-                    if (confirm("手机号"+telephone+"是否解绑账号"+userName)) {
+                    if (confirm("手机号" + telephone + "是否解绑账号" + userName)) {
                         var type = document.getElementById("typeName").value;
                         var identity = document.getElementById("isTeacher").innerText;
                         var course_id = document.getElementById("course_id").value;
@@ -135,43 +168,42 @@
                     }
                 }
 
+
                 //处理课表信息集合
                 function handleData(data) {
-                    // alert("handleData");
                     data = data.data;
                     for (var i = 0; i < data.length; i++) {
+                        // alert(i);
                         var currentTimeStamp = Date.parse(new Date()) / 1000;
                         var isTeacher = document.getElementById("isTeacher").innerText + "";
                         var isAdministrator = document.getElementById("isAdministrator").innerText;
-                        //alert(isTeacher);
-                        //alert(111111)
                         currentTimeStamp = new Number(currentTimeStamp);
                         var startTimeStamp = new Number(data[i].START_TIME_STAMP);
                         var endTimeStamp = new Number(data[i].END_TIME_STAMP);
 
                         if (isTeacher.indexOf("teacher") != -1 || isAdministrator.indexOf("administrator") != -1) {
-                            // alert("老师判断");
                             if (currentTimeStamp < startTimeStamp - (20 * 60)) {
                                 intervalTimeArray[i] = startTimeStamp - (20 * 60) - currentTimeStamp;
                                 var classTotalTime = endTimeStamp - (startTimeStamp - (20 * 60));
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).innerText = "课节未开始";
+                                classStatus[i] = 0;
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).setAttribute("tag", "notYet");
                                 // alert(data[i].CLASS_TYPE);
                                 if (data[i].CLASS_TYPE != '课表课') {
                                     document.getElementById(data[i].CLASSIN_CLASS_ID + "delete").innerText = "删除";
                                 }
                                 if (intervalTimeArray[i] * 1000 < 24 * 60 * 60 * 1000) {
-                                    alterStatus(intervalTimeArray[i] * 1000, data[i].CLASSIN_CLASS_ID, classTotalTime * 1000);
+                                    alterStatus(intervalTimeArray[i] * 1000, data[i].CLASSIN_CLASS_ID, classTotalTime * 1000, classStatus[i]);
                                 }
                             } else if (currentTimeStamp >= startTimeStamp - (20 * 60) && currentTimeStamp < endTimeStamp) {
-                                //  alert("进入教室");
                                 intervalTimeArray[i] = endTimeStamp - currentTimeStamp;
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).innerText = "进入教室";
+                                classStatus[i] = 1;
                                 document.getElementById(data[i].CLASSIN_CLASS_ID + "delete").innerText = "";
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).setAttribute("tag", "hasBegan");
                                 var lastTime = endTimeStamp - currentTimeStamp;
                                 if (lastTime * 1000 < 24 * 60 * 60 * 1000) {
-                                    alterStatus(lastTime * 1000, data[i].CLASSIN_CLASS_ID);
+                                    alterStatus(lastTime * 1000, data[i].CLASSIN_CLASS_ID, classTotalTime * 1000, classStatus[i]);
                                 }
                             }
                         } else {
@@ -179,38 +211,102 @@
                                 intervalTimeArray[i] = startTimeStamp - (10 * 60) - currentTimeStamp;
                                 var classTotalTime = endTimeStamp - (startTimeStamp - (10 * 60));
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).innerText = "课节未开始";
+                                classStatus[i] = 0;
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).setAttribute("tag", "notYet");
                                 if (intervalTimeArray[i] * 1000 < 24 * 60 * 60 * 1000) {
-                                    alterStatus(intervalTimeArray[i] * 1000, data[i].CLASSIN_CLASS_ID, classTotalTime * 1000);
+                                    alterStatus(intervalTimeArray[i] * 1000, data[i].CLASSIN_CLASS_ID, classTotalTime * 1000, classStatus[i]);
                                 }
                             } else if (currentTimeStamp >= startTimeStamp - (10 * 60) && currentTimeStamp < endTimeStamp) {
                                 intervalTimeArray[i] = endTimeStamp - currentTimeStamp;
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).innerText = "进入教室";
+                                classStatus[i] = 1;
                                 document.getElementById(data[i].CLASSIN_CLASS_ID).setAttribute("tag", "hasBegan");
                                 var lastTime = endTimeStamp - currentTimeStamp;
                                 if (lastTime * 1000 < 24 * 60 * 60 * 1000) {
-                                    alterStatus(lastTime * 1000, data[i].CLASSIN_CLASS_ID);
+                                    alterStatus(lastTime * 1000, data[i].CLASSIN_CLASS_ID, classTotalTime * 1000, classStatus[i]);
                                 }
                             }
                         }
                     }
-
                 }
 
 
+                //处理课表信息集合
+                // function handleData(data) {
+                //     data = data.data;
+                //     //alert(data.length);
+                //     for (var i = 0; i < data.length; i++) {
+                //         // alert(i);
+                //         var currentTimeStamp = Date.parse(new Date()) / 1000;
+                //         var isTeacher = document.getElementById("isTeacher").innerText + "";
+                //         var isAdministrator = document.getElementById("isAdministrator").innerText;
+                //         currentTimeStamp = new Number(currentTimeStamp);
+                //         var startTimeStamp = new Number(data[i].START_TIME_STAMP);
+                //         var endTimeStamp = new Number(data[i].END_TIME_STAMP);
+                //
+                //         if (isTeacher.indexOf("teacher") != -1 || isAdministrator.indexOf("administrator") != -1) {
+                //             if (currentTimeStamp < startTimeStamp - (20 * 60)) {
+                //                 intervalTimeArray[i] = startTimeStamp - (20 * 60) - currentTimeStamp;
+                //                 var classTotalTime = endTimeStamp - (startTimeStamp - (20 * 60));
+                //                 document.getElementById(data[i].CLASSIN_CLASS_ID).innerText = "课节未开始";
+                //                 classStatus[i] = 0;
+                //                 document.getElementById(data[i].CLASSIN_CLASS_ID).setAttribute("tag", "notYet");
+                //                 // alert(data[i].CLASS_TYPE);
+                //                 if (data[i].CLASS_TYPE != '课表课') {
+                //                     document.getElementById(data[i].CLASSIN_CLASS_ID + "delete").innerText = "删除";
+                //                 }
+                //                 if (intervalTimeArray[i] * 1000 < 24 * 60 * 60 * 1000) {
+                //                     alterStatus(intervalTimeArray[i] * 1000, data[i].CLASSIN_CLASS_ID, classTotalTime * 1000, classStatus[i]);
+                //                 }
+                //             } else if (currentTimeStamp >= startTimeStamp - (20 * 60) && currentTimeStamp < endTimeStamp) {
+                //                 intervalTimeArray[i] = endTimeStamp - currentTimeStamp;
+                //                 document.getElementById(data[i].CLASSIN_CLASS_ID).innerText = "进入教室";
+                //                 classStatus[i] = 1;
+                //                 document.getElementById(data[i].CLASSIN_CLASS_ID + "delete").innerText = "";
+                //                 document.getElementById(data[i].CLASSIN_CLASS_ID).setAttribute("tag", "hasBegan");
+                //                 var lastTime = endTimeStamp - currentTimeStamp;
+                //                 if (lastTime * 1000 < 24 * 60 * 60 * 1000) {
+                //                     alterStatus(lastTime * 1000, data[i].CLASSIN_CLASS_ID, classTotalTime * 1000, classStatus[i]);
+                //                 }
+                //             }
+                //         } else {
+                //             if (currentTimeStamp < startTimeStamp - (10 * 60)) {
+                //                 intervalTimeArray[i] = startTimeStamp - (10 * 60) - currentTimeStamp;
+                //                 var classTotalTime = endTimeStamp - (startTimeStamp - (10 * 60));
+                //                 document.getElementById(data[i].CLASSIN_CLASS_ID).innerText = "课节未开始";
+                //                 classStatus[i] = 0;
+                //                 document.getElementById(data[i].CLASSIN_CLASS_ID).setAttribute("tag", "notYet");
+                //                 if (intervalTimeArray[i] * 1000 < 24 * 60 * 60 * 1000) {
+                //                     alterStatus(intervalTimeArray[i] * 1000, data[i].CLASSIN_CLASS_ID, classTotalTime * 1000, classStatus[i]);
+                //                 }
+                //             } else if (currentTimeStamp >= startTimeStamp - (10 * 60) && currentTimeStamp < endTimeStamp) {
+                //                 intervalTimeArray[i] = endTimeStamp - currentTimeStamp;
+                //                 document.getElementById(data[i].CLASSIN_CLASS_ID).innerText = "进入教室";
+                //                 classStatus[i] = 1;
+                //                 document.getElementById(data[i].CLASSIN_CLASS_ID).setAttribute("tag", "hasBegan");
+                //                 var lastTime = endTimeStamp - currentTimeStamp;
+                //                 if (lastTime * 1000 < 24 * 60 * 60 * 1000) {
+                //                     alterStatus(lastTime * 1000, data[i].CLASSIN_CLASS_ID, classTotalTime * 1000, classStatus[i]);
+                //                 }
+                //             }
+                //         }
+                //     }
+                // }
+
+
                 //改变课节状态
-                function alterStatus(interval, classID, classTotalTime) {
+                function alterStatus(interval, classID, classTotalTime, status) {
                     setInterval(function flush() {
                         var elementById = document.getElementById(classID + "");
                         var text = elementById.innerText;
-                        if (text == "进入教室" && elementById.getAttribute("tag") == "hasBegan") {
+                        if (status == 1 && elementById.getAttribute("tag") == "hasBegan") {
                             document.getElementById(classID + "").innerText = "课节已结束";
                             document.getElementById(classID + "delete").innerText = "";
-                        } else if (text == "课节未开始") {
+                        } else if (status == 0) {
                             text = document.getElementById(classID + "").innerText = "进入教室";
                             document.getElementById(classID + "delete").innerText = "";
                             setInterval(function lastFlush() {
-                                if (text == "进入教室" && elementById.getAttribute("tag") == "notYet") {
+                                if (status == 1 && elementById.getAttribute("tag") == "notYet") {
                                     document.getElementById(classID + "").innerText = "课节已结束";
                                     document.getElementById(classID + "delete").innerText = "";
                                 }
@@ -220,12 +316,12 @@
                 }
 
                 //刷新
-                function refresh() {
+                function refresh(page) {
                     jQuery.ajax({
                         type: "GET",
                         url: "${pageContext.request.contextPath}/classinCourseClass/getClassStatus.do",
                         // data:{"id":val},     // data参数是可选的，有多种写法，也可以直接在url参数拼接参数上去，例如这样：url:"getUser?id="+val,
-                        data: "course_id=" + courseId,
+                        data: "course_id=" + courseId+"&page="+page,
                         async: true,   // 异步，默认开启，也就是$.ajax后面的代码是不是跟$.ajx里面的代码一起执行
                         cache: true,  // 表示浏览器是否缓存被请求页面,默认是 true
                         dataType: "json",   // 返回浏览器的数据类型，指定是json格式，前端这里才可以解析json数据
@@ -244,7 +340,10 @@
                 }
 
                 //进入教室
-                function classBegin(classinClassId) {
+                function classBegin(classinClassId, id) {
+                    id--;
+                    //  alert(id);
+                    // alert(classStatus.length);
                     var identity = document.getElementById("isTeacher").innerText;
                     var text = document.getElementById(classinClassId).innerText;
                     if (identity.indexOf("teacher") != -1) {
@@ -260,7 +359,7 @@
                         var currentUserPhone = document.getElementById("currentUserTelephone").innerText;
                         currentUserPhone = currentUserPhone.trim();
                         if (assistPhone.indexOf(currentUserPhone) != -1 || teacherPhone.indexOf(currentUserPhone) != -1) {
-                            if (text == "进入教室") {
+                            if (classStatus[id] == 1) {
                                 jQuery.ajax({
                                     type: "GET",
                                     url: "${pageContext.request.contextPath}/classinCourseClass/turnIntoClassRoom.do",
@@ -286,7 +385,7 @@
                                         //alert("ajax请求完成")
                                     }
                                 });
-                            } else if (text == "课节未开始") {
+                            } else if (classStatus[id] == 0) {
                                 alert("课节未开始");
                             } else {
                                 alert("课节已结束");
@@ -303,7 +402,7 @@
                                     if (data.errno != "1" && data.errno != "166") {
                                         alert(data.errno + data.error);
                                     } else {
-                                        if (text == "进入教室") {  //getClassScheduleList.do
+                                        if (classStatus[id] == 1) {  //getClassScheduleList.do
                                             jQuery.ajax({
                                                 type: "GET",
                                                 url: "${pageContext.request.contextPath}/classinCourseClass/turnIntoClassRoom.do",
@@ -329,7 +428,7 @@
                                                     //alert("ajax请求完成")
                                                 }
                                             });
-                                        } else if (text == "课节未开始") {
+                                        } else if (classStatus[id] == 0) {
                                             alert("课节未开始");
                                         } else {
                                             alert("课节已结束");
@@ -341,58 +440,6 @@
                                 }
                             })
                         }
-                        <%--} else if (assistPhone == "") {--%>
-                        <%--// alert("没有助教啦");--%>
-                        <%--jQuery.ajax({--%>
-                        <%--type: "GET",--%>
-                        <%--url: "${pageContext.request.contextPath}/classinCourseClass/addClassAssitant.do",--%>
-                        <%--data: {"classId": classinClassId, "listenClass": "listen"},--%>
-                        <%--async: true,--%>
-                        <%--cache: true,--%>
-                        <%--dataType: "json",--%>
-                        <%--success: function (data) {--%>
-                        <%--if (data.errno == "1") {--%>
-                        <%--if (text == "进入教室") {--%>
-                        <%--jQuery.ajax({--%>
-                        <%--type: "GET",--%>
-                        <%--url: "${pageContext.request.contextPath}/classinCourseClass/turnIntoClassRoom.do",--%>
-                        <%--data: {--%>
-                        <%--"classId": classinClassId,--%>
-                        <%--},     // data参数是可选的，有多种写法，也可以直接在url参数拼接参数上去，例如这样：url:"getUser?id="+val,--%>
-                        <%--async: true,   // 异步，默认开启，也就是$.ajax后面的代码是不是跟$.ajx里面的代码一起执行--%>
-                        <%--cache: true,  // 表示浏览器是否缓存被请求页面,默认是 true--%>
-                        <%--dataType: "json",   // 返回浏览器的数据类型，指定是json格式，前端这里才可以解析json数据--%>
-                        <%--success: function (data) {--%>
-                        <%--if (data.condition != "error") {--%>
-                        <%--window.location.href = "${pageContext.request.contextPath}/classinCourseClass/getClassScheduleList.do";--%>
-                        <%--window.open("https://www.eeo.cn/client/invoke/index.html?" + data.condition);--%>
-                        <%--} else if (data.source == "classin提示您----") {--%>
-                        <%--window.open("${pageContext.request.contextPath}/page/classin/tips.jsp?source=" + data.source + "&" + "errno=" + data.errorno + "&error=" + data.error);--%>
-                        <%--} else {--%>
-                        <%--window.open("${pageContext.request.contextPath}/page/classin/tips.jsp?source=" + data.source + "&error=" + data.error);--%>
-                        <%--}--%>
-                        <%--},--%>
-                        <%--error: function () {--%>
-                        <%--alert("发生错误123~");--%>
-                        <%--},--%>
-                        <%--complete: function () {--%>
-                        <%--//alert("ajax请求完成")--%>
-                        <%--}--%>
-                        <%--});--%>
-                        <%--} else if (text == "课节未开始") {--%>
-                        <%--alert("课节未开始");--%>
-                        <%--} else {--%>
-                        <%--alert("课节已结束");--%>
-                        <%--}--%>
-                        <%--} else {--%>
-                        <%--alert(data.errno + data.error);--%>
-                        <%--}--%>
-                        <%--},--%>
-                        <%--error: function () {--%>
-
-                        <%--}--%>
-                        <%--});--%>
-                        <%--}--%>
                     } else {
                         jQuery.ajax({
                             type: "GET",
@@ -405,7 +452,7 @@
                                 if (data.errno != "1" && data.errno != "163") {
                                     alert(data.errno + data.error);
                                 } else {
-                                    if (text == "进入教室") {
+                                    if (classStatus[id] == 1) {
                                         jQuery.ajax({
                                             type: "GET",
                                             url: "${pageContext.request.contextPath}/classinCourseClass/turnIntoClassRoom.do",
@@ -431,7 +478,7 @@
                                                 //alert("ajax请求完成")
                                             }
                                         });
-                                    } else if (text == "课节未开始") {
+                                    } else if (classStatus[id] == 0) {
                                         alert("课节未开始");
                                     } else {
                                         alert("课节已结束");
@@ -450,7 +497,7 @@
                 function deleteClass(classId) {
                     var courseId = document.getElementById("course_id").value;
                     if (confirm("是否删除此节课？")) {
-                        window.location.href = "${pageContext.request.contextPath}/classinCourseClass/deleteClass.do?classId=" + classId + "&bbCourseId=" + courseId;
+                        window.location.href = "${pageContext.request.contextPath}/classinCourseClass/deleteClass.do?classId=" + classId + "&bbCourseId=" + courseId+"&page="+pageNow;
                     }
 
                 }
@@ -489,7 +536,7 @@
                     var teacherInfo = teacher;
                     // alert(teacherInfo);
                     if (confirm("确认更换授课教师？")) {
-                        window.location.href = "${pageContext.request.contextPath}/classinCourseClass/editClassTeacher.do?classId=" + classId + "&teacherInfo=" + teacherInfo + "&course_id=" + course_id + "&position=1";
+                        window.location.href = "${pageContext.request.contextPath}/classinCourseClass/editClassTeacher.do?classId=" + classId + "&teacherInfo=" + teacherInfo + "&course_id=" + course_id + "&position=1" + "&page="+pageNow;
                     } else {
                         var teacherSelect = document.getElementById('teacher' + classId);
                         teacherSelect.selectedIndex = teacherIndex111;
@@ -509,7 +556,7 @@
                         var assistantTeacherIndex = assistantTeacherSelect.selectedIndex;
                         var assistantTeacher = assistantTeacherSelect.options[assistantTeacherIndex].value;
                         var assistantInfo = assistantTeacher;
-                        window.location.href = "${pageContext.request.contextPath}/classinCourseClass/editClassTeacher.do?classId=" + classId + "&teacherInfo=" + teacherInfo + "&assistantInfo=" + assistantInfo + "&course_id=" + course_id + "&position=1";
+                        window.location.href = "${pageContext.request.contextPath}/classinCourseClass/editClassTeacher.do?classId=" + classId + "&teacherInfo=" + teacherInfo + "&assistantInfo=" + assistantInfo + "&course_id=" + course_id + "&position=1" + "&page="+pageNow;;
                     } else {
                         var assistantTeacherSelect = document.getElementById('assistantTeacher' + classId);
                         assistantTeacherSelect.selectedIndex = -1;
@@ -521,16 +568,116 @@
                 function getHuaXiData() {
                     window.open("${pageContext.request.contextPath}/classinCourseClass/error.do?error=123");
                     var elementsByTagName = document.getElementsByTagName("label");
-                    for (var i = 0; i < elementsByTagName.length; i++){
+                    for (var i = 0; i < elementsByTagName.length; i++) {
                         var id = elementsByTagName[i].id;
                     }
                 }
 
 
-
                 function getCreateStatus() {
                     var courseId = document.getElementById("course_id").value;
                     window.location.href = "${pageContext.request.contextPath}/classinCourseClass/getFailureData.do?course_id=" + courseId
+                }
+
+                if(Number(document.getElementById("pageNumber").innerText)==1){
+                    document.getElementById("firstBtn").disabled=true;
+                    document.getElementById("previousBtn").disabled=true;
+                }
+                var page=1;
+                // console.log(page);
+                document.getElementById("targetPage").value=document.getElementById("pageNumber").innerText;
+
+                function goFirstPage(){
+                    if(Number(document.getElementById("pageNumber").innerText)<=1){
+                        return;
+                    }else{
+                        document.getElementById("pageNumber").innerText=1;
+                        document.getElementById("firstBtn").disabled=true;
+                        document.getElementById("previousBtn").disabled=true;
+                        document.getElementById("lasttBtn").disabled=false;
+                        document.getElementById("nextBtn").disabled=false;
+                        document.getElementById("targetPage").value=document.getElementById("pageNumber").innerText;
+                    }
+                    page=1;
+                    window.location.href="${pageContext.request.contextPath}/classinCourseClass/getHomeClassList.do?course_id="+courseId+"&page="+page;
+                }
+                function goEndPage(){
+                    if(Number(document.getElementById("pageNumber").innerText)>=Number(document.getElementById("pageNumTotal").innerText)){
+                        return;
+                    }else{
+                        document.getElementById("pageNumber").innerText=document.getElementById("pageNumTotal").innerText;
+                        document.getElementById("lasttBtn").disabled=true;
+                        document.getElementById("nextBtn").disabled=true;
+                        document.getElementById("firstBtn").disabled=false;
+                        document.getElementById("previousBtn").disabled=false;
+                    }
+                    document.getElementById("targetPage").value=document.getElementById("pageNumber").innerText;
+                    page=-1;
+                    window.location.href="${pageContext.request.contextPath}/classinCourseClass/getHomeClassList.do?course_id="+courseId+"&page="+page;
+                }
+
+                function goPreviousPage(){
+                    document.getElementById("pageNumber").innerText=Number(document.getElementById("pageNumber").innerText)-1;
+                    if(Number(document.getElementById("pageNumber").innerText)<=1){
+                        document.getElementById("firstBtn").disabled=true;
+                        document.getElementById("previousBtn").disabled=true;
+                    }else{
+                        document.getElementById("firstBtn").disabled=false;
+                        document.getElementById("previousBtn").disabled=false;
+                        if(Number(document.getElementById("pageNumber").innerText)<Number(document.getElementById("pageNumTotal").innerText)){
+                            document.getElementById("lasttBtn").disabled=false;
+                            document.getElementById("nextBtn").disabled=false;
+                        }
+                    }
+                    document.getElementById("targetPage").value=document.getElementById("pageNumber").innerText;
+                    page=document.getElementById("pageNumber").innerText;
+                    // console.log(page);
+                    window.location.href="${pageContext.request.contextPath}/classinCourseClass/getHomeClassList.do?course_id="+courseId+"&page="+page;
+                }
+                function goNextPage(){
+                    document.getElementById("pageNumber").innerText=Number(document.getElementById("pageNumber").innerText)+1;
+                    if(Number(document.getElementById("pageNumber").innerText)>=Number(document.getElementById("pageNumTotal").innerText)){
+                        document.getElementById("lasttBtn").disabled=true;
+                        document.getElementById("nextBtn").disabled=true;
+                        page=-1;
+                    }else{
+                        document.getElementById("lasttBtn").disabled=false;
+                        document.getElementById("nextBtn").disabled=false;
+                        if(Number(document.getElementById("pageNumber").innerText)>1){
+                            document.getElementById("firstBtn").disabled=false;
+                            document.getElementById("previousBtn").disabled=false;
+                        }
+                        document.getElementById("targetPage").value=document.getElementById("pageNumber").innerText;
+                        page=document.getElementById("pageNumber").innerText;
+                    }
+                    // console.log(page);
+                    window.location.href="${pageContext.request.contextPath}/classinCourseClass/getHomeClassList.do?course_id="+courseId+"&page="+page;
+                }
+
+                function jump(){
+                    var targetPage=document.getElementById("targetPage").value;
+                    var reg=/^[0-9]+$/;
+                    if(reg.test(targetPage)){
+                        if(Number(targetPage)>Number(document.getElementById("pageNumTotal").innerText)){
+                            document.getElementById("pageNumber").innerText=Number(document.getElementById("pageNumTotal").innerText);
+                            document.getElementById("targetPage").value=document.getElementById("pageNumTotal").innerText;
+                        }else if(Number(targetPage)==1){
+                            document.getElementById("pageNumber").innerText=1;
+                        }else{
+                            document.getElementById("pageNumber").innerText=targetPage;
+                        }
+                    }else{
+                        document.getElementById("targetPage").value="";
+                    }
+                    // page=document.getElementById("pageNumber").innerText;
+                    // page = Number(page);
+                    // alert("_"+page+"_")
+                    // alert(page);
+                    var currentPage = document.getElementById("pageNumber").innerText;
+                    if(document.getElementById("pageNumber").innerText==pageNow){
+                        return;
+                    }
+                    window.location.href="${pageContext.request.contextPath}/classinCourseClass/getHomeClassList.do?course_id="+courseId+"&page="+currentPage;
                 }
 
 
@@ -561,8 +708,8 @@
                 <%--}--%>
                 <%--}--%>
 
-                var lableList=document.getElementsByTagName("label");
-                for(var i=0;i<lableList.length;i++){
+                var lableList = document.getElementsByTagName("label");
+                for (var i = 0; i < lableList.length; i++) {
                     if (lableList[i].id.indexOf("startTime") != -1 || lableList[i].id.indexOf("startDate") != -1) {
                         var lableListValue = lableList[i].innerText;
                         lableListValue = lableListValue * 1000;
@@ -576,7 +723,8 @@
                         }
                     }
                 }
-                function getLocalTime(i,len) {
+
+                function getLocalTime(i, len) {
                     //参数i为时区值数字，比如北京为东八区则输进8,西5输入-5
                     if (typeof i !== 'number') return;
                     var d = new Date();
@@ -632,13 +780,12 @@
                             arr[1] = "12";
                             break;
                     }
-                    var arr1=arr[4].split(":");
-                    var startTime=arr[4]=arr1[0]+":"+arr1[1];
-                    var startDate=arr[3]+"-"+arr[1]+"-"+arr[2]
-                    var time=[startDate,startTime];
+                    var arr1 = arr[4].split(":");
+                    var startTime = arr[4] = arr1[0] + ":" + arr1[1];
+                    var startDate = arr[3] + "-" + arr[1] + "-" + arr[2]
+                    var time = [startDate, startTime];
                     return time;
                 }
-
             </SCRIPT>
         </bbNG:jsBlock>
 
@@ -654,7 +801,7 @@
         <bbNG:actionControlBar>
             <bbNG:actionPanelButton type="SEARCH" alwaysOpen="true">
                 <c:if test="${type != 'meetingroom'}">
-                    <bbNG:actionButton url="javaScript:getClassList();" title="当前课程日历" primary="true"/>
+                    <bbNG:actionButton url="javaScript:refreshCurrrentPage();" title="刷新当前页课表" primary="true"/>
                     <bbNG:actionButton url="javaScript:getReplayURLs();" title="获取历史回放列表" primary="true"/>
                 </c:if>
                 <c:if test="${type == 'meetingroom'}">
@@ -666,9 +813,12 @@
                 <%--&lt;%&ndash;<c:if test="${isTeacher==true}">&ndash;%&gt;--%>
                 <%--<bbNG:actionButton primary="true" url="javaScript:getCreateStatus();" title="查看创建课节失败数据"/>--%>
                 <%--</c:if>--%>
-                <c:if test="${isTeacher==true || isAdministrator == true}">
+                <%--<c:if test="${isTeacher==true || isAdministrator == true}">--%>
                     <bbNG:actionButton primary="true" url="javaScript:advanceSet();" title="创建classin课堂"/>
-                </c:if>
+                <%--</c:if>--%>
+                <%--<c:if test="${isTeacher==true || isAdministrator == true}">--%>
+                    <bbNG:actionButton primary="true" url="javaScript:getEducationData();" title="教学数据"/>
+                <%--</c:if>--%>
                 <bbNG:form id="searchForm" name="searchForm" action="" method="POST">
                     <span style="color: #ac1d2a">${tips}</span><br/>
                     <c:if test="${type != 'meetingroom'}">
@@ -736,7 +886,8 @@
                             onclick="getTeacherOption(${classInfo.CLASSIN_CLASS_ID})"
                             onchange="editTeacher(${classInfo.CLASSIN_CLASS_ID})" style="width: 100%">
                         <option value="${classInfo.TEACHER_NAME},${classInfo.TEACHER_PHONE}">${classInfo.TEACHER_NAME}&nbsp;&nbsp;&nbsp;${classInfo.TEACHER_PHONE}</option>
-                        <option id="teacherPhone${classInfo.CLASSIN_CLASS_ID}" hidden>${classInfo.TEACHER_PHONE}</option>
+                        <option id="teacherPhone${classInfo.CLASSIN_CLASS_ID}"
+                                hidden>${classInfo.TEACHER_PHONE}</option>
                         <c:forEach items="${teachers}" var="bbUser">
                             <c:if test="${bbUser.phone!='   (请绑定手机号)' && (classInfo.TEACHER_PHONE != bbUser.phone)}">
                                 <option value="${bbUser.userName},${bbUser.phone}"
@@ -763,13 +914,13 @@
                         </c:forEach>
                     </select>
                     <%--<script type="text/javascript">--%>
-                        <%--var assistantTeacherSelect = document.getElementById('assistantTeacher' +${classInfo.CLASSIN_CLASS_ID});--%>
-                        <%--var assistantTeacherIndex = assistantTeacherSelect.selectedIndex;--%>
-                        <%--var assistantTeacher = assistantTeacherSelect.options[assistantTeacherIndex].value;--%>
-                        <%--if (assistantTeacher.indexOf("1") != -1) {--%>
-                            <%--//alert(assistantTeacher)--%>
-                            <%--assistantTeacherSelect.setAttribute("disabled", "disabled");--%>
-                        <%--}--%>
+                    <%--var assistantTeacherSelect = document.getElementById('assistantTeacher' +${classInfo.CLASSIN_CLASS_ID});--%>
+                    <%--var assistantTeacherIndex = assistantTeacherSelect.selectedIndex;--%>
+                    <%--var assistantTeacher = assistantTeacherSelect.options[assistantTeacherIndex].value;--%>
+                    <%--if (assistantTeacher.indexOf("1") != -1) {--%>
+                    <%--//alert(assistantTeacher)--%>
+                    <%--assistantTeacherSelect.setAttribute("disabled", "disabled");--%>
+                    <%--}--%>
                     <%--</script>--%>
                 </c:if>
                 <c:if test="${isTeacher!=true && isAdministrator != true}">
@@ -777,24 +928,68 @@
                 </c:if>
             </bbNG:listElement>
             <bbNG:listElement label="操作" name="action">
-                    <%--<span id="${classInfo.CLASSIN_CLASS_ID}edit" onclick="editClass(${classInfo.CLASSIN_CLASS_ID})"--%>
-                    <%--style="color: #210a04;cursor: pointer">保存</span>--%>
-                    <c:if test="${isTeacher==true || isAdministrator == true}">
-                    <span id="${classInfo.CLASSIN_CLASS_ID}delete" onclick="deleteClass(${classInfo.CLASSIN_CLASS_ID})"
-                          style="color: #f44b1c;cursor: pointer"></span>
+                <%--<span id="${classInfo.CLASSIN_CLASS_ID}edit" onclick="editClass(${classInfo.CLASSIN_CLASS_ID})"--%>
+                <%--style="color: #210a04;cursor: pointer">保存</span>--%>
+                <%--<c:if test="${isTeacher==true || isAdministrator == true}">
+                    <c:if test="${classInfo.START_TIME_STAMP-(20*60) < currentTimeStamp}">
+                        <button id="${classInfo.CLASSIN_CLASS_ID}"
+                                onclick="classBegin(${classInfo.CLASSIN_CLASS_ID},${classInfo.id})" tag="hasBegan"
+                                style="cursor: pointer;background-color:#dadada;border-radius:3px;border-style:none;line-height:30px;width:80px;">
+                            进入教室
+                        </button>
                     </c:if>
-                <button id="${classInfo.CLASSIN_CLASS_ID}" onclick="classBegin(${classInfo.CLASSIN_CLASS_ID})" tag="hasBegan"
+                    <c:if test="${classInfo.START_TIME_STAMP-(20*60) > currentTimeStamp}">
+                        <button id="${classInfo.CLASSIN_CLASS_ID}"
+                                onclick="classBegin(${classInfo.CLASSIN_CLASS_ID},${classInfo.id})" tag="hasBegan"
+                                style="cursor: pointer;background-color:#dadada;border-radius:3px;border-style:none;line-height:30px;width:80px;">
+                            课节未开始
+                        </button>
+                    </c:if>
+                </c:if>
+
+                <c:if test="${isTeacher==false && isAdministrator == false}">
+                    <c:if test="${classInfo.START_TIME_STAMP-(20*60) < currentTimeStamp}">
+                        <button id="${classInfo.CLASSIN_CLASS_ID}"
+                                onclick="classBegin(${classInfo.CLASSIN_CLASS_ID},${classInfo.id})" tag="hasBegan"
+                                style="cursor: pointer;background-color:#dadada;border-radius:3px;border-style:none;line-height:30px;width:80px;">
+                            进入教室
+                        </button>
+                    </c:if>
+                    <c:if test="${classInfo.START_TIME_STAMP-(20*60) > currentTimeStamp}">
+                        <button id="${classInfo.CLASSIN_CLASS_ID}"
+                                onclick="classBegin(${classInfo.CLASSIN_CLASS_ID},${classInfo.id})" tag="hasBegan"
+                                style="cursor: pointer;background-color:#dadada;border-radius:3px;border-style:none;line-height:30px;width:80px;">
+                            课节未开始
+                        </button>
+                    </c:if>
+                </c:if>--%>
+
+                <button id="${classInfo.CLASSIN_CLASS_ID}"
+                        onclick="classBegin(${classInfo.CLASSIN_CLASS_ID},${classInfo.id})" tag="hasBegan"
                         style="cursor: pointer;background-color:#dadada;border-radius:3px;border-style:none;line-height:30px;width:80px;">
                     进入教室
                 </button>
+                <c:if test="${isTeacher==true || isAdministrator == true}">
+                    <span id="${classInfo.CLASSIN_CLASS_ID}delete" onclick="deleteClass(${classInfo.CLASSIN_CLASS_ID})"
+                          style="color: #f44b1c;cursor: pointer"></span>
+                </c:if>
                 <%--<span id="${classInfo.CLASSIN_CLASS_ID}" onclick="classBegin(${classInfo.CLASSIN_CLASS_ID})"--%>
-                      <%--style="cursor: pointer"></span>--%>
+                <%--style="cursor: pointer"></span>--%>
 
                 <%--<c:if test="${classInfo.TYPE==非课表课}">--%>
 
                 <%--</c:if>--%>
             </bbNG:listElement>
         </bbNG:inventoryList>
+        <div style="float:right;">
+            共<span id="pageNumTotal">&nbsp;${pages}&nbsp;</span>页&nbsp;&nbsp;
+            当前第&nbsp;<span id="pageNumber">${currentPage}</span>&nbsp;页
+            <input type="button" value="第一页" id="firstBtn" onclick="goFirstPage()">
+            <input type="button" value="上一页" id="previousBtn" onclick="goPreviousPage()">
+            <input type="button" value="下一页" id="nextBtn" onclick="goNextPage()">
+            <input type="button" value="最后一页" id="lasttBtn" onclick="goEndPage()">
+            前往<input type="text" style="width:30px;height:20px;line-height:20px;text-align:center;" id="targetPage" onblur="jump()">页
+        </div>
         <bbNG:button type="PageLevel" label="返回" url="javascript:goBack()"/>
     </bbData:context>
 </bbNG:learningSystemPage>

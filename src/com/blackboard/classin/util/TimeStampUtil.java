@@ -56,6 +56,25 @@ public class TimeStampUtil {
         return time;
     }
 
+    //时间戳转日期
+    public static String timeStampToDate(String secondTimeStamp){
+        SimpleDateFormat date11 = new SimpleDateFormat("yyyy-MM-dd");
+        Long aLong = Long.valueOf(secondTimeStamp+"000");
+        String format11 = date11.format(new Date(aLong));
+        String time= format11;
+        return time;
+    }
+
+
+    //时间戳转时间,没有秒
+    public static String timeStampToTimeNotSecond(String secondTimeStamp){
+        SimpleDateFormat date11 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        Long aLong = Long.valueOf(secondTimeStamp+"000");
+        String format11 = date11.format(new Date(aLong));
+        String time= format11;
+        return time;
+    }
+
     //明天时间戳转时间
     public static String tommorrowTimeStampToTime(){
         String format = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));

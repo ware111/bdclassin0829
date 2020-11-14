@@ -31,9 +31,11 @@
                     cache: true,  // 表示浏览器是否缓存被请求页面,默认是 true
                     dataType: "json",   // 返回浏览器的数据类型，指定是json格式，前端这里才可以解析json数据
                     success: function (data) {
+                        // alert(data.className);
                         document.getElementById("className").value = data.className;
                         $("#teacher").get(0).selectedIndex = new Number(data.teacherNum);
                         $("#assistantTeacher").get(0).selectedIndex = new Number(data.assistantNum);
+                        document.getElementById("hiddenName").value = data.className;
                         // alert("刷新成功了")
                     },
                     error: function () {
@@ -152,8 +154,115 @@
                             line-height: 30px;
                             border-width: 1px;
                         }
+                        /*批量添加开关*/
+                        .switch{
+                            width:48px;
+                            height:24px;
+                            line-height:24px;
+                            padding:0 5px;
+                            position:relative;
+                            background-color:#fff;
+                            border:1px solid #d2d2d2;
+                            border-radius:20px;
+                            cursor:pointer;
+                            vertical-align:middle;
+                        }
+                        #switch-circle{
+                            display:block;
+                            width:16px;
+                            height:16px;
+                            background-color:#d2d2d2;
+                            border-radius:50%;
+                            position:absolute;
+                            top:3px;
+                            left:5px;
+                        }
+
+                        /*星期循环*/
+                        .form-checkbox{
+                            display:block;
+                            width:48px;
+                            height:28px;
+                            line-height:28px;
+                            border-left:1px solid #000;
+                            border-top:1px solid #000;
+                            border-bottom:1px solid #000;
+                            text-align:center;
+                            background-color:#ccc;
+                        }
+                        #timeLoop1>div{
+                            float:left;
+                            height:50px;
+                        }
+                        .clearfix:after{
+                            content:"";
+                            height:0;
+                            display:block;
+                            clear:both;
+                            visibility:hidden;
+                        }
+                        .clearfix{
+                            *zoom:1;
+                        }
+
                     </style>
                     <div style="margin-left: 3%">
+                        <!-- 开关 -->
+                        <div>
+                            <span>批量添加：</span>
+                            <input type="checkbox" value="switch" id="btn-switch" style="display:none;">
+                            <label id="switch" for="btn-switch" class="switch">
+                                <i id="switch-circle"></i>
+                            </label>
+                        </div>
+
+                        <!-- 课节数量 -->
+                        <div class="row" id="classNum" style="display:none;margin-bottom:20px;margin-top:15px;">
+                            <div class='col-sm-2' style="width: 10%;">
+                                <span style="line-height:30px;">课节数量</span>
+                            </div>
+                            <div class='col-sm-5' style="padding-left:10px;">
+                                <input type="text" id="classAmount" value="10" onblur="isNumberAndGreaterTwenty('classNumWeek','spanWarning','spanWarning2')" style="width:60px;">
+                                <span style="display:none;color:red;" id="spanWarning">批量建课一次最多可以建20节</span>
+                                <span style="display:none;color:red;" id="spanWarning2">至少需要添加一节课</span>
+                            </div>
+                        </div>
+
+
+                        <!-- 星期循环 -->
+                        <div class="row" id="timeLoop" style="display:none;">
+                            <div class='col-sm-2' style="width: 10%;">
+                                <span style="line-height:30px;">每周规律</span>
+                            </div>
+                            <div class='col-sm-6' style="padding-left:10px;">
+                                <div class="clearfix" id="timeLoop1">
+                                    <div>
+                                        <label class="form-checkbox"><input type="checkbox" style="display:none;">周日</label>
+                                    </div>
+                                    <div>
+                                        <label class="form-checkbox"><input type="checkbox" style="display:none;">周一</label>
+                                    </div>
+                                    <div>
+                                        <label class="form-checkbox"><input type="checkbox" style="display:none;">周二</label>
+                                    </div>
+                                    <div>
+                                        <label class="form-checkbox"><input type="checkbox" style="display:none;">周三</label>
+                                    </div>
+                                    <div>
+                                        <label class="form-checkbox"><input type="checkbox" style="display:none;">周四</label>
+                                    </div>
+                                    <div>
+                                        <label class="form-checkbox"><input type="checkbox" style="display:none;">周五</label>
+                                    </div>
+                                    <div>
+                                        <label class="form-checkbox" style="border-right:1px solid #000;"><input type="checkbox" style="display:none;">周六</label>
+                                    </div>
+                                    <div style="line-height:24px;height:24px;margin-top:-15px;">
+                                        <span id="timeLoopWarning" style="display:none;color:red;">请至少选择一天作为每周规律</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row" style="margin-top:20px;">
                             <div class="col-sm-2" style="width: 10%;">
                                 <span style="line-height:34px;width:100%;">课节名称:</span>
@@ -162,6 +271,21 @@
                                 <input type="text" name="className" value="" id="className"
                                        style="height: 34px;width:100%;" onblur="checkClassRoom()" maxlength="50">
                             </div>
+                            <!-- 课节后缀 -->
+                            <div id="classNameNumDv" class="col-sm-1"  style="margin-left:-30px;display: none">
+                                &nbsp;-&nbsp;<input type="text" name="classNameNum" value="" id="classNameNum" style="height: 34px;width:60%;" maxlength="50" onblur="num('classNameNum')">
+                                <input hidden type="text" id="hiddenName">
+                            </div>
+                            <script>
+                                // 判断课节名称后缀
+                                function num(id){
+                                    var result=document.getElementById(id).value;
+                                    var reg=/^[0-9]+$/;
+                                    if(!reg.test(result)){
+                                        document.getElementById(id).value=0;
+                                    }
+                                }
+                            </script>
                             <div class="col-sm-2" style="padding-left:10px;line-height:32px;">
                                 <span id="checkClassName"></span>
                             </div>
@@ -332,8 +456,9 @@
                                    style="vertical-align:middle;margin-left:2px;margin-top:-3px;">
                         </div>
                         <div class="row" style="margin-left: 10%;margin-top:20px;">
-                            <input type="button" name="btn" value="取消" onclick="goBack()">
-                            <input type="button" name="btn" value="确定" onclick="save()" id="btn"
+                            <input type="button" name="cancel" value="取消" onclick="goBack()">
+                            <a href=" " id="skip" style="display:none;">1</a>
+                            <input type="button" name="confirm" value="确定" onclick="save()" id="btn"
                                    style="margin-left:40px;">
                         </div>
                     </div>
@@ -415,6 +540,7 @@
                 var timexin = min_hour + ':' + min_minute + ':' + '00';
                 laydate.render({
                     elem: '#test',
+                    trigger: 'click',
                     type: 'time',
                     format: 'HH:mm',
                     btns: ['confirm'],
@@ -430,6 +556,7 @@
                 var laydate = layui.laydate;
                 laydate.render({
                     elem: '#test1',
+                    trigger: 'click',
                     showBottom: false,
                     min: today,
                     max: toToday,
@@ -448,6 +575,7 @@
                                 var timexin = min_hour + ':' + min_minute + ':' + '00';
                                 laydate.render({
                                     elem: '#test',
+                                    trigger: 'click',
                                     type: 'time',
                                     format: 'HH:mm',
                                     btns: ['confirm'],
@@ -468,6 +596,7 @@
                                 var laydate = layui.laydate;
                                 laydate.render({
                                     elem: '#test2',
+                                    trigger: 'click',
                                     type: 'time',
                                     format: 'HH:mm',
                                     btns: ['confirm'],
@@ -488,12 +617,14 @@
 
             //保存设置
             function save() {
+                document.getElementById("btn").disabled="disabled";
                 checkStartTime();
                 checkClassRoom();
                 checkStartDate();
                 var className = document.getElementById("className").value;
                 var classType = document.getElementById('classType').value;
                 var startDate = document.getElementById('startDate').value;
+                startDate = startDate.replace(/-/g,"/");
                 var startTime = document.getElementById('startTime').value;
                 var bbCourseId = document.getElementById('course_id').value;
                 var hourSelect = document.getElementById('hour');
@@ -511,13 +642,84 @@
                 var live = document.getElementById('live').checked;
                 var record = document.getElementById('record').checked;
                 var replay = document.getElementById('replay').checked;
-
+                var url;
+                var obj=document.getElementById("skip");
                 var startTimeStamp = Date.parse(startDate + " " + startTime) / 1000;
                 if (checkStartTime() != 1 && checkStartDate() != 1 && checkClassRoom() != 1 && checkTeacher() != 1) {
-                    window.location.href = "${pageContext.request.contextPath}/classinCourseClass/store.do?className=" + className +
-                        "&classType=" + classType + "&startDate=" + startDate + "&startTime=" + startTime + "&hour=" + hour + "&minute=" + minute +
-                        "&teacher=" + teacher + "&assistantTeacher=" + assistantTeacher + "&bbCourseId=" + bbCourseId +
-                        "&isLive=" + live + "&isRecord=" + record + "&isReplay=" + replay + "&startTimeStamp=" + startTimeStamp;
+                    var isBathClass=false;
+                    var checked = document.getElementById("btn-switch").checked;
+                    // 判断批量添加开关是否打开
+                    if(checked){
+                        // alert(checked);
+                        isBathClass = true;
+                        //提交选中的星期
+                        var inList=document.getElementById("timeLoop").getElementsByTagName("input");
+                        var days="";
+                        for(var i=0;i<inList.length;i++){
+                            if(inList[i].checked){
+                                if(days.length==0){
+                                    days=i;
+                                }else{
+                                    days+=","+i;
+                                }
+                            }
+                        }
+                        // 判断是否选择循环星期
+                        if(days.length==0){
+                            document.getElementById("timeLoopWarning").style.display="block";
+                            return false;
+                        }else{
+                            document.getElementById("timeLoopWarning").style.display="none";
+                        }
+                        var nstartDate=document.getElementById("startDate").value;
+                        nstartDate=nstartDate.replace(/-/g,"/");
+                        var nstartTime=document.getElementById("startTime").value;
+                        var sumTime=nstartDate+" "+nstartTime;
+                        var nowTime=Math.ceil(Date.parse(sumTime+":00"));
+                        var startWeekTime=new Date(nstartDate);
+                        var startWeek=startWeekTime.getDay();
+                        if(d.getTimezoneOffset()<=0){
+                            startWeek=startWeekTime.getDay();
+                        }else{
+                            startWeek=startWeekTime.getDay()+1;
+                        }
+                        if(startWeek==7){
+                            startWeek=0;
+                        }
+
+                        var currentDay = dt.getDay();
+                        var classAmount = document.getElementById("classAmount").value;
+                        var classNameSuffix = document.getElementById("classNameNum").value;
+                        if (classNameSuffix == ""){
+                            var name = className.split("_");
+                            var startNum = name[2];
+                            classNameSuffix = startNum;
+                        }
+                        // var name = className.split("_");
+                        // var startNum = name[2];
+                        // var subName = className.substr(0, className.length-2);
+                        var subName = document.getElementById("classNameNum").value;
+                        className=className+"_"+subName;
+                        url = encodeURI("${pageContext.request.contextPath}/classinCourseClass/store.do?className=" + className +
+                            "&classType=" + classType + "&startDate=" + startDate + "&startTime=" + startTime + "&hour=" + hour + "&minute=" + minute +
+                            "&teacher=" + teacher + "&assistantTeacher=" + assistantTeacher + "&bbCourseId=" + bbCourseId +
+                            "&isLive=" + live + "&isRecord=" + record + "&isReplay=" + replay + "&startTimeStamp=" + startTimeStamp+"&isBathClass="+isBathClass
+                            +"&classAmount="+classAmount+"&days="+days+"&currentDay="+currentDay+"&classNameSuffix="+classNameSuffix);
+                    }else {
+                        url = encodeURI("${pageContext.request.contextPath}/classinCourseClass/store.do?className=" + className +
+                            "&classType=" + classType + "&startDate=" + startDate + "&startTime=" + startTime + "&hour=" + hour + "&minute=" + minute +
+                            "&teacher=" + teacher + "&assistantTeacher=" + assistantTeacher + "&bbCourseId=" + bbCourseId +
+                            "&isLive=" + live + "&isRecord=" + record + "&isReplay=" + replay + "&startTimeStamp=" + startTimeStamp+"&isBathClass="+isBathClass);
+                    }
+                    obj.href = url;
+                    obj.click();
+
+
+                    // var timeLoopList=document.getElementById("timeLoop1").getElementsByTagName("input");
+                    // for(var i=0;i<timeLoopList.length-1;i++){
+                    //     console.log(timeLoopList[i].checked);
+                    // }
+                    // alert("开关状态");
                 }
             }
 
@@ -624,6 +826,121 @@
             }
 
             computeOverTime();
+
+
+
+            //判断是否显示批量建课课节数 
+            var classNameNumDv=document.getElementById("classNameNumDv");
+            //批量添加开关
+            document.getElementById("switch").onclick=function(){
+                var initClassName=document.getElementById("hiddenName").value;
+                // alert(initClassName);
+                //alert(initClassName+1);
+                var classNameArr=initClassName.split("_");
+                if(document.getElementById("switch-circle").offsetLeft==5){
+                    var timeId=setInterval(function(){
+                        var temp=2;
+                        document.getElementById("switch-circle").style.left=document.getElementById("switch-circle").offsetLeft+temp+"px";
+                        if(document.getElementById("switch-circle").offsetLeft>=25){
+                            clearInterval(timeId);
+                        }
+                    },5);
+                    document.getElementById("timeLoop").style.display="block";
+                    document.getElementById("classNum").style.display="block";
+                    classNameNumDv.style.display="block";
+                    var transitionName=document.getElementById("className").value;
+                    transitionClassName=transitionName.split('_');
+                    var reg=/^[0-9]+$/;
+                    var classNameNumSu;
+                    var classNameFormal;
+
+                //课节名称后缀
+                if(transitionName.indexOf("_")!=-1){
+                    var result=transitionClassName[transitionClassName.length-1];
+                    if(!reg.test(result)){
+                        transitionClassName=transitionClassName.join("_");
+                        classNameNumSu=classNameArr[classNameArr.length-1];
+                        classNameFormal=transitionClassName;
+                        }else{
+                            classNameNumSu=transitionClassName[transitionClassName.length-1];
+                            for(var i=0;i<transitionClassName.length-1;i++){
+                                if(i<=0){
+                                    classNameFormal=transitionClassName[0];
+                                }else{
+                                    classNameFormal=classNameFormal+"_"+transitionClassName[i];
+                                }
+                            }
+                        }
+                        document.getElementById("className").value=classNameFormal;
+                        document.getElementById("classNameNum").value=classNameNumSu;
+                    }else{
+                        document.getElementById("className").value=transitionClassName;
+                        document.getElementById("classNameNum").value=classNameArr[classNameArr.length-1];
+                    }
+                }else{
+                    timeId=setInterval(function(){
+                        var temp=-2;
+                        document.getElementById("switch-circle").style.left=document.getElementById("switch-circle").offsetLeft+temp+"px";
+                        if(document.getElementById("switch-circle").offsetLeft<=5){
+                            clearInterval(timeId);
+                        }
+                    },5);
+                    document.getElementById("timeLoop").style.display="none";
+                    document.getElementById("classNum").style.display="none";
+                    classNameNumDv.style.display="none";
+                    document.getElementById("className").value=initClassName;
+                }
+                if(document.getElementById("switch-circle").offsetLeft==5){
+                    document.getElementById("switch").style.border="1px solid #5FB878";
+                    document.getElementById("switch").style.backgroundColor="#5FB878";
+                    document.getElementById("switch-circle").style.backgroundColor="#fff";
+                }else{
+                    document.getElementById("switch").style.border="1px solid #d2d2d2";
+                    document.getElementById("switch").style.backgroundColor="#fff";
+                    document.getElementById("switch-circle").style.backgroundColor="#d2d2d2";
+                }
+            }
+
+
+            //每周规律
+            var labelList=document.getElementById("timeLoop").getElementsByTagName("label");
+            var inputList=document.getElementById("timeLoop").getElementsByTagName("input");
+            var d=new Date();
+            labelList[d.getDay()].style.backgroundColor="#30ba78";
+            labelList[d.getDay()].style.color="#fff";
+            inputList[d.getDay()].checked=true;
+
+            for(var i=0;i<labelList.length;i++){
+                labelList[i].setAttribute("index",i);
+                var flag=true;
+                labelList[i].onclick=function(){
+                    var index=this.getAttribute("index");
+                    if(inputList[index].checked){
+                        this.style.backgroundColor="#30ba78";
+                        this.style.color="#fff";
+                    }else{
+                        this.style.backgroundColor="#ccc";
+                        this.style.color="#000";
+                    }
+                }
+            }
+
+
+            // 判断课节数量
+            function isNumberAndGreaterTwenty(id1,id2,id3){
+                var result=document.getElementById(id1).value;
+                var reg=/^[0-9]+$/;
+                if(!reg.test(result) || document.getElementById(id1).value==0){
+                    document.getElementById(id1).value=1;
+                    document.getElementById(id3).style.display="inline-block";
+                    document.getElementById(id2).style.display="none";
+                }else if(document.getElementById(id1).value>20){
+                    document.getElementById(id1).value=20;
+                    document.getElementById(id3).style.display="none";
+                    document.getElementById(id2).style.display="inline-block";
+                }
+            }
+
 
             function goBack() {
                 var courseId = document.getElementsByName("course_id")[0].value;

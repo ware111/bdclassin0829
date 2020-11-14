@@ -1,8 +1,6 @@
 package com.blackboard.classin.controller;
 
-import blackboard.base.BbList;
 import blackboard.data.course.Course;
-import blackboard.data.course.CourseMembership;
 import blackboard.data.user.User;
 import blackboard.persist.PersistenceException;
 import blackboard.platform.authentication.SessionManager;
@@ -12,18 +10,17 @@ import com.alibaba.fastjson.JSONObject;
 import com.blackboard.classin.constants.Constants;
 import com.blackboard.classin.entity.*;
 import com.blackboard.classin.mapper.*;
-import com.blackboard.classin.service.IBbCourseClassinCourse;
-import com.blackboard.classin.service.IClassinCourseClass;
-import com.blackboard.classin.service.LabelService;
-import com.blackboard.classin.service.TimerTaskService;
-import com.blackboard.classin.task.ScheduledTask;
-import com.blackboard.classin.util.*;
+import com.blackboard.classin.service.*;
+import com.blackboard.classin.util.HttpClient;
+import com.blackboard.classin.util.SystemUtil;
+import com.blackboard.classin.util.TimeStampUtil;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.org.apache.regexp.internal.RE;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.TaskExecutor;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,19 +28,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.mail.MessagingException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.text.SimpleDateFormat;
+import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.concurrent.Executors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/classinCourseClass")
@@ -70,14 +68,19 @@ public class ClassinCourseClassController {
     private BbCourseClassinCourseMapper bbCourseClassinCourseMapper;
 
     @Autowired
-    private ClassScheduleDataMapper classScheduleDataMapper;
-
-    @Autowired
-    private TimerTaskService timerTaskService;
-
-    @Autowired
     private LabelService labelService;
 
+    @Autowired
+    private CheckinRelationDataService checkinRelationDataService;
+
+    @Autowired
+    private CourseDataService courseDataService;
+
+    @Autowired
+    private CourseStudentDataService courseStudentDataService;
+
+    @Autowired
+    private ClassStudentDataService classStudentDataService;
 
     @Autowired
     private IBbCourseClassinCourse iBbCourseClassinCourse;
@@ -86,34 +89,406 @@ public class ClassinCourseClassController {
     @ResponseBody
     @RequestMapping("test.do")
     public String test() throws IOException, PersistenceException {
-        class MyThread extends Thread{
-            @Override
-            public void run() {
-                try {
-                    iBbCourseClassinCourse.deleteCourseStudentByPhoneAndUid();
-                } catch (IOException e) {
-                    e.printStackTrace();
+//        class MyThread extends Thread{
+//            @Override
+//            public void run() {
+//                try {
+//                    iBbCourseClassinCourse.deleteCourseStudentByPhoneAndUid();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//
+//        new MyThread().start();
+//       SystemUtil.getStudentState("21");
+//        SystemUtil.getStudentState("121");
+        InputStream resource = ClassinCourseClassController.class.getClassLoader().getResourceAsStream("json.txt");
+//        FileInputStream resource = new FileInputStream("D:\\json.txt");
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource));
+        StringBuilder datas = new StringBuilder();
+        String data;
+        while ((data = bufferedReader.readLine()) != null) {
+            datas.append(data + "\n");
+        }
+//        checkinRelationDataService.handleClassSituationData(datas + "");
+        checkinRelationDataService.handleStudentDetailData(datas + "");
+//        checkinRelationDataService.handleStudentDetailData(datas+"");
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("data", "success");
+        return jsonObject.toJSONString();
+    }
+
+
+    /**
+     * 下载课节学生数据
+     *
+     * @author panhaiming
+     * @date 20201012
+     */
+    @ResponseBody
+    @RequestMapping("downloadClassStudentData.do")
+    public String downloadClassStudentData(String beginTime, String endTime, String classId, String courseId, HttpServletResponse response, String startTime) throws IOException {
+        Course course = SystemUtil.getCourseById(courseId);
+        HashMap<String, String> params = new HashMap<>();
+        params.put("beginTime", beginTime);
+        params.put("endTime", (Integer.valueOf(endTime) + 24 * 60 * 60) + "");
+        params.put("classId", classId);
+        List<StudentDetail> datas = classStudentDataService.getClassStudentData(params);
+        String fileName = System.getProperty("user.dir") + File.separator + "课节学生汇总数据_" + course.getTitle() + "_" + System.currentTimeMillis() + ".csv";
+        BufferedWriter bufferedWriters = null;
+        FileOutputStream fileOutputStream = new FileOutputStream(fileName);
+        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
+        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(bufferedOutputStream, "gbk");
+        bufferedWriters = new BufferedWriter(outputStreamWriter);
+        bufferedWriters.append("课节名称," + "课节ID," + "课程ID," + "开课时间," + "结束时间," + "学生姓名," + "学生BBID," +
+                "学生手机号," + "学生uid," + "身份," + "学生实际上课时长(分钟)," + "教师实际上课时长(分钟)," + "出勤," + "迟到," + "早退," + "奖励次数," +
+                "举手次数," + "授权次数," + "答题器次数," + "答题正确次数," + "发言时长(分钟)," + "上台次数," +
+                "上台时长(分钟)," + "下台次数," + "下台时长(分钟)," + "移出次数," + "授权时长(分钟)," + "抢答器次数," +
+                "抢答次数," + "抢中次数," + "摄像头打开时长(分钟)" + "\n");
+        if (datas != null) {
+            for (StudentDetail data : datas) {
+                String json = data.getJson();
+                JSONObject jsonObject = (JSONObject) JSONObject.parse(json);
+                String studentDuration = String.format("%.2f", Double.valueOf(data.getStudentInClassTime()) / 60);
+                String teacherDuration = String.format("%.2f", Double.valueOf(data.getTeacherInClassTime()) / 60);
+                String speakingDuration = String.format("%.2f", Double.valueOf(jsonObject.get("speakingDuration").toString()) / 60);
+                String upStateDuration = String.format("%.2f", Double.valueOf(jsonObject.get("upStateDuration").toString()) / 60);
+                String downStageDuration = String.format("%.2f", Double.valueOf(jsonObject.get("downStageDuration").toString()) / 60);
+                String authorizeTotalDuration = String.format("%.2f", Double.valueOf(jsonObject.get("authorizeTotalDuration").toString()) / 60);
+                String cameraDuration = String.format("%.2f", Double.valueOf(jsonObject.get("cameraDuration").toString()) / 60);
+                bufferedWriters.append(data.getClassName() + "," + data.getClassId() + "," + data.getCourseId() + "," + TimeStampUtil.timeStampToTimeNotSecond(data.getStartTime() + "") + ","
+                        + TimeStampUtil.timeStampToTimeNotSecond(data.getCloseTime() + "") + "," + data.getStudentName() + "," + data.getStudentBBId() + "," +
+                        data.getStudentPhone() + "," + data.getStudentUid() + "," + data.getIdentity() + "," + studentDuration + "," + teacherDuration + ","
+                        + data.getCheckin() + "," + data.getLate() + "," + data.getBack() + "," + data.getAwardCount() + "," + data.getHandsupCount() + "," + data.getAuthorizeCount() + "," +
+                        data.getAnswerCount() + "," + data.getAnswerCorrectTimes() + ","
+                        + speakingDuration + "," + jsonObject.get("upStageTimes") + "," + upStateDuration + ","
+                        + jsonObject.get("downStageTimes") + "," + downStageDuration + "," + jsonObject.get("removeTimes") +
+                        "," + authorizeTotalDuration + "," + jsonObject.get("responderUseTimes") + "," + jsonObject.get("responderTimes") + "," + jsonObject.get("responderAnswerTimes") + "," +
+                        cameraDuration + "\n");
+            }
+        }
+        bufferedWriters.flush();
+        if (fileOutputStream != null) {
+            fileOutputStream.close();
+        }
+        if (bufferedOutputStream != null) {
+            bufferedOutputStream.close();
+        }
+        if (outputStreamWriter != null) {
+            outputStreamWriter.close();
+        }
+        if (bufferedWriters != null) {
+            bufferedWriters.close();
+        }
+        ServletOutputStream outputStream = response.getOutputStream();
+        File file = new File(fileName);
+        FileInputStream fileInputStream = new FileInputStream(file);
+        response.setCharacterEncoding("utf-8");
+        response.setHeader("Content-Length", "" + file.length());
+        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        String replace = startTime.replace("-", "");
+        String replace1 = replace.replace(" ", "");
+        String replace2 = replace1.replace(":", "");
+        String name = "课节学生汇总数据_" + course.getTitle() + "_" + System.currentTimeMillis() + "_" + replace2 + ".csv";
+        name = URLEncoder.encode(name, "UTF-8");
+        response.setHeader("Content-Disposition", "attachment;fileName=" + name);
+        byte[] bytes = new byte[1024];
+        int len;
+        int i = 0;
+        while ((len = fileInputStream.read(bytes)) != -1) {
+            outputStream.write(bytes, 0, len);
+        }
+        outputStream.close();
+        fileInputStream.close();
+        return "";
+    }
+
+    /**
+     * 下载课程学生数据
+     *
+     * @author panhaiming
+     * @date 20201012
+     */
+    @ResponseBody
+    @RequestMapping("downloadCourseStudentData.do")
+    public String downloadCourseStudentData(String beginTime, String endTime, String courseId, HttpServletResponse response) throws IOException {
+        Course course = SystemUtil.getCourseById(courseId);
+        String bbcourseId = course.getCourseId();
+        String classinCourseId = bbCourseClassinCourseMapper.findByCourseId(bbcourseId).getClassinCourseId();
+        HashMap<String, String> params = new HashMap<>();
+        params.put("beginTime", beginTime);
+        params.put("endTime", (Integer.valueOf(endTime) + 24 * 60 * 60) + "");
+        params.put("courseId", classinCourseId);
+        List<StudentDetail> studentDetails = courseStudentDataService.getCourseStudentData(params);
+        String fileName = System.getProperty("user.dir") + File.separator + "课程学生汇总数据_" + course.getTitle() + "_" + System.currentTimeMillis() + ".csv";
+        BufferedWriter bufferedWriters = null;
+        FileOutputStream fileOutputStream = new FileOutputStream(fileName);
+        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
+        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(bufferedOutputStream, "gbk");
+        bufferedWriters = new BufferedWriter(outputStreamWriter);
+        bufferedWriters.append("课节名称," + "课节ID," + "课程ID," + "开课时间," + "结束时间," + "学生姓名," + "学生BBID," +
+                "学生手机号," + "学生uid," + "身份," + "学生实际上课时长(分钟)," + "教师实际上课时长(分钟)," + "出勤," + "迟到," + "早退," + "奖励次数," +
+                "举手次数," + "授权次数," + "答题器次数" + "答题正确次数," + "发言时长(分钟)," + "上台次数," +
+                "上台时长(分钟)," + "下台次数," + "下台时长(分钟)," + "移出次数," + "授权时长(分钟)," + "抢答器次数," +
+                "抢答次数," + "抢中次数," + "摄像头打开时长(分钟)" + "\n");
+        if (studentDetails != null) {
+            for (StudentDetail data : studentDetails) {
+                String json = data.getJson();
+                JSONObject jsonObject = (JSONObject) JSONObject.parse(json);
+                String studentDuration = String.format("%.2f", Double.valueOf(data.getStudentInClassTime()) / 60);
+                String teacherDuration = String.format("%.2f", Double.valueOf(data.getTeacherInClassTime()) / 60);
+                String speakingDuration = String.format("%.2f", Double.valueOf(jsonObject.get("speakingDuration").toString()) / 60);
+                String upStateDuration = String.format("%.2f", Double.valueOf(jsonObject.get("upStateDuration").toString()) / 60);
+                String downStageDuration = String.format("%.2f", Double.valueOf(jsonObject.get("downStageDuration").toString()) / 60);
+                String authorizeTotalDuration = String.format("%.2f", Double.valueOf(jsonObject.get("authorizeTotalDuration").toString()) / 60);
+                String cameraDuration = String.format("%.2f", Double.valueOf(jsonObject.get("cameraDuration").toString()) / 60);
+                bufferedWriters.append(data.getClassName() + "," + data.getClassId() + "," + data.getCourseId() + "," + TimeStampUtil.timeStampToTimeNotSecond(data.getStartTime() + "") + ","
+                        + TimeStampUtil.timeStampToTimeNotSecond(data.getCloseTime() + "") + "," + data.getStudentName() + "," + data.getStudentBBId() + "," +
+                        data.getStudentPhone() + "," + data.getStudentUid() + "," + data.getIdentity() + "," + studentDuration + "," + teacherDuration + ","
+                        + data.getCheckin() + "," + data.getLate() + "," + data.getBack() + "," + data.getAwardCount() + "," + data.getHandsupCount() + "," + data.getAuthorizeCount() + "," +
+                        data.getAnswerCount() + "," + data.getAnswerCorrectTimes() + ","
+                        + speakingDuration + "," + jsonObject.get("upStageTimes") + "," + upStateDuration + ","
+                        + jsonObject.get("downStageTimes") + "," + downStageDuration + "," + jsonObject.get("removeTimes") +
+                        "," + authorizeTotalDuration + "," + jsonObject.get("responderUseTimes") + "," + jsonObject.get("responderTimes") + "," + jsonObject.get("responderAnswerTimes") + "," +
+                        cameraDuration + "\n");
+            }
+        }
+        bufferedWriters.flush();
+        if (fileOutputStream != null) {
+            fileOutputStream.close();
+        }
+        if (bufferedOutputStream != null) {
+            bufferedOutputStream.close();
+        }
+        if (outputStreamWriter != null) {
+            outputStreamWriter.close();
+        }
+        if (bufferedWriters != null) {
+            bufferedWriters.close();
+        }
+        ServletOutputStream outputStream = response.getOutputStream();
+        File file = new File(fileName);
+        FileInputStream fileInputStream = new FileInputStream(file);
+        response.setCharacterEncoding("utf-8");
+        response.setHeader("Content-Length", "" + file.length());
+        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        String name = "课程学生汇总数据_" + course.getTitle() + "_" + System.currentTimeMillis() + ".csv";
+        name = URLEncoder.encode(name, "utf-8");
+        response.setHeader("Content-Disposition", "attachment;fileName=" + name);
+        byte[] bytes = new byte[1024];
+        int len;
+        int i = 0;
+        while ((len = fileInputStream.read(bytes)) != -1) {
+            outputStream.write(bytes, 0, len);
+        }
+        outputStream.close();
+        fileInputStream.close();
+
+        return "";
+    }
+
+    @ResponseBody
+    @RequestMapping("getData.do")
+    public String getCourseData(String courseId) {
+        Course course = SystemUtil.getCourseById(courseId);
+        String bbcourseId = course.getCourseId();
+        BbCourseClassinCourse byCourseId = bbCourseClassinCourseMapper.findByCourseId(bbcourseId);
+        JSONObject jsonObject = new JSONObject();
+        if (byCourseId != null) {
+            jsonObject.put("data", 1);
+        } else {
+            jsonObject.put("data", 0);
+        }
+        return jsonObject.toJSONString();
+    }
+
+    /**
+     * 显示课节情况数据
+     *
+     * @author panhaiming
+     * @date 20201012
+     */
+//    @ResponseBody
+    @RequestMapping("getCourseClassData.do")
+    public String getCourseClassData(String courseId, Model model) {
+        Course course = SystemUtil.getCourseById(courseId);
+        String bbcourseId = course.getCourseId();
+        BbCourseClassinCourse byCourseId = bbCourseClassinCourseMapper.findByCourseId(bbcourseId);
+        if (byCourseId != null) {
+            String classinCourseId = byCourseId.getClassinCourseId();
+            List<CourseClassConditionData> courseDatas = new ArrayList<>();
+            HashMap<String, String> params = new HashMap<>();
+            int k = 0;
+            int beginRow = (Integer.valueOf(1) - 1) * 10 + 0;
+            int endRow = (Integer.valueOf(1) - 1) * 10 + 11;
+            int totalPage = 0;
+            params.put("beginRow", beginRow + "");
+            params.put("endRow", endRow + "");
+            params.put("courseId", classinCourseId);
+            courseDatas = courseDataService.getPageClassData(params);
+            if (courseDatas != null) {
+                for (CourseClassConditionData courseData : courseDatas) {
+                    String classId = courseData.getClassId();
+                    String classType = iClassinCourseClass.getClassType(classId);
+                    courseData.setClassType(classType);
+                    courseData.setId(++k);
                 }
+                model.addAttribute("classData", courseDatas);
+                int rows = courseDataService.getDataRows(classinCourseId);
+                int i = rows % 10;
+                if (i == 0) {
+                    totalPage = rows / 10;
+                } else {
+                    totalPage = rows / 10 + 1;
+                }
+            }
+            model.addAttribute("pages", totalPage);
+            model.addAttribute("currentPage", 1);
+
+            //课程名称
+            String courseName = course.getTitle();
+            model.addAttribute("courseName", courseName);
+            //课程进度
+            List<Map<String, Object>> summaryData = iClassinCourseClass.getSummaryDataByClassType();
+            if (summaryData != null) {
+                summaryData.forEach((result) -> {
+//            System.out.println("*************************"+result.get("CLASS_TYPE"));
+                    String classType = result.get("CLASS_TYPE").toString();
+                    BigDecimal bigDecimal = (BigDecimal) result.get("TOTAL");
+                    int total = bigDecimal.intValue();
+                    if (classType.equals("课表课")) {
+                        model.addAttribute("KeBiaoKe", total);
+                    } else {
+//                System.out.println("*******非课表课**********"+total);
+                        model.addAttribute("notKeBiaoKe", total);
+                    }
+                });
+                model.addAttribute("courseProcess", summaryData);
+            }
+
+
+            //课程出勤
+            Map courseCheckAndRate = courseDataService.getCourseCheckAndRate(classinCourseId);
+            if (courseCheckAndRate != null) {
+                int studentTotal = ((BigDecimal) courseCheckAndRate.get("STUDENTTOTAL")).intValue();
+//            log.info("***********classinCourseId******"+classinCourseId);
+                int courseCheckinStudentTotal = courseStudentDataService.getCourseCheckinStudentTotal(classinCourseId);
+                //课程出勤率
+                String courseCheckinRate = (String) courseCheckAndRate.get("RATE");
+                model.addAttribute("courseCheckin", studentTotal);
+                model.addAttribute("checkinStudents", courseCheckinStudentTotal);
+                model.addAttribute("courseCheckinRate", String.format("%.1f", Double.valueOf(courseCheckinRate) * 100));
+            }
+
+            //课表课出勤率
+            String keBiaoKeCheckRate = courseDataService.getKeBiaoKeCheckRate(classinCourseId);
+            if (keBiaoKeCheckRate != null) {
+                model.addAttribute("keBiaoKeCheckRate", String.format("%.1f", Double.valueOf(keBiaoKeCheckRate) * 100));
+            } else {
+                model.addAttribute("keBiaoKeCheckRate", "");
+            }
+        }
+        return "/classin/educationData";
+
+    }
+
+
+    /**
+     * 下载课程课节情况数据
+     *
+     * @author panhaiming
+     * @date 20201012
+     */
+    @ResponseBody
+    @RequestMapping("downloadCourseClassData.do")
+    public String downloadCourseClassData(String beginTime, String endTime, String courseId, HttpServletResponse response) throws IOException {
+        Course course = SystemUtil.getCourseById(courseId);
+        String bbcourseId = course.getCourseId();
+        String classinCourseId = bbCourseClassinCourseMapper.findByCourseId(bbcourseId).getClassinCourseId();
+        HashMap<String, String> params = new HashMap<>();
+        params.put("beginTime", beginTime);
+        params.put("endTime", (Integer.valueOf(endTime) + 24 * 60 * 60) + "");
+        params.put("courseId", classinCourseId);
+        List<CourseClassConditionData> courseDatas = courseDataService.getCourseData(params);
+        String fileName = System.getProperty("user.dir") + File.separator + "课程课节汇总数据_" + course.getTitle() + "_" + System.currentTimeMillis() + ".csv";
+        BufferedWriter bufferedWriters = null;
+        FileOutputStream fileOutputStream = new FileOutputStream(fileName);
+        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
+        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(bufferedOutputStream, "gbk");
+        bufferedWriters = new BufferedWriter(outputStreamWriter);
+        bufferedWriters.append("课节名称," + "课节ID," + "课程ID," + "开课时间," + "结束时间," + "教师姓名," + "教师bbid," +
+                "教师手机号," + "助教姓名," + "助教手机号," + "授课教师上课时长(分钟)," + "助教上课时长(分钟)," + "出勤," + "迟到," + "早退," + "应出勤总数," + "学生出勤," +
+                "学生迟到," + "学生早退," + "奖励次数," + "奖励人数," + "举手次数," + "举手人数," + "授权次数," +
+                "授权人数," + "答题器次数," + "答题器平均正确率," + "文本课件数量," + "文本课件累计时长," + "音视频课件数量,"
+                + "音视频课件累计时长(分钟)," + "全体禁言次数," + "全体禁言累计时长(分钟)," + "移出学生次数," + "移出学生人数,"
+                + "授权累计时长(分钟)," + "桌面共享次数," + "桌面共享累计时长(分钟)," + "定时器次数," + "骰子次数," + "抢答器次数,"
+                + "小黑板次数," + "小黑帮累计时长(分钟)," + "\n");
+//        JSONArray jsonArray = new JSONArray();
+        if (courseDatas != null) {
+            for (CourseClassConditionData data : courseDatas) {
+                String json = data.getJson();
+                JSONObject jsonObject = (JSONObject) JSONObject.parse(json);
+                bufferedWriters.append(data.getClassName() + "," + data.getClassId() + "," + data.getCourseId() + "," + TimeStampUtil.timeStampToTimeNotSecond(data.getStartTime() + "") + ","
+                        + TimeStampUtil.timeStampToTimeNotSecond(data.getCloseTime() + "") + "," + data.getTeacherName() + "," + data.getTeacherBBId() + "," +
+                        data.getTeacherPhone() + "," + data.getAssistantName() + "," + data.getAssistantPhone() + "," + data.getTeacheInClassTime() + "," + String.format("%.2f", Double.valueOf(data.getAssistantInClassTime()) / 60) + "," + data.getCheckin() + "," + data.getLate() + ","
+                        + data.getBack() + "," + data.getStudentTotal() + "," + data.getCheckinStudent() + "," +
+                        data.getLaterTotal() + "," + data.getLeaveEarly() + "," + data.getAwardCount() + "," + data.getAwardPeoples() + ","
+                        + data.getHandsupCount() + "," + data.getHandsupPeoples() + "," + data.getAuthorizeCount() + "," +
+                        data.getAuthorizePeoples() + "," + data.getAnswerCount() + "," + Double.valueOf(data.getAverageAccuracy()) * 100 + "%" + ","
+                        + jsonObject.get("textFiles") + "," + String.format("%.2f", Double.valueOf(jsonObject.get("textFileTotalDuration").toString()) / 60) + "," + Double.valueOf(jsonObject.get("audioVideoFiles").toString()) + ","
+                        + String.format("%.2f", Double.valueOf(jsonObject.get("audioVideoTotalDuration").toString()) / 60) + "," + jsonObject.get("muteAllTimes") +
+                        "," + String.format("%.2f", Double.valueOf(jsonObject.get("muteAllTotallDuration").toString()) / 60) + "," + jsonObject.get("removeStudentTimes") + "," + jsonObject.get("removeStudents") + ","
+                        + String.format("%.2f", Double.valueOf(jsonObject.get("authorizeTotalDuration").toString()) / 60) + "," + jsonObject.get("deskShareTimes") + "," + String.format("%.2f", Double.valueOf(jsonObject.get("deskShareTotalDuration").toString()) / 60) + "," +
+                        jsonObject.get("countDownTimes") + "," + jsonObject.get("diceTimes") + "," + jsonObject.get("responderTimes") + "," + jsonObject.get("blackboardTimes") + "," +
+                        String.format("%.2f", Double.valueOf(jsonObject.get("blackboardTotalDuration").toString()) / 60) + "\n");
+
             }
         }
 
-        new MyThread().start();
-//       SystemUtil.getStudentState("21");
-//        SystemUtil.getStudentState("121");
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("data","success");
-        return jsonObject.toJSONString();
+        bufferedWriters.flush();
+        if (fileOutputStream != null) {
+            fileOutputStream.close();
+        }
+        if (bufferedOutputStream != null) {
+            bufferedOutputStream.close();
+        }
+        if (outputStreamWriter != null) {
+            outputStreamWriter.close();
+        }
+        if (bufferedWriters != null) {
+            bufferedWriters.close();
+        }
+        ServletOutputStream outputStream = response.getOutputStream();
+        File file = new File(fileName);
+        FileInputStream fileInputStream = new FileInputStream(file);
+        response.setCharacterEncoding("utf-8");
+        response.setHeader("Content-Length", "" + file.length());
+        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        String name = "课程课节汇总数据_" + course.getTitle() + "_" + System.currentTimeMillis() + ".csv";
+        name = URLEncoder.encode(name, "utf-8");
+        response.setHeader("Content-Disposition", "attachment;fileName=" + name);
+        byte[] bytes = new byte[1024];
+        int len;
+        int i = 0;
+        while ((len = fileInputStream.read(bytes)) != -1) {
+            outputStream.write(bytes, 0, len);
+        }
+        outputStream.close();
+        fileInputStream.close();
+        return "";
     }
+
 
     /**
      * 网页端报错请求
      *
      * @author panhaiming
      * @date 20200915
-     * */
+     */
     @RequestMapping("error.do")
-    public String getErrorMsg(String error,Model model){
-        model.addAttribute("error",error);
+    public String getErrorMsg(String error, Model model) {
+        model.addAttribute("error", error);
         return "/classin/tips";
     }
 
@@ -126,10 +501,15 @@ public class ClassinCourseClassController {
      */
     @ResponseBody
     @RequestMapping(value = "receiveCheckinData.do", method = RequestMethod.POST)
-    public String summaryCheckinData(@RequestBody String datas) throws PersistenceException {
-
-
-        return "";
+    public SureData summaryCheckinData(@RequestBody String datas) throws PersistenceException, IOException {
+        log.info(datas);
+        checkinRelationDataService.handleStudentDetailData(datas);
+        SureData sureData = new SureData();
+        ErrorInfo errorInfo = new ErrorInfo();
+        errorInfo.setError("程序正常运行");
+        errorInfo.setErrno(1);
+        sureData.setError_info(errorInfo);
+        return sureData;
     }
 
     /**
@@ -187,6 +567,7 @@ public class ClassinCourseClassController {
         } else {
             jsonObject.put("assistantNum", 0);
         }
+        log.info("************className****************" + bbCourseId + "_" + courseTitle + "_" + courseNum);
         return jsonObject.toJSONString();
     }
 
@@ -228,7 +609,6 @@ public class ClassinCourseClassController {
         JSONArray jsonArray = new JSONArray();
         jsonArray.add(stuJson);
         String param7 = "studentJson=" + jsonArray;
-        log.info("para7>>>>>>>>>>>>>>" + param7);
 //        String param_studentName = "studentName=" + userId;
         String classin_addclassstudent_url = systemRegistryMapper.getURLByKey("classin_addclassstudent_url");
         StringBuilder sBuilder = new StringBuilder();
@@ -236,7 +616,6 @@ public class ClassinCourseClassController {
                 .append("&").append(param4).append("&").append(param5).append("&").append(param6).append("&").append(param7);
         ObjectMapper objectMapper = new ObjectMapper();
         String addClassStudentResultMapString = HttpClient.doPost(classin_addclassstudent_url, sBuilder.toString());
-        log.info("addCourseStudentResultMapString is >>>" + addClassStudentResultMapString);
         Map<String, Object> addCourseStudentResultMap = new HashMap<String, Object>();
 
         if (addClassStudentResultMapString != null && !"".equals(addClassStudentResultMapString)) {
@@ -295,7 +674,6 @@ public class ClassinCourseClassController {
         for (int i = 0; i < 2; i++) {
             ObjectMapper objectMapper = new ObjectMapper();
             String addClassStudentResultMapString = HttpClient.doPost(classin_addclassstudent_url, sBuilder.toString());
-            log.info("addCourseStudentResultMapString is >>>" + addClassStudentResultMapString);
             Map<String, Object> addCourseStudentResultMap = new HashMap<String, Object>();
 
             if (addClassStudentResultMapString != null && !"".equals(addClassStudentResultMapString)) {
@@ -309,7 +687,6 @@ public class ClassinCourseClassController {
                     jsonObject.put("errno", errno);
                     return jsonObject.toJSONString();
                 } else if ("228".equals(errno)) {
-                    log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>机构下无此学生");
                     String classin_addstudent_url = systemRegistryMapper.getURLByKey("classin_addstudent_url");
                     long currentCreateClassTime = System.currentTimeMillis() / 1000;
                     parma1 = "SID=" + Constants.SID;
@@ -366,13 +743,11 @@ public class ClassinCourseClassController {
         String assistantPhone = "";
         assistantName = userInfo.getUserId();
         assistantPhone = telephone;
-        //log.info("老师信息****************8"+teacherInfo);
         String teacherName = "";
         String teacherPhone = "";
         ClassinCourseClass classinCourse = classinCourseClassMapper.findByClassId(classId);
         teacherName = classinCourse.getTeacherName();
         teacherPhone = classinCourse.getTeacherPhone();
-        log.info("addClassAssitant****************" + "电话" + assistantPhone + "姓名" + assistantName);
         ClassinCourseClass classinClass = classinCourseClassMapper.findByClassId(classId);
         String classinCourseId = classinClass.getClassinCourseId();
         long currentLoignTime = System.currentTimeMillis() / 1000;
@@ -393,7 +768,6 @@ public class ClassinCourseClassController {
                     .append("&").append(param4).append("&").append(param5).append("&").append(param7).append("&").append(param6);
         }
         String resultMap = HttpClient.doPost(classinEditCourseClassURL, stringBuilder.toString());
-        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>调用听课教师编辑课节信息");
         JSONObject jsonObject = new JSONObject();
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> resultHashMap = new HashMap<>();
@@ -436,7 +810,7 @@ public class ClassinCourseClassController {
      */
     @RequestMapping("/editClassTeacher.do")
     public String editTeacher(HttpServletRequest request, HttpServletResponse response, String teacherInfo,
-                              String classId, String assistantInfo, String course_id, String listenClass, String position, Model
+                              String classId, String assistantInfo, String course_id, String listenClass, String page,String position, Model
                                       model) throws
             PersistenceException, IOException {
         SessionManager sessionManager = (SessionManager) SessionManager.Factory.getInstance();
@@ -455,9 +829,8 @@ public class ClassinCourseClassController {
         String param5 = "courseId=" + classinCourseId;
         String param6 = "classId=" + classId;
         String teacherUid = userPhoneMapper.findByPhone(teacherPhone).getClassinUid();     //thirduid1111
-        if (teacherUid == null){
-            SystemUtil.getUid(user,systemRegistryMapper,userPhoneMapper);
-            log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>teacherUid"+teacherUid);
+        if (teacherUid == null) {
+            SystemUtil.getUid(user, systemRegistryMapper, userPhoneMapper);
             teacherUid = userPhoneMapper.findByPhone(teacherPhone).getClassinUid();
         }
         String param4 = "teacherUid=" + teacherUid;
@@ -466,19 +839,16 @@ public class ClassinCourseClassController {
         StringBuilder stringBuilder = new StringBuilder();
         String assistantName = "";
         String assistantPhone = "";
-
-        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>assistantInfo"+assistantInfo);
         for (int i = 0; i <= 2; i++) {
             if (assistantInfo != null) {
                 assistantName = assistantInfo.split(",")[0].trim();
                 assistantPhone = assistantInfo.split(",")[1].trim();
                 String assistantUid = userPhoneMapper.findByPhone(assistantPhone).getClassinUid();//fourthuid1111
-                if (assistantUid == null){
-                    SystemUtil.getUid(userPhoneMapper.findByPhone(assistantPhone),systemRegistryMapper,userPhoneMapper);
+                if (assistantUid == null) {
+                    SystemUtil.getUid(userPhoneMapper.findByPhone(assistantPhone), systemRegistryMapper, userPhoneMapper);
                     assistantUid = userPhoneMapper.findByPhone(assistantPhone).getClassinUid();
-                    log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>assistantUid"+assistantUid);
                 }
-                String param7 = "assistantUid="+assistantUid;
+                String param7 = "assistantUid=" + assistantUid;
                 stringBuilder.append(parma1).append("&").append(param2).append("&").append(param3)
                         .append("&").append(param4).append("&").append(param5).append("&").append(param7).append("&").append(param6);
             } else {
@@ -486,7 +856,6 @@ public class ClassinCourseClassController {
                         .append("&").append(param4).append("&").append(param5).append("&").append(param6);
             }
             String resultMap = HttpClient.doPost(classinEditCourseClassURL, stringBuilder.toString());
-            log.info(">>>>>>>>>>>>>>>>>>>>>>>>>调用编辑课节信息");
             JSONObject jsonObject = new JSONObject();
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, Object> resultHashMap = new HashMap<>();
@@ -506,23 +875,20 @@ public class ClassinCourseClassController {
                     classMap.put("classId", classId);
                     classMap.put("teacherPhone", teacherPhone);
                     classMap.put("userName", userName);
-                    log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>老师信息" + teacherName + "***********" + teacherPhone);
                     if (assistantInfo != null) {
                         classMap.put("assistantName", assistantName);
                         classMap.put("assistantPhone", assistantPhone);
-                        log.info(">>>>>>>>>>>>>>>>>>>更新助教老师" + teacherPhone);
                         classinCourseClassMapper.editAssistantTeacher(classMap);
                     }
 
                     if (assistantInfo == null) {
-                        log.info(">>>>>>>>>>>>>>>>>>>更新授课老师" + teacherPhone);
                         classinCourseClassMapper.editClassTeacher(classMap);
                     }
 
                     if (position != null) {
-                        return "redirect:/classinCourseClass/getHomeClassList.do?course_id=" + course_id;
+                        return "redirect:/classinCourseClass/getHomeClassList.do?course_id=" + course_id+"&page="+page;
                     } else {
-                        return "redirect:/classinCourseClass/getClassScheduleList.do?course_id=" + course_id;
+                        return "redirect:/classinCourseClass/getClassScheduleList.do?course_id=" + course_id+"&page="+page;
                     }
                 } else if ("325".equals(errno) || "321".equals(errno)) {
                     String identtity = "identity=1";
@@ -586,9 +952,9 @@ public class ClassinCourseClassController {
                                     }
 
                                     if (position != null) {
-                                        return "redirect:/classinCourseClass/getHomeClassList.do?course_id=" + course_id;
+                                        return "redirect:/classinCourseClass/getHomeClassList.do?course_id=" + course_id+"&page="+page;
                                     } else {
-                                        return "redirect:/classinCourseClass/getClassScheduleList.do?course_id=" + course_id;
+                                        return "redirect:/classinCourseClass/getClassScheduleList.do?course_id=" + course_id+"&page="+page;
                                     }
                                 } else {
                                     model.addAttribute("source", "来自Classin的提示信息");
@@ -656,7 +1022,7 @@ public class ClassinCourseClassController {
      */
     @RequestMapping("/deleteClass.do")
     public String deleteClass(HttpServletRequest request, HttpServletResponse response, String classId, String
-            bbCourseId, Model model) throws PersistenceException, IOException {
+            bbCourseId,String page, Model model) throws PersistenceException, IOException {
         SessionManager sessionManager = (SessionManager) SessionManager.Factory.getInstance();
         BbSession bbSession = sessionManager.getSession(request, response);
         Course course = SystemUtil.getCourseById(bbCourseId);
@@ -688,9 +1054,8 @@ public class ClassinCourseClassController {
 
             //成功返回信息
             if ("1".equals(errno)) {
-                log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>" + classId + "++++++++++++++++++++++" + classinCourseId);
                 classinCourseClassMapper.deleteClass(classId, classinCourseId);
-                return "redirect:/classinCourseClass/getHomeClassList.do?course_id=" + bbCourseId;
+                return "redirect:/classinCourseClass/getHomeClassList.do?course_id=" + bbCourseId+"&page="+page;
             } else {
                 model.addAttribute("errno", errno);
                 model.addAttribute("error", error);
@@ -734,7 +1099,6 @@ public class ClassinCourseClassController {
         String param2 = "safeKey=" + SystemUtil.MD5Encode(Constants.SECRET + currentLoignTime);
         String param3 = "timeStamp=" + currentLoignTime;
         String param4 = "uid=" + classinUid;
-        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>uid" + classinUid);
         String param5 = "courseId=" + classInfo.getClassinCourseId();
         String param6 = "classId=" + classId;
         ObjectMapper objectMapper = new ObjectMapper();
@@ -784,7 +1148,7 @@ public class ClassinCourseClassController {
     public String firstPag(HttpServletRequest request, HttpServletResponse response, String tips, Model
             model, String course_id) {
         model.addAttribute("tips", tips);
-        return "redirect:/classinCourseClass/getHomeClassList.do?course_id=" + course_id;
+        return "redirect:/classinCourseClass/getHomeClassList.do?course_id=" + course_id + "&page=1";
     }
 
     /**
@@ -796,8 +1160,9 @@ public class ClassinCourseClassController {
     @ResponseBody
     @RequestMapping("/getClassStatus.do")
     public String getClassStatus(HttpServletRequest request, HttpServletResponse
-            response, String course_id) {
+            response, String course_id, String page) {
         Course course = SystemUtil.getCourseById(course_id);
+        JSONObject jsonObject = new JSONObject();
         String bbCourseId = course.getCourseId();
         HashMap<String, Object> paraMap = new HashMap<>();
         paraMap.put("bbCourseId", bbCourseId);
@@ -807,21 +1172,54 @@ public class ClassinCourseClassController {
         Map<String, Object> map = new HashMap<>();
         map.put("isTeacher", isTeacher);
         int i = 0;
-        String currentUserName = SystemUtil.getCurrentUser().getUserName();
-        for (Map data : classList) {
-            if (currentUserName.equals(data.get("USER_NAME"))) {
-                i = 1;
-                map.put("hasFinished", "no");
+
+        if (classList.size() > 0) {
+            /******************************************/
+            List<Map<String, Object>> courseDatas = new ArrayList<>();
+            int k = 0;
+            int rows = classList.size();
+            int remainder = rows % 20;
+            HashMap<String, String> params = new HashMap<>();
+            int beginRow = 0;
+            int endRow = 0;
+            if (!page.equals("-1")) {
+                beginRow = (Integer.valueOf(page) - 1) * 20 + 0;
+                endRow = (Integer.valueOf(page) - 1) * 20 + 20;
+            } else {
+                if (remainder == 0) {
+                    beginRow = rows - 20;
+                    endRow = rows + 1;
+                } else {
+                    beginRow = rows - remainder;
+                    endRow = rows + 1;
+                }
             }
-        }
+            for (int j = beginRow; j < endRow; j++) {
+                if (j > classList.size()){
+                    break;
+                }
+                if (j == classList.size()) {
+                    break;
+                }
+                courseDatas.add(classList.get(j));
+            }
 
-        if (i == 0) {
-            map.put("hasFinished", "yes");
-        }
+            String currentUserName = SystemUtil.getCurrentUser().getUserName();
+            for (Map data : courseDatas) {
+                if (currentUserName.equals(data.get("USER_NAME"))) {
+                    i = 1;
+                    map.put("hasFinished", "no");
+                }
+            }
 
-        classList.add(map);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("data", classList);
+            if (i == 0) {
+                map.put("hasFinished", "yes");
+            }
+
+            classList.add(map);
+
+            jsonObject.put("data", courseDatas);
+        }
         return jsonObject.toJSONString();
     }
 
@@ -857,8 +1255,8 @@ public class ClassinCourseClassController {
         boolean isTeacher = SystemUtil.isTeacher();
         boolean isAdministrator = SystemUtil.isAdministrator();
         String userName = SystemUtil.getCurrentUser().getUserName();
-        model.addAttribute("userName",userName);
-        model.addAttribute("isAdministrator",isAdministrator);
+        model.addAttribute("userName", userName);
+        model.addAttribute("isAdministrator", isAdministrator);
         model.addAttribute("isTeacher", isTeacher);
         model.addAttribute("classList", newClassList);
         model.addAttribute("assistantTeachers", assistantTeachers);
@@ -875,7 +1273,7 @@ public class ClassinCourseClassController {
      */
     @RequestMapping("/getHomeClassList.do")
     public String getHomeClassList(HttpServletRequest request, HttpServletResponse response, String
-            course_id, Model model) throws PersistenceException, IOException {
+            course_id, String page, Model model) throws PersistenceException, IOException {
         Course course = SystemUtil.getCourseById(course_id);
         String bbCourseId = course.getCourseId();
         SessionManager sessionManager = (SessionManager) SessionManager.Factory.getInstance();
@@ -886,27 +1284,79 @@ public class ClassinCourseClassController {
         paraMap.put("bbCourseId", bbCourseId);
         paraMap.put("todayTimaStamp", new Long(timeStamp).intValue());
         List<Map<String, Object>> classList = classinCourseClassMapper.getClassList(paraMap);
-        List<Map<String, Object>> newClassList = new ArrayList<>();
-        int i = 1;
-        for (Map<String, Object> map : classList) {
-            map.put("id", i++);
-            newClassList.add(map);
-            log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + map.get("TEACHER_NAME") + map.get("TEACHER_PHONE"));
+        if (classList.size() > 0) {
+            String[] split = course_id.split("_");
+            String bb_course_id = split[1];
+            List<BBUser> assistantTeachers = SystemUtil.getBbAssistantTeachers(bb_course_id, userPhoneMapper);
+            List<BBUser> teachers = SystemUtil.getBbTeachers(bb_course_id, userPhoneMapper);
+            boolean isTeacher = SystemUtil.isTeacher();
+            boolean isAdministrator = SystemUtil.isAdministrator();
+            String userName = SystemUtil.getCurrentUser().getUserName();
+/***************************************************************************************/
+            List<Map<String, Object>> courseDatas = new ArrayList<>();
+            int k = 0;
+            String currentPage = "";
+            int totalPage = 0;
+            int rows = classList.size();
+//            log.info("******************rows******************" + rows);
+            int remainder = rows % 20;
+            if (remainder == 0) {
+                totalPage = rows / 20;
+            } else {
+                totalPage = rows / 20 + 1;
+            }
+            if (page.equals("-1")) {
+                currentPage = totalPage + "";
+            } else {
+                currentPage = page;
+            }
+            model.addAttribute("pages", totalPage);
+            model.addAttribute("currentPage", currentPage);
+            HashMap<String, String> params = new HashMap<>();
+            int beginRow = 0;
+            int endRow = 0;
+            if (!page.equals("-1")) {
+                beginRow = (Integer.valueOf(page) - 1) * 20 + 0;
+                endRow = (Integer.valueOf(page) - 1) * 20 + 20;
+            } else {
+                if (remainder == 0) {
+                    beginRow = rows - 20;
+                    endRow = rows + 1;
+                } else {
+                    beginRow = rows - remainder;
+                    endRow = rows + 1;
+                }
+            }
+            for (int j = beginRow; j < endRow; j++) {
+                if (j > classList.size()){
+                    break;
+                }
+                if (j == classList.size()) {
+                    break;
+                }
+                courseDatas.add(classList.get(j));
+            }
+
+            List<Map<String, Object>> newClassList = new ArrayList<>();
+            int i = 1;
+            for (Map<String, Object> map : courseDatas) {
+                map.put("id", i++);
+                newClassList.add(map);
+            }
+
+            /***************************************************************************************/
+
+            model.addAttribute("pages", totalPage);
+            model.addAttribute("currentPage", currentPage);
+            model.addAttribute("userName", userName);
+            model.addAttribute("isAdministrator", isAdministrator);
+            model.addAttribute("isTeacher", isTeacher);
+            model.addAttribute("classList", newClassList);
+            model.addAttribute("assistantTeachers", assistantTeachers);
+            model.addAttribute("teachers", teachers);
+            model.addAttribute("currentUserTelephone", telephone);
+            model.addAttribute("currentTimeStamp", timeStamp);
         }
-        String[] split = course_id.split("_");
-        String bb_course_id = split[1];
-        List<BBUser> assistantTeachers = SystemUtil.getBbAssistantTeachers(bb_course_id, userPhoneMapper);
-        List<BBUser> teachers = SystemUtil.getBbTeachers(bb_course_id, userPhoneMapper);
-        boolean isTeacher = SystemUtil.isTeacher();
-        boolean isAdministrator = SystemUtil.isAdministrator();
-        String userName = SystemUtil.getCurrentUser().getUserName();
-        model.addAttribute("userName",userName);
-        model.addAttribute("isAdministrator",isAdministrator);
-        model.addAttribute("isTeacher", isTeacher);
-        model.addAttribute("classList", newClassList);
-        model.addAttribute("assistantTeachers", assistantTeachers);
-        model.addAttribute("teachers", teachers);
-        model.addAttribute("currentUserTelephone", telephone);
         return "/classin/createClassinClass";
     }
 
@@ -919,13 +1369,19 @@ public class ClassinCourseClassController {
                                                      String className, String classType, String startDate,
                                                      String startTime, String hour, String minute, String teacher,
                                                      String assistantTeacher, String bbCourseId, String isLive,
-                                                     String isRecord, String isReplay,String startTimeStamp,
-                                                     Model model) throws
+                                                     String isRecord, String isReplay, String startTimeStamp,
+                                                     Model model, String isBathClass, String classAmount, String days, String currentDay, String classNameSuffix) throws
             PersistenceException, IOException {
+        if (isBathClass.equals("true")) {
+            return "redirect:/newclassinCourseClass/batchClass.do?className=" + URLEncoder.encode(className, "UTF-8") +
+                    "&classType=" + URLEncoder.encode(classType, "UTF-8") + "&hour=" + hour + "&minute=" + minute + "&teacher=" +
+                    URLEncoder.encode(teacher, "UTF-8") + "&assistantTeacher=" + URLEncoder.encode(assistantTeacher, "UTF-8") + "&bbCourseId=" + bbCourseId +
+                    "&isLive=" + isLive + "&isRecord=" + isRecord + "&isReplay=" + isReplay +
+                    "&startTimeStamp=" + startTimeStamp + "&classAmount=" + classAmount + "&days=" + days + "&currentDay=" + currentDay + "&classNameSuffix=" + classNameSuffix;
+        }
         SessionManager sessionManager = (SessionManager) SessionManager.Factory.getInstance();
         BbSession bbSession = sessionManager.getSession(request, response);
         String telephone = bbSession.getGlobalKey("telephone");
-        System.out.println(teacher + "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
         String[] teacherInfo = teacher.split(" ");
         String assistantTeacherUID = "";
         String[] assistantTeacherInfo = null;
@@ -934,15 +1390,15 @@ public class ClassinCourseClassController {
             assistantTeacherInfo = assistantTeacher.split(" ");
             assistantTeacherPhone = assistantTeacherInfo[1];
             assistantTeacherUID = userPhoneMapper.findByPhone(assistantTeacherPhone).getClassinUid();   //firstuid1111
-            if (assistantTeacherUID == null){
-                SystemUtil.getUid(userPhoneMapper.findByPhone(assistantTeacherPhone),systemRegistryMapper,userPhoneMapper);
+            if (assistantTeacherUID == null) {
+                SystemUtil.getUid(userPhoneMapper.findByPhone(assistantTeacherPhone), systemRegistryMapper, userPhoneMapper);
                 assistantTeacherUID = userPhoneMapper.findByPhone(assistantTeacherPhone).getClassinUid();
             }
         }
         String teacherPhone = teacherInfo[1];
         String teacherUID = userPhoneMapper.findByPhone(teacherPhone).getClassinUid();    //seconduid1111
-        if (teacherUID == null){
-            SystemUtil.getUid(userPhoneMapper.findByPhone(teacherPhone),systemRegistryMapper,userPhoneMapper);
+        if (teacherUID == null) {
+            SystemUtil.getUid(userPhoneMapper.findByPhone(teacherPhone), systemRegistryMapper, userPhoneMapper);
             teacherUID = userPhoneMapper.findByPhone(teacherPhone).getClassinUid();
         }
         String createCoureseURL = systemRegistryMapper.getURLByKey("classin_addcourse_url");
@@ -956,7 +1412,6 @@ public class ClassinCourseClassController {
         int status = 0;
         //创建课程
         Course bbCourse = SystemUtil.getCourseById(bbCourseId);
-        log.info("bbCourse>>>>>>>>>>>>>>>" + bbCourse);
         //bb课程Id
         String bbId = bbCourse.getCourseId();
         bbSession.setGlobalKey("bbCourseId", bbId);
@@ -1002,7 +1457,6 @@ public class ClassinCourseClassController {
         className = "className=" + className;
         //String tempStartTime = startDate + "  " + startTime;
         //long startTimeStamp = TimeStampUtil.getTimeStamp(tempStartTime);
-        log.info(">>>>>>>>>>>>>>>课程ID>>>>>>>>>>>>>" + classInCourseId);
         long endTimeStamp = new Integer(hour) * 60 * 60 + new Integer(minute) * 60 + Long.valueOf(startTimeStamp);
         String beginTime = "beginTime=" + startTimeStamp;
         String endTime = "endTime=" + endTimeStamp;
@@ -1087,7 +1541,6 @@ public class ClassinCourseClassController {
                     Map<String, Object> moreData = (Map<String, Object>) classInclassMap.get("more_data");
                     moreData = (Map<String, Object>) classInClassMap.get("more_data");
                     String liveURL = moreData.get("live_url").toString();
-                    log.info(">>>>>>>>>>>>>>>>>>回放回放" + liveURL);
                     String liveInfo = moreData.get("live_info").toString();
                     UserPhone userPhone = userPhoneMapper.findByPhone(teacherPhone);
                     String userName = userPhone.getUserId();
@@ -1100,8 +1553,8 @@ public class ClassinCourseClassController {
                     //  CustomClassinClassInfo customClassinClassInfo = new CustomClassinClassInfo();
                     if (assistantTeacher.equals("请选择助教教师")) {
                         //    classinCourseClass.setAssistantTeacherName("无助教教师");
-                        paramMap.put("assistantName", " ");
-                        paramMap.put("assistantPhone", " ");
+                        paramMap.put("assistantName", null);
+                        paramMap.put("assistantPhone", null);
                     } else {
                         //   classinCourseClass.setAssistantTeacherName(assistantTeacherInfo[0]);
                         paramMap.put("assistantName", assistantTeacherInfo[0]);
@@ -1149,8 +1602,8 @@ public class ClassinCourseClassController {
                     paramMap.put("deleteStatus", "N");
                     paramMap.put("studentsTotal", 0);
                     Map<String, String> labelMap = labelService.getLabel(classType);
-                    String labelId=null;
-                    String labelName=null;
+                    String labelId = null;
+                    String labelName = null;
                     JSONArray jsonArray = new JSONArray();
                     JSONArray labelArray = new JSONArray();
                     JSONObject jsonObject = new JSONObject();
@@ -1161,18 +1614,18 @@ public class ClassinCourseClassController {
                         classLableIds.add(labelId);
                         paramMap.put("labelId", labelId);
                         paramMap.put("labelName", labelName);
-                        jsonObject.put("classId",classinCourseClassId);
+                        jsonObject.put("classId", classinCourseClassId);
                         labelArray.add(labelId);
-                        jsonObject.put("classLabelId",labelArray);
+                        jsonObject.put("classLabelId", labelArray);
                         jsonArray.add(jsonObject);
-                    } else{
+                    } else {
                         paramMap.put("labelId", null);
                         paramMap.put("labelName", null);
                     }
                     classinCourseClassMapper.save(paramMap);
 
                     if (labelId != null) {
-                        String classList = "classList="+jsonArray;
+                        String classList = "classList=" + jsonArray;
                         String classin_label_url = systemRegistryMapper.getURLByKey("classin_label_url");
                         params = sID + "&" + timeStamp + "&" + safeKey + "&" + courseId + "&" + classList;
                         resultClass = HttpClient.doPost(classin_label_url, params);
@@ -1223,7 +1676,6 @@ public class ClassinCourseClassController {
                     }
 
                 } else {
-                    log.info(">>>>>>>>>>>>>>>>>>>>>>99999999999");
                     //其他错误代码
                     model.addAttribute("error", error);
                     return "/classin/tips";
@@ -1271,9 +1723,8 @@ public class ClassinCourseClassController {
      */
     @RequestMapping("/delete.do")
     public String deleteClassinClass(HttpServletRequest request, HttpServletResponse response,
-                                     String course_id, String classinClassId,String classinCourseId, Model model)
+                                     String course_id, String classinClassId, String classinCourseId, Model model)
             throws JsonParseException, JsonMappingException, IOException {
-        log.info("deleteClassinClass: classinClassId=" + classinClassId);
         ObjectMapper objectMapper = new ObjectMapper();
         //删除classin端数据
         String deleteCourseClassURL = systemRegistryMapper.getURLByKey("classin_deletecourseclassvideo_url");
@@ -1290,7 +1741,6 @@ public class ClassinCourseClassController {
                 .append("&").append(param4).append("&");
 
         String resultLoginMap = HttpClient.doPost(deleteCourseClassURL, stringBuilder.toString());
-        log.info("resultLoginMap >>>>" + resultLoginMap);
         Map<String, Object> classInCourseClassIdMap = new HashMap<String, Object>();
 
         if (resultLoginMap != null && !resultLoginMap.equals("")) {
@@ -1314,8 +1764,8 @@ public class ClassinCourseClassController {
 
         }
         HashMap<String, Object> paraMap = new HashMap<>();
-        paraMap.put("bbCourseId",classinCourseId);
-        paraMap.put("currentTimeStamp",System.currentTimeMillis()/1000+"");
+        paraMap.put("bbCourseId", classinCourseId);
+        paraMap.put("currentTimeStamp", System.currentTimeMillis() / 1000 + "");
         List<ClassinCourseClass> classinCourseClassList = classinCourseClassMapper.getReplayList(paraMap);
 //		if(classinCourseClassList != null && classinCourseClassList.size() != 0) {
 //			for(int i=0;i<classinCourseClassList.size();i++) {
@@ -1379,7 +1829,6 @@ public class ClassinCourseClassController {
             return "redirect:/classinCourseClass/addTeacherToClassin.do?course_id=" + course_id + "&type=" + type;
         } else if ("replayFlagNull".equals(infos) || "NetworkIsInstability".equals(infos)) {
             //其他错误信息
-            log.info("else if replayFlagNull");
             model.addAttribute("source", "来自BB的提示信息");
             model.addAttribute("error", "由于网络不稳定，课节未成功创建，请返回上一步重新创建~");
             model.addAttribute("type", type);
@@ -1407,7 +1856,6 @@ public class ClassinCourseClassController {
     public String addTeacherToClassin(String course_id, HttpServletRequest request, HttpServletResponse
             response, Model model, String flag, String type)
             throws JsonParseException, JsonMappingException, IOException, PersistenceException {
-        log.info("classin addTeacher");
         SessionManager sessionManager = (SessionManager) SessionManager.Factory.getInstance();
         BbSession bbSession = sessionManager.getSession(request, response);
         String telephone = bbSession.getGlobalKey("telephone");
@@ -1425,8 +1873,6 @@ public class ClassinCourseClassController {
 
         String classin_addteacher_url = systemRegistryMapper.getURLByKey("classin_addteacher_url");
         String addTeacherResultMap = HttpClient.doPost(classin_addteacher_url, strBuilder.toString());
-        log.info("addTeacher resultMap>>>" + addTeacherResultMap);
-
         Map<String, Object> addTeacherMap = new HashMap<String, Object>();
 
         if (addTeacherResultMap != null && !addTeacherResultMap.equals("")) {
@@ -1457,9 +1903,6 @@ public class ClassinCourseClassController {
 
                 String classin_register_url = systemRegistryMapper.getURLByKey("classin_register_url");
                 String resultRegisterMap = HttpClient.doPost(classin_register_url, strsBuilder.toString());
-
-                log.info("resultRegisterMap is >>>" + resultRegisterMap);
-
                 Map<String, Object> registerMap = new HashMap<String, Object>();
                 if (resultRegisterMap != null && !resultRegisterMap.equals("")) {
                     registerMap = objectMapper.readValue(resultRegisterMap, Map.class);
@@ -1541,9 +1984,6 @@ public class ClassinCourseClassController {
                 .append("&").append(param4).append("&").append(param5).append("&").append(param6);
 
         String resultLoginMap = HttpClient.doPost(classinEntranceUrl, stringBuilder.toString());
-
-        log.info("resultLoginMap >>>>" + resultLoginMap);
-
         Map<String, Object> classInCourseClassIdMap = new HashMap<String, Object>();
 
         if (resultLoginMap != null && !resultLoginMap.equals("")) {
@@ -1642,8 +2082,6 @@ public class ClassinCourseClassController {
                 .append("&").append(param4).append("&").append(param5).append("&").append(param6);
 
         String reslutEditClassMapString = HttpClient.doPost(classin_editCourseClass_url, stringBuilder.toString());
-        log.info("resultLoginMap >>>>" + reslutEditClassMapString);
-
         Map<String, Object> editClassResultMap = new HashMap<String, Object>();
 
         if (reslutEditClassMapString != null && !reslutEditClassMapString.equals("")) {
@@ -1716,8 +2154,6 @@ public class ClassinCourseClassController {
             model, String
                                             course_id, String tips140, String type) throws
             JsonParseException, JsonMappingException, IOException, PersistenceException {
-
-        log.info("do addAsClassStudent");
         SessionManager sessionManager = (SessionManager) SessionManager.Factory.getInstance();
         BbSession bbSession = sessionManager.getSession(request, response);
         String telephone = bbSession.getGlobalKey("telephone");
@@ -1746,7 +2182,6 @@ public class ClassinCourseClassController {
                 .append(param_studentName).append("&").append(param5);
         ObjectMapper objectMapper = new ObjectMapper();
         String addCourseStudentResultMapString = HttpClient.doPost(classin_addcoursestudent_url, sBuilder.toString());
-        log.info("addCourseStudentResultMapString is >>>" + addCourseStudentResultMapString);
         Map<String, Object> addCourseStudentResultMap = new HashMap<String, Object>();
         if (addCourseStudentResultMapString != null && !"".equals(addCourseStudentResultMapString)) {
             addCourseStudentResultMap = objectMapper.readValue(addCourseStudentResultMapString, Map.class);
@@ -1787,8 +2222,6 @@ public class ClassinCourseClassController {
 
                 String classin_register_url = systemRegistryMapper.getURLByKey("classin_register_url");
                 String resultRegisterMap = HttpClient.doPost(classin_register_url, strsBuilder.toString());
-                log.info("resultRegisterMap is >>>" + resultRegisterMap);
-
                 //继续添加学生
                 return "redirect:/classinCourseClass/addAsClassStudent.do?course_id=" + course_id + "&type=" + type;
             } else if ("332".equals(errno)) {
@@ -1822,19 +2255,15 @@ public class ClassinCourseClassController {
     @RequestMapping("/getRepalyList.do")
     public String getRepalyList(HttpServletRequest request, HttpServletResponse response, Model model, String
             course_id) throws PersistenceException {
-        log.info("get getRepalyList");
         Course course = SystemUtil.getCourseById(course_id);
         String bbCourseId = course.getCourseId();
-        long currentTimeStamp = System.currentTimeMillis()/1000;
-        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + bbCourseId);
+        long currentTimeStamp = System.currentTimeMillis() / 1000;
         HashMap<String, Object> paraMap = new HashMap<>();
-        paraMap.put("bbCourseId",bbCourseId);
-        paraMap.put("currentTimeStamp",currentTimeStamp+"");
+        paraMap.put("bbCourseId", bbCourseId);
+        paraMap.put("currentTimeStamp", currentTimeStamp + "");
         if (bbCourseId != null && !"".equals(bbCourseId)) {
             //根据classinCourseId获取已过期的且有回放URL的
             List<ClassinCourseClass> classinCourseClassList = classinCourseClassMapper.getReplayList(paraMap);
-            log.info(">>>>>>>>>>>>>>>>>>>>>>>>>replay list counts"+classinCourseClassList.size());
-            //   log.info("》》》》》》》》》》》》》》》liveURL" + classinCourseClassList.get(0).getLiveURL());
             if (classinCourseClassList != null && classinCourseClassList.size() != 0) {
                 model.addAttribute("classinCourseClassList", classinCourseClassList);
                 model.addAttribute("isTeacher", SystemUtil.isTeacher());

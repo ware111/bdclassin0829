@@ -14,4 +14,11 @@ public class GetServiceHostNameUtil {
         String hostName = properties.getProperty("hostName");
         return hostName;
     }
+    public static String getSecondHostName() throws IOException {
+        InputStream resource = ClassinCourseClassController.class.getClassLoader().getResourceAsStream("HostName.properties");
+        Properties properties = new Properties();
+        properties.load(resource);
+        String hostName = properties.getProperty("secondHostName");
+        return hostName;
+    }
 }

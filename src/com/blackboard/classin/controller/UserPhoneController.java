@@ -162,7 +162,7 @@ public class UserPhoneController {
             }
             bbSession.setGlobalKey("telephone", phone);
             bbSession.setGlobalKey("classinUid", classinUid);
-            return "redirect:/classinCourseClass/getHomeClassList.do?course_id=" + course_id;
+            return "redirect:/classinCourseClass/getHomeClassList.do?course_id=" + course_id+"&page=1";
         } else {
             //用户未绑定手机号，需要初始化
             model.addAttribute("type", type);
