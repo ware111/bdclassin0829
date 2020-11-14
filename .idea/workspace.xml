@@ -2,92 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="992ca7fd-32f7-404b-874f-294548831d3c" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/bin/bb-user_course.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/controller/NewClassinCourseClassController.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/entity/CourseClassConditionData.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/entity/ErrorInfo.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/entity/StudentDetail.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/entity/SureData.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/mapper/ClassConditionMapper.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/mapper/ClassConditionMapper.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/mapper/StudentDetailMapper.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/mapper/StudentDetailMapper.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/service/ClassStudentDataService.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/service/CourseDataService.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/service/CourseStudentDataService.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/service/CreateCourseClassService.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/service/impl/ClassStudentDataImp.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/service/impl/CourseDataImpl.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/service/impl/CourseStudentDataImp.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/service/impl/CreateCourseClassImp.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bin/spring/batchClassData.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/bb-user_course.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/json.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/spring/batchClassData.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/blackboard/classin/controller/NewClassinCourseClassController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/blackboard/classin/entity/ErrorInfo.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/blackboard/classin/entity/StudentDetail.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/blackboard/classin/entity/SureData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/blackboard/classin/mapper/ClassConditionMapper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/blackboard/classin/mapper/ClassConditionMapper.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/blackboard/classin/mapper/StudentDetailMapper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/blackboard/classin/mapper/StudentDetailMapper.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/blackboard/classin/service/ClassStudentDataService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/blackboard/classin/service/CourseDataService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/blackboard/classin/service/CourseStudentDataService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/blackboard/classin/service/CreateCourseClassService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/blackboard/classin/service/impl/ClassStudentDataImp.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/blackboard/classin/service/impl/CourseDataImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/blackboard/classin/service/impl/CourseStudentDataImp.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/blackboard/classin/service/impl/CreateCourseClassImp.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/blackboard/classin/util/SearchUtil.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/webContent/page/classin/educationData.jsp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bb-classin-2018Q4.iml" beforeDir="false" afterPath="$PROJECT_DIR$/bb-classin-2018Q4.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bb-classin.war" beforeDir="false" afterPath="$PROJECT_DIR$/bb-classin.war" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/HostName.properties" beforeDir="false" afterPath="$PROJECT_DIR$/bin/HostName.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/controller/ClassinCourseClassController$1MyThread.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/controller/ClassinCourseClassController.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/controller/ClassinCourseClassController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/controller/UserPhoneController.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/controller/UserPhoneController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/entity/ClassCondition.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/entity/ClassinCourseClass.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/entity/ClassinCourseClass.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/mapper/ClassinCourseClassMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/mapper/ClassinCourseClassMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/mapper/ClassinCourseClassMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/mapper/ClassinCourseClassMapper.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/service/IClassinCourseClass.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/service/IClassinCourseClass.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/service/impl/BbCourseClassinCourseImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/service/impl/BbCourseClassinCourseImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/service/impl/CheckinRelationDataImp.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/service/impl/CheckinRelationDataImp.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/service/impl/ClassinCourseClassImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/service/impl/ClassinCourseClassImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/service/impl/TimerTaskImp.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/service/impl/TimerTaskImp.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/task/ScheduledTask.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/task/ScheduledTask.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/util/GetServiceHostNameUtil.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/util/GetServiceHostNameUtil.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/util/SystemUtil.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/util/SystemUtil.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/com/blackboard/classin/util/TimeStampUtil.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/com/blackboard/classin/util/TimeStampUtil.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/test/Test$MyTread.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/test/Test$MyTread.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/test/Test.class" beforeDir="false" afterPath="$PROJECT_DIR$/bin/test/Test.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/HostName.properties" beforeDir="false" afterPath="$PROJECT_DIR$/config/HostName.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/controller/ClassinCourseClassController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/controller/ClassinCourseClassController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/controller/UserPhoneController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/controller/UserPhoneController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/entity/ClassCondition.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/entity/CourseClassConditionData.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/entity/ClassinCourseClass.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/entity/ClassinCourseClass.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/mapper/ClassinCourseClassMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/mapper/ClassinCourseClassMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/mapper/ClassinCourseClassMapper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/mapper/ClassinCourseClassMapper.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/service/CheckinRelationDataService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/service/CheckinRelationDataService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/service/IBbCourseClassinCourse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/service/IBbCourseClassinCourse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/service/IClassinCourseClass.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/service/IClassinCourseClass.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/service/impl/CheckinRelationDataImp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/service/impl/CheckinRelationDataImp.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/service/impl/ClassinCourseClassImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/service/impl/ClassinCourseClassImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/service/impl/TimerTaskImp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/service/impl/TimerTaskImp.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/task/ScheduledTask.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/task/ScheduledTask.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/util/GetServiceHostNameUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/util/GetServiceHostNameUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/util/SystemUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/util/SystemUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/blackboard/classin/util/TimeStampUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/blackboard/classin/util/TimeStampUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/Test.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/Test.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webContent/configure/update.sql" beforeDir="false" afterPath="$PROJECT_DIR$/webContent/configure/update.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webContent/configure/数据库初始化.sql" beforeDir="false" afterPath="$PROJECT_DIR$/webContent/configure/数据库初始化.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webContent/page/classin/classEdit.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/webContent/page/classin/classEdit.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webContent/page/classin/classScheduleList.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/webContent/page/classin/classScheduleList.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webContent/page/classin/createClassinClass.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/webContent/page/classin/createClassinClass.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webContent/page/classin/replayList.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/webContent/page/classin/replayList.jsp" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/bin/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -516,12 +431,12 @@
       <workItem from="1604038572377" duration="23974000" />
       <workItem from="1604131288716" duration="6509000" />
       <workItem from="1604288038005" duration="186951000" />
-      <workItem from="1605064279197" duration="57045000" />
+      <workItem from="1605064279197" duration="57396000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="803396000" />
+    <option name="totallyTimeSpent" value="803747000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
